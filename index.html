@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>三国自走棋商店 Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="viewport-shell">
+      <section class="shop-stage" aria-label="商店界面">
+        <img class="stage-background" src="./res/ShopPanel/背景.jpg" alt="" />
+
+        <div class="heart-strip" aria-label="生命">
+          <img src="./res/ShopPanel/爱心图标_左上角_透明.png" alt="" />
+          <img src="./res/ShopPanel/爱心图标_左上角_透明.png" alt="" />
+          <img src="./res/ShopPanel/爱心图标_左上角_透明.png" alt="" />
+          <img src="./res/ShopPanel/爱心图标_左上角_透明.png" alt="" />
+          <img src="./res/ShopPanel/爱心图标_左上角_透明.png" alt="" />
+          <span id="lifeText">5</span>
+        </div>
+
+        <div class="hud-brush trophy-brush">
+          <img src="./res/ShopPanel/profile_brush_bg.png" alt="" />
+          <strong id="trophyText">0 / 10</strong>
+        </div>
+
+        <div class="hud-brush gold-brush">
+          <img src="./res/ShopPanel/profile_brush_bg.png" alt="" />
+          <img class="gold-icon" src="./res/ShopPanel/金币图标_右上角.png" alt="" />
+          <strong id="goldText">100</strong>
+        </div>
+
+        <div class="round-level" id="tierText">商店规则 固定</div>
+        <div class="round-label">第 <strong id="roundText">1</strong> 回合 · <strong id="phaseText">商店</strong></div>
+
+        <button id="resetButton" class="menu-button" type="button" aria-label="重置演示">
+          <img src="./res/ShopPanel/menu_button.png" alt="" />
+        </button>
+
+        <aside class="fate-panel" aria-label="当前生效羁绊">
+          <img class="panel-image" src="./res/ShopPanel/左侧区域面板_透明.png" alt="" />
+          <h2>当前生效羁绊</h2>
+          <div id="bondList" class="bond-list" aria-live="polite"></div>
+        </aside>
+
+        <section class="team-panel" aria-label="己方阵容">
+          <img class="team-panel-bg" src="./res/ShopPanel/阵容面板_透明.png" alt="" />
+          <h2>己方阵容</h2>
+          <div id="lineupGrid" class="lineup-grid" aria-label="己方阵容槽位"></div>
+        </section>
+
+        <section class="shop-panel" aria-label="商店">
+          <img class="shop-panel-bg" src="./res/ShopPanel/下方商店面板_无文字_原图笔触_半透明.png" alt="" />
+          <h2>商店</h2>
+          <div id="shopGrid" class="shop-grid" aria-label="商店槽位"></div>
+        </section>
+
+        <button id="refreshButton" class="shop-action refresh-action" type="button">
+          <img src="./res/ShopPanel/刷新按钮_图标无文字_透明.png" alt="" />
+          <span>刷新</span>
+        </button>
+
+        <button id="endTurnButton" class="end-turn-action" type="button">
+          <img src="./res/ShopPanel/red_button_start_pressed.png" alt="" />
+          <span>结束回合</span>
+        </button>
+
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
