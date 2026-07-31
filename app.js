@@ -636,6 +636,7 @@ const elements = {
   refreshButton: document.querySelector("#refreshButton"),
   endTurnButton: document.querySelector("#endTurnButton"),
   codexButton: document.querySelector("#codexButton"),
+  fullscreenButton: document.querySelector("#fullscreenButton"),
   codexOverlay: document.querySelector("#codexOverlay"),
   codexCloseButton: document.querySelector("#codexCloseButton"),
   codexTypeFilters: document.querySelector("#codexTypeFilters"),
@@ -697,6 +698,39 @@ const elements = {
   stratagemChoiceOptions: document.querySelector("#stratagemChoiceOptions"),
   stratagemChoiceCancelButton: document.querySelector("#stratagemChoiceCancelButton"),
 };
+
+function isPageFullscreen() {
+  return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function updateFullscreenButton() {
+  const button = elements.fullscreenButton;
+  if (!button) return;
+  const isFullscreen = isPageFullscreen();
+  const label = isFullscreen ? "退出" : "全屏";
+  const accessibleLabel = isFullscreen ? "退出全屏" : "进入全屏";
+  button.setAttribute("aria-pressed", String(isFullscreen));
+  button.setAttribute("aria-label", accessibleLabel);
+  button.title = accessibleLabel;
+  const labelElement = button.querySelector(".fullscreen-button-label");
+  if (labelElement) labelElement.textContent = label;
+}
+
+async function togglePageFullscreen() {
+  try {
+    if (isPageFullscreen()) {
+      const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
+      await exitFullscreen?.call(document);
+    } else {
+      const root = document.documentElement;
+      const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
+      if (!requestFullscreen) throw new Error("当前浏览器不支持网页全屏");
+      await requestFullscreen.call(root);
+    }
+  } catch (error) {
+    console.warn("切换全屏失败：", error);
+  }
+}
 
 function hasCompleteOpponentRounds(session, roundCount = PLAYER_DATA_TEST_MAX_ROUND) {
   if (
@@ -9802,6 +9836,10 @@ function render() {
 elements.refreshButton.addEventListener("click", () => refreshShop());
 elements.endTurnButton.addEventListener("click", endTurn);
 elements.codexButton?.addEventListener("click", openCodex);
+elements.fullscreenButton?.addEventListener("click", togglePageFullscreen);
+document.addEventListener("fullscreenchange", updateFullscreenButton);
+document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+updateFullscreenButton();
 elements.codexCloseButton?.addEventListener("click", () => closeCodex());
 elements.codexTypeFilters?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-codex-type]");

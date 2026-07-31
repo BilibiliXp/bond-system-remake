@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>三国自走棋商店 Demo</title>
-    <link rel="stylesheet" href="./styles.css?v=20260731-15" />
+    <link rel="stylesheet" href="./styles.css?v=20260731-17" />
   </head>
   <body>
     <main class="viewport-shell">
@@ -64,6 +64,18 @@
             <img src="./res/ShopPanel/codex_button.svg" alt="" />
           </button>
         </div>
+
+        <button
+          id="fullscreenButton"
+          class="fullscreen-button"
+          type="button"
+          aria-label="进入全屏"
+          aria-pressed="false"
+          title="进入全屏"
+        >
+          <span class="fullscreen-button-icon" aria-hidden="true"></span>
+          <span class="fullscreen-button-label">全屏</span>
+        </button>
 
         <aside class="fate-panel" aria-label="当前羁绊">
           <h2>当前羁绊</h2>
@@ -352,6 +364,6 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="./game-data.js?v=20260730-1"></script>
     <script src="./opponent-data/opponent-data.js?v=20260731-1"></script>
-    <script src="./app.js?v=20260731-14"></script>
+    <script src="./app.js?v=20260731-15"></script>
   </body>
 </html>
