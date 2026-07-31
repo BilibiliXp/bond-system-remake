@@ -3226,11 +3226,11 @@ button:disabled {
 }
 
 .battle-teams {
-  --battle-card-scale: 0.58;
+  --battle-card-scale: 0.78;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   margin-bottom: 14px;
 }
 
@@ -5773,7 +5773,7 @@ button:disabled {
 
 .battle-field-armies {
   grid-row: 2;
-  grid-template-columns: minmax(0, 1fr) 66px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr);
   align-items: center;
   padding: 0;
 }
@@ -5789,12 +5789,12 @@ button:disabled {
 }
 
 .battle-field-cards {
-  --battle-field-card-scale: 0.62;
+  --battle-field-card-scale: 0.78;
   gap: 4px;
 }
 
 .battle-field-divider {
-  height: 246px;
+  height: 264px;
 }
 
 .battle-field-center {
@@ -7380,7 +7380,7 @@ body.game-result-visible {
 .battle-animation-details {
   width: min(1120px, 92vw);
   order: 3;
-  margin: 4px auto 0;
+  margin: 40px auto 0;
   border-top: 1px solid rgba(61, 56, 43, 0.28);
   border-bottom: 1px solid rgba(61, 56, 43, 0.34);
   background:
