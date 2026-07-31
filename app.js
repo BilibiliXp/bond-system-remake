@@ -1316,7 +1316,8 @@ function finishShopPresentationSequence() {
     );
     const playerDataComplete = completePlayerDataTestSession();
     state.gameOutcome = getGameOutcome(state.life, state.flags);
-    state.gameOver = Boolean(state.gameOutcome);
+    // 终局只在玩家看完最后一场战斗并主动点击“游戏结算”后展示。
+    state.gameOver = false;
     if (playerDataComplete) {
       addLog("第 20 回合数据记录完成，已保存并导出玩家阵容测试数据。");
       persistPlayerDataTestSession();
@@ -7155,6 +7156,11 @@ function startNextRound() {
     resetDemo();
     return;
   }
+  if (state.gameOutcome) {
+    state.gameOver = true;
+    render();
+    return;
+  }
   state.round += 1;
   state.phase = "shop";
   state.gold = TURN_GOLD;
@@ -9638,8 +9644,9 @@ function renderBattle() {
   if (elements.battleLineupPanel) elements.battleLineupPanel.open = false;
   setBattleView(battle.view);
   updateBattleExchangeControls(battle);
-  elements.continueButton.textContent =
-    "进入下一回合";
+  elements.continueButton.textContent = state.gameOutcome
+    ? "游戏结算"
+    : "进入下一回合";
 }
 
 function renderGameResult() {
