@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">图鉴</title>
+  <desc id="desc">绘有展开书册的图鉴按钮</desc>
+  <defs>
+    <linearGradient id="paper" x1="42" y1="30" x2="208" y2="224" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff9dc"/>
+      <stop offset="0.52" stop-color="#e8deba"/>
+      <stop offset="1" stop-color="#b8aa7f"/>
+    </linearGradient>
+    <linearGradient id="page" x1="76" y1="76" x2="174" y2="181" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff7d3"/>
+      <stop offset="1" stop-color="#d8c794"/>
+    </linearGradient>
+    <linearGradient id="cover" x1="65" y1="74" x2="195" y2="190" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a66a2a"/>
+      <stop offset="1" stop-color="#5b351a"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#17130e" flood-opacity=".62"/>
+    </filter>
+  </defs>
+
+  <path
+    d="M55 24 196 26q25 2 26 27l-1 145q-2 25-27 27l-141-2q-24-2-25-26L30 51q2-24 25-27Z"
+    fill="#4a4537"
+    opacity=".48"
+    filter="url(#shadow)"
+  />
+  <path
+    d="M57 22 198 24q24 1 26 25l-2 146q-1 24-25 26l-144-2q-23-1-25-24l2-147q2-23 27-26Z"
+    fill="url(#paper)"
+    stroke="#4b493d"
+    stroke-width="9"
+    stroke-linejoin="round"
+  />
+  <path
+    d="m66 83 55-15q9-2 15 7 6-9 15-6l44 16v101l-50-14q-8-2-10 7-4-9-13-7l-56 14Z"
+    fill="url(#cover)"
+    stroke="#44331f"
+    stroke-width="7"
+    stroke-linejoin="round"
+  />
+  <path
+    d="m72 77 48-13q10-3 15 9v91q-8-9-18-6l-45 13Z"
+    fill="url(#page)"
+    stroke="#5b4a2e"
+    stroke-width="5"
+    stroke-linejoin="round"
+  />
+  <path
+    d="m136 73 13-8 39 15v91l-39-13q-8-2-14 6Z"
+    fill="url(#page)"
+    stroke="#5b4a2e"
+    stroke-width="5"
+    stroke-linejoin="round"
+  />
+  <path d="M135 75v88" fill="none" stroke="#6c4c24" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="100" cy="110" r="17" fill="#b88737" stroke="#4d3b24" stroke-width="5"/>
+  <path d="M91 111q9-18 18 0v7H91Z" fill="#4d3b24"/>
+  <circle cx="100" cy="103" r="6" fill="#4d3b24"/>
+  <path d="M86 139h31M83 149h36M151 93h23M151 108h27M151 123h23M151 138h27" fill="none" stroke="#57462c" stroke-width="6" stroke-linecap="round"/>
+  <path d="m163 66 15 5v30l-8-8-8 3Z" fill="#b53b2e" stroke="#573022" stroke-width="3" stroke-linejoin="round"/>
+</svg>

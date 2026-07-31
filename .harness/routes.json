@@ -1,0 +1,713 @@
+{
+  "schema_version": "1.0",
+  "classification_order": [
+    "documentation_governance",
+    "card_upgrade",
+    "skill_resolution",
+    "opponent_pool",
+    "balance_data",
+    "bond_rules",
+    "ui_assets",
+    "demo_behavior",
+    "feature_change",
+    "fallback"
+  ],
+  "global_required": [
+    {
+      "doc_id": "harness.router",
+      "read": "full"
+    }
+  ],
+  "routes": [
+    {
+      "id": "documentation_governance",
+      "intent": "新增、整理、移动、重命名、废弃文档，或修改 Harness、索引、路由和权威关系。",
+      "keywords": [
+        "文档",
+        "规范",
+        "索引",
+        "路由",
+        "Harness",
+        "归档",
+        "重命名",
+        "权威",
+        "source of truth"
+      ],
+      "required": [
+        {
+          "doc_id": "harness.manual",
+          "read": "full"
+        },
+        {
+          "doc_id": "harness.manifest",
+          "read": "full"
+        },
+        {
+          "doc_id": "harness.routes",
+          "read": "full"
+        }
+      ],
+      "conditional": [
+        {
+          "when": "修改某一业务文档的正文",
+          "doc_id": "$target_doc_id",
+          "read": "full"
+        }
+      ],
+      "artifacts": [],
+      "search_paths": [
+        "AGENTS.md",
+        ".harness",
+        "*.md"
+      ],
+      "do_not_read": [
+        "hero_icon",
+        "item_icon",
+        "res"
+      ]
+    },
+    {
+      "id": "card_upgrade",
+      "intent": "讨论或修改同名卡叠加、等级、经验、满级、合并、阵容拖拽排序、装备穿戴/交换、计策拖拽目标、购买目标和拖拽出售。",
+      "keywords": [
+        "升级",
+        "叠加",
+        "合并",
+        "装备槽",
+        "穿戴",
+        "换装",
+        "交换装备",
+        "计策拖拽",
+        "拖拽预览",
+        "卡牌跟随",
+        "拖拽持续显示",
+        "单体计策",
+        "非单体计策",
+        "targetMode",
+        "出售区域",
+        "售出装备",
+        "经验",
+        "copies",
+        "level",
+        "同名卡",
+        "满级",
+        "阵容挤位",
+        "挤位排序",
+        "阵容排序"
+      ],
+      "required": [
+        {
+          "doc_id": "gameplay.card-upgrade-demo",
+          "read": "full"
+        }
+      ],
+      "conditional": [
+        {
+          "when": "问题涉及完整游戏的升级奖励或升级候选",
+          "doc_id": "gameplay.bond-spec",
+          "read": "sections",
+          "sections": [
+            "8. 武将升级奖励"
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "implementation.app",
+          "when": "需要核对或修改当前实现",
+          "symbols": [
+            "UNIT_LEVEL_COPY_THRESHOLDS",
+            "getUnitProgress",
+            "getExperienceNeeded",
+            "canMergeCardIntoUnit",
+            "canMergeUnits",
+            "mergeCardIntoUnit",
+            "mergeUnitIntoTarget",
+            "getLineupDragIntent",
+            "insertLineupUnit",
+            "moveOrMergeLineupUnit",
+            "getDirectStatTotals",
+            "syncUnitStats",
+            "buyHeroToLineup",
+            "getUnitEquipment",
+            "buyEquipmentToLineup",
+            "useStratagemOnLineup",
+            "moveOrSwapEquipment",
+            "sellEquipment",
+            "sellUnit",
+            "startDragPreview",
+            "updateDragPreview",
+            "showDragPreview",
+            "clearDragPreview",
+            "createHeroCardMarkup",
+            "renderShop",
+            "renderLineup"
+          ]
+        }
+        ,
+        {
+          "artifact_id": "implementation.data-copy",
+          "when": "需要核对或修改计策目标分类"
+        }
+      ],
+      "search_paths": [
+        "卡牌升级规则.md",
+        "羁绊系统说明.md",
+        "app.js",
+        "game-data.js",
+        "index.html",
+        "styles.css"
+      ],
+      "do_not_read": [
+        "hero_icon",
+        "item_icon",
+        "res"
+      ]
+    },
+    {
+      "id": "skill_resolution",
+      "intent": "解释或修改技能事件、触发时机、同时攻击、触发顺序、伤害管线、连锁触发和效果优先级。",
+      "keywords": [
+        "技能结算",
+        "事件队列",
+        "触发时机",
+        "同时攻击",
+        "攻击前",
+        "攻击后",
+        "伤害管线",
+        "动态排序",
+        "优先触发",
+        "连锁触发",
+        "事件链"
+      ],
+      "required": [
+        {
+          "doc_id": "gameplay.skill-resolution",
+          "read": "full"
+        }
+      ],
+      "conditional": [
+        {
+          "when": "问题涉及羁绊效果或战斗副本",
+          "doc_id": "gameplay.bond-spec",
+          "read": "sections",
+          "sections": [
+            "5. 商店阵容与战斗副本",
+            "6. 四种羁绊效果"
+          ]
+        },
+        {
+          "when": "问题涉及商店属性、装备或计策使用",
+          "doc_id": "gameplay.card-upgrade-demo",
+          "read": "sections",
+          "sections": [
+            "4. 属性模型",
+            "6. 装备、计策与出售"
+          ]
+        },
+        {
+          "when": "问题使用具体武将、装备、计策或羁绊数值",
+          "doc_id": "data.balance-readable",
+          "read": "lookup",
+          "locator": "按名称或触发时机检索；修改正式数据时直接更新本文件"
+        }
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "implementation.app",
+          "when": "需要核对或修改当前实现",
+          "symbols": [
+            "cloneBattleUnit",
+            "simulateBasicBattle",
+            "useStratagemOnLineup",
+            "buyEquipmentToLineup"
+          ]
+        },
+        {
+          "artifact_id": "implementation.data-copy",
+          "when": "功能使用网页卡牌效果元数据"
+        }
+      ],
+      "search_paths": [
+        "技能结算规则.md",
+        "羁绊系统说明.md",
+        "卡牌升级规则.md",
+        "游戏数据速查.md",
+        "app.js",
+        "game-data.js",
+        "README.md"
+      ],
+      "do_not_read": [
+        "hero_icon",
+        "item_icon",
+        "res"
+      ]
+    },
+    {
+      "id": "opponent_pool",
+      "intent": "查询、添加、校验或修改网页 Demo 的对手回放 JSON、对手数据池、运行时数据生成和受约束抽取规则。",
+      "keywords": [
+        "对手数据",
+        "敌方数据",
+        "对手池",
+        "数据池",
+        "敌方回放",
+        "对手回放",
+        "回放 JSON",
+        "抽取规则",
+        "连续重复",
+        "10回合",
+        "opponent-data"
+      ],
+      "required": [
+        {
+          "doc_id": "project.opponent-pool-guide",
+          "read": "full"
+        }
+      ],
+      "conditional": [
+        {
+          "when": "需要核对对手进入战斗后的当前行为或测试骑兵兜底",
+          "doc_id": "project.demo-readme",
+          "read": "sections",
+          "sections": [
+            "基础战斗模拟"
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "data.opponent-pool-source",
+          "when": "添加、删除、替换或校验对手回放 JSON"
+        },
+        {
+          "artifact_id": "implementation.opponent-pool-bundle",
+          "when": "核对浏览器实际加载的数据池"
+        },
+        {
+          "artifact_id": "tooling.opponent-pool-builder",
+          "when": "更新或排查数据池生成流程"
+        },
+        {
+          "artifact_id": "implementation.app",
+          "when": "核对或修改对手抽取和战斗加载行为",
+          "symbols": [
+            "getOpponentDataPool",
+            "createOpponentPoolSchedule",
+            "getScheduledOpponentRound",
+            "createEnemyBattleSetup"
+          ]
+        }
+      ],
+      "search_paths": [
+        "opponent-data/README.md",
+        "opponent-data/*.json",
+        "opponent-data/opponent-data.js",
+        "scripts/build-opponent-pool.ps1",
+        "README.md",
+        "app.js",
+        "index.html"
+      ],
+      "do_not_read": [
+        "hero_icon",
+        "item_icon",
+        "res",
+        "设计文档.md"
+      ]
+    },
+    {
+      "id": "balance_data",
+      "intent": "查询或修改武将、计策、羁绊效果的具体数值、阶级、属性和技能。",
+      "keywords": [
+        "数值",
+        "武将数据",
+        "计策数据",
+        "攻击",
+        "生命",
+        "阶级",
+        "卡池",
+        "平衡",
+        "游戏数据速查",
+        "数据表",
+        "Markdown"
+      ],
+      "required": [
+        {
+          "doc_id": "data.balance-readable",
+          "read": "lookup",
+          "locator": "按名称或数据类型检索；修改正式数据时直接更新本文件"
+        }
+      ],
+      "conditional": [
+        {
+          "when": "需要解释字段背后的羁绊机制或结算语义",
+          "doc_id": "gameplay.bond-spec",
+          "read": "sections",
+          "sections": [
+            "1. 系统概述",
+            "4. 羁绊人数与等级",
+            "6. 四种羁绊效果",
+            "7. 武将技能中的羁绊条件"
+          ]
+        },
+        {
+          "when": "需要理解历史设计意图且当前规范未说明",
+          "doc_id": "gameplay.early-design",
+          "read": "sections",
+          "sections": [
+            "4. 演示版羁绊设计",
+            "5. 演示版武将卡池",
+            "9. 平衡原则"
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "implementation.app",
+          "when": "核对网页 Demo 是否已同步该数据",
+          "symbols": [
+            "BOND_RULES",
+            "CARD_POOLS"
+          ]
+        },
+        {
+          "artifact_id": "implementation.data-copy",
+          "when": "核对网页 Demo 是否已同步计策数据与目标类型"
+        }
+      ],
+      "search_paths": [
+        "游戏数据速查.md",
+        "羁绊系统说明.md",
+        "app.js"
+        ,
+        "game-data.js"
+      ],
+      "do_not_read": [
+        "hero_icon",
+        "item_icon",
+        "res"
+      ]
+    },
+    {
+      "id": "bond_rules",
+      "intent": "解释或修改羁绊计数、等级、额外羁绊、同名同步、战斗快照、阵营效果和缘分移除。",
+      "keywords": [
+        "羁绊",
+        "缘分",
+        "阵营",
+        "魏",
+        "蜀",
+        "吴",
+        "群",
+        "额外羁绊",
+        "战斗副本",
+        "羁绊等级"
+      ],
+      "required": [
+        {
+          "doc_id": "gameplay.bond-spec",
+          "read": "full"
+        }
+      ],
+      "conditional": [
+        {
+          "when": "问题包含具体武将、计策或羁绊效果数值",
+          "doc_id": "data.balance-readable",
+          "read": "lookup",
+          "locator": "按名称检索；修改正式数据时直接更新本文件"
+        },
+        {
+          "when": "用户明确询问设计背景、备选方向或历史方案",
+          "doc_id": "gameplay.early-design",
+          "read": "sections",
+          "sections": [
+            "1. 设计目标",
+            "3. 羁绊基础规则",
+            "10. 后续扩展方向",
+            "12. 需要优先验证的问题"
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "implementation.app",
+          "when": "核对网页 Demo 当前实现或准备修改代码",
+          "symbols": [
+            "BOND_RULES",
+            "getBondCounts",
+            "getBondEntries",
+            "getEffectiveUnitBonds",
+            "addExtraBond",
+            "getWuOpeningTargets",
+            "resolveWuOpeningBurn"
+          ]
+        }
+      ],
+      "search_paths": [
+        "羁绊系统说明.md",
+        "游戏数据速查.md",
+        "设计文档.md",
+        "app.js"
+      ],
+      "do_not_read": [
+        "hero_icon",
+        "item_icon",
+        "res"
+      ]
+    },
+    {
+      "id": "ui_assets",
+      "intent": "修改页面结构、布局、样式、图片、图标、卡牌表现或资源引用。",
+      "keywords": [
+        "UI",
+        "界面",
+        "布局",
+        "样式",
+        "图片",
+        "图标",
+        "资源",
+        "按钮",
+        "Prefab",
+        "攻击图标",
+        "血量图标",
+        "金币图标",
+        "阵容间距",
+        "卡牌拥挤",
+        "卡牌缩放",
+        "装备栏重叠",
+        "拖拽预览",
+        "卡牌跟随",
+        "卡牌表现",
+        "CSS"
+      ],
+      "required": [
+        {
+          "doc_id": "project.demo-readme",
+          "read": "sections",
+          "sections": [
+            "Demo 目标",
+            "运行方式"
+          ]
+        }
+      ],
+      "conditional": [
+        {
+          "when": "界面修改会展示或改变卡牌升级规则",
+          "doc_id": "gameplay.card-upgrade-demo",
+          "read": "sections",
+          "sections": [
+            "2. 张数、等级与经验",
+            "5. 拖拽视觉规则",
+            "6. 装备、计策与出售"
+          ]
+        },
+        {
+          "when": "界面修改会展示或改变羁绊规则",
+          "doc_id": "gameplay.bond-spec",
+          "read": "sections",
+          "sections": [
+            "4. 羁绊人数与等级"
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "implementation.page",
+          "when": "总是"
+        },
+        {
+          "artifact_id": "implementation.styles",
+          "when": "总是"
+        },
+        {
+          "artifact_id": "assets.runtime",
+          "when": "需要核对当前使用的资源"
+        },
+        {
+          "artifact_id": "assets.hero-source",
+          "when": "明确需要查找武将头像"
+        },
+        {
+          "artifact_id": "assets.item-source",
+          "when": "明确需要查找道具图标"
+        }
+      ],
+      "search_paths": [
+        "index.html",
+        "styles.css",
+        "app.js",
+        "res",
+        "hero_icon",
+        "item_icon"
+      ],
+      "do_not_read": [
+        "设计文档.md"
+      ]
+    },
+    {
+      "id": "demo_behavior",
+      "intent": "运行、解释、排查或核对网页 Demo 当前已经实现的流程和行为。",
+      "keywords": [
+        "Demo",
+        "网页",
+        "运行",
+        "刷新",
+        "购买",
+        "出售",
+        "装备",
+        "计策",
+        "换装",
+        "结束回合",
+        "当前实现",
+        "bug",
+        "排查"
+      ],
+      "required": [
+        {
+          "doc_id": "project.demo-readme",
+          "read": "full"
+        }
+      ],
+      "conditional": [
+        {
+          "when": "涉及卡牌叠加或升级",
+          "doc_id": "gameplay.card-upgrade-demo",
+          "read": "full"
+        },
+        {
+          "when": "涉及羁绊语义",
+          "doc_id": "gameplay.bond-spec",
+          "read": "sections",
+          "sections": [
+            "3. 武将羁绊",
+            "4. 羁绊人数与等级"
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "implementation.app",
+          "when": "总是"
+        },
+        {
+          "artifact_id": "implementation.page",
+          "when": "涉及页面元素或槽位"
+        },
+        {
+          "artifact_id": "implementation.styles",
+          "when": "涉及视觉或交互表现"
+        },
+        {
+          "artifact_id": "implementation.data-copy",
+          "when": "涉及卡牌数据或计策目标分类"
+        }
+      ],
+      "search_paths": [
+        "README.md",
+        "卡牌升级规则.md",
+        "羁绊系统说明.md",
+        "app.js",
+        "game-data.js",
+        "index.html",
+        "styles.css"
+      ],
+      "do_not_read": [
+        "hero_icon",
+        "item_icon",
+        "res"
+      ]
+    },
+    {
+      "id": "feature_change",
+      "intent": "实现一个尚未被更具体路由覆盖的游戏功能。",
+      "keywords": [
+        "新增功能",
+        "实现",
+        "修改功能",
+        "接入",
+        "扩展"
+      ],
+      "required": [
+        {
+          "doc_id": "project.demo-readme",
+          "read": "sections",
+          "sections": [
+            "Demo 目标",
+            "当前不实现",
+            "后续可扩展位置"
+          ]
+        }
+      ],
+      "conditional": [
+        {
+          "when": "功能改变羁绊规则",
+          "doc_id": "gameplay.bond-spec",
+          "read": "full"
+        },
+        {
+          "when": "功能改变升级或叠加",
+          "doc_id": "gameplay.card-upgrade-demo",
+          "read": "full"
+        },
+        {
+          "when": "功能使用具体卡牌或数值",
+          "doc_id": "data.balance-readable",
+          "read": "lookup",
+          "locator": "按名称或触发时机检索；修改正式数据时直接更新本文件"
+        }
+      ],
+      "artifacts": [
+        {
+          "artifact_id": "implementation.app",
+          "when": "总是"
+        },
+        {
+          "artifact_id": "implementation.data-copy",
+          "when": "功能使用网页卡牌数据或交互元数据"
+        },
+        {
+          "artifact_id": "implementation.page",
+          "when": "功能需要新页面结构"
+        },
+        {
+          "artifact_id": "implementation.styles",
+          "when": "功能需要新视觉表现"
+        }
+      ],
+      "search_paths": [
+        "README.md",
+        "游戏数据速查.md",
+        "技能结算规则.md",
+        "羁绊系统说明.md",
+        "卡牌升级规则.md",
+        "app.js",
+        "game-data.js",
+        "index.html",
+        "styles.css"
+      ],
+      "do_not_read": []
+    },
+    {
+      "id": "fallback",
+      "intent": "任务无法匹配其他路由时的保守入口。",
+      "keywords": [],
+      "required": [
+        {
+          "doc_id": "harness.manifest",
+          "read": "full"
+        }
+      ],
+      "conditional": [],
+      "artifacts": [],
+      "search_paths": [
+        ".harness/manifest.json"
+      ],
+      "do_not_read": [
+        "hero_icon",
+        "item_icon",
+        "res"
+      ],
+      "stop_and_ask_when": "清单中有两个以上可能的权威领域，且选择不同领域会改变结论或修改范围。"
+    }
+  ]
+}

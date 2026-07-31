@@ -1,0 +1,6683 @@
+{
+  "schemaVersion": 1,
+  "id": "87fd43f9-6935-4bfe-974b-22262c2c4974",
+  "status": "completed",
+  "startedAt": "2026-07-31T07:28:37.570Z",
+  "completedAt": "2026-07-31T07:48:12.626Z",
+  "rules": {
+    "maxRound": 20,
+    "startingLife": 100,
+    "trophyTarget": 100,
+    "enemy": {
+      "name": "骑兵",
+      "count": 5,
+      "attackFormula": "round * 2.5",
+      "healthFormula": "round * 2.5"
+    }
+  },
+  "operations": [
+    {
+      "sequence": 1,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:37.572Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 2,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:43.469Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 3,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:44.887Z",
+      "message": "拖拽购买 甄姬 到 2 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 4,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:44.888Z",
+      "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+    },
+    {
+      "sequence": 5,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:45.763Z",
+      "message": "拖拽购买 甄姬 到 3 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 6,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:45.763Z",
+      "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+    },
+    {
+      "sequence": 7,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:45.763Z",
+      "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+    },
+    {
+      "sequence": 8,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:46.880Z",
+      "message": "拖拽购买 诸葛瑾 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 9,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:46.880Z",
+      "message": "甄姬【洛神】：诸葛瑾获得 +1 攻击"
+    },
+    {
+      "sequence": 10,
+      "round": 1,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:46.880Z",
+      "message": "甄姬【洛神】：诸葛瑾获得 +1 攻击"
+    },
+    {
+      "sequence": 11,
+      "round": 1,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:28:48.252Z",
+      "message": "战斗失败，生命 -1。"
+    },
+    {
+      "sequence": 12,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:49.492Z",
+      "message": "第 2 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 13,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:49.492Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 14,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:51.853Z",
+      "message": "拖拽购买 华雄 到 5 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 15,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:51.854Z",
+      "message": "甄姬【洛神】：华雄获得 +1 攻击"
+    },
+    {
+      "sequence": 16,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:51.854Z",
+      "message": "甄姬【洛神】：华雄获得 +1 攻击"
+    },
+    {
+      "sequence": 17,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:55.441Z",
+      "message": "演练已锁定。"
+    },
+    {
+      "sequence": 18,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:56.174Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 19,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:57.412Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 20,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:58.969Z",
+      "message": "拖拽购买 华雄 到 4 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 21,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:58.969Z",
+      "message": "甄姬【洛神】：华雄获得 +1 攻击"
+    },
+    {
+      "sequence": 22,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:28:58.969Z",
+      "message": "甄姬【洛神】：华雄获得 +1 攻击"
+    },
+    {
+      "sequence": 23,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:01.059Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 24,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:01.978Z",
+      "message": "华雄已锁定。"
+    },
+    {
+      "sequence": 25,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:02.552Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 26,
+      "round": 2,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:03.772Z",
+      "message": "演练已解除锁定。"
+    },
+    {
+      "sequence": 27,
+      "round": 2,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:29:04.430Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 28,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:05.959Z",
+      "message": "第 3 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 29,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:05.959Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 30,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:08.248Z",
+      "message": "华雄 合并到 5 号位，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 31,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:10.329Z",
+      "message": "拖拽叠加 华雄，升级为 2 级。"
+    },
+    {
+      "sequence": 32,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:14.185Z",
+      "message": "华雄 升到 2 级：选择 乐进 作为升级奖励，购买费用 3 金币。"
+    },
+    {
+      "sequence": 33,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:16.037Z",
+      "message": "拖拽购买 陈宫 到 4 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 34,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:16.039Z",
+      "message": "陈宫【百计多谋】：对甄姬使用了1阶计策口才"
+    },
+    {
+      "sequence": 35,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:16.039Z",
+      "message": "甄姬【洛神】：陈宫获得 +1 攻击"
+    },
+    {
+      "sequence": 36,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:16.039Z",
+      "message": "甄姬【洛神】：陈宫获得 +1 攻击"
+    },
+    {
+      "sequence": 37,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:19.060Z",
+      "message": "出售 诸葛瑾，获得 1 金币。"
+    },
+    {
+      "sequence": 38,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:20.373Z",
+      "message": "拖拽购买 乐进 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 39,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:20.373Z",
+      "message": "甄姬【洛神】：乐进获得 +1 攻击"
+    },
+    {
+      "sequence": 40,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:20.373Z",
+      "message": "甄姬【洛神】：乐进获得 +1 攻击"
+    },
+    {
+      "sequence": 41,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:21.859Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 42,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:22.788Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 43,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:25.143Z",
+      "message": "颜良已锁定。"
+    },
+    {
+      "sequence": 44,
+      "round": 3,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:26.232Z",
+      "message": "颜良已锁定。"
+    },
+    {
+      "sequence": 45,
+      "round": 3,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:29:30.399Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 46,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:58.447Z",
+      "message": "第 4 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 47,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:29:58.447Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 48,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:01.556Z",
+      "message": "甄姬 合并到 3 号位，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 49,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:04.087Z",
+      "message": "拖拽购买 甄姬 到 2 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 50,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:04.087Z",
+      "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+    },
+    {
+      "sequence": 51,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:04.087Z",
+      "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+    },
+    {
+      "sequence": 52,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:09.954Z",
+      "message": "出售 陈宫，获得 1 金币。"
+    },
+    {
+      "sequence": 53,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:11.604Z",
+      "message": "拖拽购买 颜良 到 4 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 54,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:11.604Z",
+      "message": "甄姬【洛神】：颜良获得 +1 攻击"
+    },
+    {
+      "sequence": 55,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:11.604Z",
+      "message": "甄姬【洛神】：颜良获得 +1 攻击"
+    },
+    {
+      "sequence": 56,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:16.243Z",
+      "message": "出售 乐进，获得 1 金币。"
+    },
+    {
+      "sequence": 57,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:17.368Z",
+      "message": "拖拽购买 颜良 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 58,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:17.368Z",
+      "message": "甄姬【洛神】：颜良获得 +1 攻击"
+    },
+    {
+      "sequence": 59,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:17.368Z",
+      "message": "甄姬【洛神】：颜良获得 +1 攻击"
+    },
+    {
+      "sequence": 60,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:19.069Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 61,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:20.673Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 62,
+      "round": 4,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:21.461Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 63,
+      "round": 4,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:30:23.632Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 64,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:38.041Z",
+      "message": "第 5 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 65,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:38.042Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 66,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:42.190Z",
+      "message": "甄姬 合并到 3 号位，升级为 2 级。"
+    },
+    {
+      "sequence": 67,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:45.216Z",
+      "message": "甄姬 升到 2 级：选择 公孙瓒 作为升级奖励，购买费用 3 金币。"
+    },
+    {
+      "sequence": 68,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:47.005Z",
+      "message": "拖拽购买 徐晃 到 2 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 69,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:47.005Z",
+      "message": "甄姬【洛神】：徐晃获得 +2 攻击"
+    },
+    {
+      "sequence": 70,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:52.442Z",
+      "message": "出售 甄姬，获得 2 金币。"
+    },
+    {
+      "sequence": 71,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:55.156Z",
+      "message": "拖拽购买 公孙瓒 到 3 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 72,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:30:59.749Z",
+      "message": "拖拽叠加 华雄，当前为 2 级 1 经验。"
+    },
+    {
+      "sequence": 73,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:03.629Z",
+      "message": "使用计策 举贤，由 3 号阵容位触发：从最高等级“群”羁绊中选中公孙瓒，分别永久 +2/+1。"
+    },
+    {
+      "sequence": 74,
+      "round": 5,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:06.386Z",
+      "message": "绝影已锁定。"
+    },
+    {
+      "sequence": 75,
+      "round": 5,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:31:07.146Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 76,
+      "round": 6,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:20.354Z",
+      "message": "第 6 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 77,
+      "round": 6,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:20.354Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 78,
+      "round": 6,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:24.874Z",
+      "message": "颜良 合并到 4 号位，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 79,
+      "round": 6,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:25.994Z",
+      "message": "购买装备 绝影，由 颜良 佩戴；真实效果已接入。"
+    },
+    {
+      "sequence": 80,
+      "round": 6,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:28.032Z",
+      "message": "拖拽购买 汉献帝 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 81,
+      "round": 6,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:30.019Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 82,
+      "round": 6,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:35.124Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 83,
+      "round": 6,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:38.156Z",
+      "message": "使用计策 口才，目标为 徐晃：徐晃的全部同名卡牌获得本回合“群”羁绊。"
+    },
+    {
+      "sequence": 84,
+      "round": 6,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:31:39.606Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 85,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:50.824Z",
+      "message": "第 7 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 86,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:50.824Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 87,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:58.021Z",
+      "message": "购买装备 百厄角，由 公孙瓒 佩戴；真实效果已接入。"
+    },
+    {
+      "sequence": 88,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:31:59.155Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 89,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:02.018Z",
+      "message": "出售 汉献帝，获得 1 金币。"
+    },
+    {
+      "sequence": 90,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:03.325Z",
+      "message": "拖拽购买 张郃 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 91,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:08.019Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 92,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:13.294Z",
+      "message": "使用计策 歃血盟书，目标为 徐晃：徐晃的全部同名卡牌本局永久获得“群”羁绊。"
+    },
+    {
+      "sequence": 93,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:18.212Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 94,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:21.428Z",
+      "message": "徐晃已锁定。"
+    },
+    {
+      "sequence": 95,
+      "round": 7,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:25.550Z",
+      "message": "张郃 插入 3 号阵容位，向左挤动至 1 号空位。"
+    },
+    {
+      "sequence": 96,
+      "round": 7,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:32:29.488Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 97,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:59.241Z",
+      "message": "第 8 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 98,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:32:59.241Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 99,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:32.004Z",
+      "message": "颜良 将 绝影 交给 张郃。"
+    },
+    {
+      "sequence": 100,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:34.216Z",
+      "message": "出售 颜良，获得 1 金币。"
+    },
+    {
+      "sequence": 101,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:37.369Z",
+      "message": "拖拽购买 徐晃 到 4 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 102,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:39.349Z",
+      "message": "徐晃 合并到 1 号位，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 103,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:41.061Z",
+      "message": "拖拽购买 乐进 到 4 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 104,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:42.803Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 105,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:44.547Z",
+      "message": "出售 乐进，获得 1 金币。"
+    },
+    {
+      "sequence": 106,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:46.477Z",
+      "message": "拖拽购买 甄姬 到 4 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 107,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:46.478Z",
+      "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+    },
+    {
+      "sequence": 108,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:48.189Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 109,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:50.939Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 110,
+      "round": 8,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:33:53.910Z",
+      "message": "甄姬 插入 1 号阵容位，向右挤动至 4 号空位。"
+    },
+    {
+      "sequence": 111,
+      "round": 8,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:33:55.670Z",
+      "message": "战斗失败，生命 -1。"
+    },
+    {
+      "sequence": 112,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:34:28.625Z",
+      "message": "第 9 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 113,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:34:28.625Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 114,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:34:51.245Z",
+      "message": "拖拽叠加 张郃，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 115,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:34:53.802Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 116,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:34:57.463Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 117,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:00.015Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 118,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:02.378Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 119,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:08.373Z",
+      "message": "出售 甄姬，获得 1 金币。"
+    },
+    {
+      "sequence": 120,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:15.718Z",
+      "message": "拖拽购买 公孙瓒 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 121,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:18.191Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 122,
+      "round": 9,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:19.606Z",
+      "message": "袁术已锁定。"
+    },
+    {
+      "sequence": 123,
+      "round": 9,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:35:23.165Z",
+      "message": "战斗失败，生命 -1。"
+    },
+    {
+      "sequence": 124,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:50.320Z",
+      "message": "第 10 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 125,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:50.320Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 126,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:57.495Z",
+      "message": "出售 华雄，获得 2 金币。"
+    },
+    {
+      "sequence": 127,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:59.319Z",
+      "message": "拖拽购买 袁术 到 5 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 128,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:35:59.319Z",
+      "message": "袁术【玉玺】：获得并佩戴传国玉玺，当前阵亡效果共结算2次"
+    },
+    {
+      "sequence": 129,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:03.633Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 130,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:07.505Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 131,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:11.929Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 132,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:20.784Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 133,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:24.851Z",
+      "message": "公孙瓒 合并到 3 号位，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 134,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:26.440Z",
+      "message": "拖拽购买 董卓 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 135,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:27.928Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 136,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:31.931Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 137,
+      "round": 10,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:36.040Z",
+      "message": "开悟已锁定。"
+    },
+    {
+      "sequence": 138,
+      "round": 10,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:36:38.218Z",
+      "message": "战斗失败，生命 -1。"
+    },
+    {
+      "sequence": 139,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:58.699Z",
+      "message": "第 11 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 140,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:36:58.699Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 141,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:02.627Z",
+      "message": "使用计策 开悟，目标为 张郃：张郃经验值 +1，当前为 2 级 0 经验，并触发升级。"
+    },
+    {
+      "sequence": 142,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:07.548Z",
+      "message": "张郃 升到 2 级：选择 孙权 作为升级奖励，购买费用 3 金币。"
+    },
+    {
+      "sequence": 143,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:12.934Z",
+      "message": "使用计策 开悟，目标为 袁术：袁术经验值 +1，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 144,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:13.967Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 145,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:21.653Z",
+      "message": "出售 董卓，获得 1 金币。"
+    },
+    {
+      "sequence": 146,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:22.880Z",
+      "message": "拖拽购买 徐晃 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 147,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:23.555Z",
+      "message": "徐晃 合并到 2 号位，升级为 2 级。"
+    },
+    {
+      "sequence": 148,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:27.610Z",
+      "message": "徐晃 升到 2 级：跳过本次升级奖励。"
+    },
+    {
+      "sequence": 149,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:29.472Z",
+      "message": "徐晃 插入 3 号阵容位，向左挤动至 2 号空位。"
+    },
+    {
+      "sequence": 150,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:33.257Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 151,
+      "round": 11,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:35.244Z",
+      "message": "张角已锁定。"
+    },
+    {
+      "sequence": 152,
+      "round": 11,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:37:37.233Z",
+      "message": "战斗失败，生命 -1。"
+    },
+    {
+      "sequence": 153,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:39.851Z",
+      "message": "第 12 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 154,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:39.852Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 155,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:43.183Z",
+      "message": "拖拽购买 张角 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 156,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:44.530Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 157,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:47.946Z",
+      "message": "出售 徐晃，获得 2 金币。"
+    },
+    {
+      "sequence": 158,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:49.618Z",
+      "message": "拖拽购买 袁术 到 3 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 159,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:49.618Z",
+      "message": "袁术【玉玺】：获得并佩戴传国玉玺，当前阵亡效果共结算2次"
+    },
+    {
+      "sequence": 160,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:50.490Z",
+      "message": "袁术 合并到 5 号位，升级为 2 级。"
+    },
+    {
+      "sequence": 161,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:53.495Z",
+      "message": "袁术 升到 2 级：选择 袁绍 作为升级奖励，购买费用 3 金币。"
+    },
+    {
+      "sequence": 162,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:37:56.554Z",
+      "message": "拖拽购买 袁绍 到 3 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 163,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:00.356Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 164,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:04.692Z",
+      "message": "公孙瓒 将 百厄角 交给 袁绍。"
+    },
+    {
+      "sequence": 165,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:06.550Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 166,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:08.319Z",
+      "message": "张郃已锁定。"
+    },
+    {
+      "sequence": 167,
+      "round": 12,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:10.390Z",
+      "message": "吕布已锁定。"
+    },
+    {
+      "sequence": 168,
+      "round": 12,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:38:13.149Z",
+      "message": "战斗失败，生命 -1。"
+    },
+    {
+      "sequence": 169,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:35.018Z",
+      "message": "第 13 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 170,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:35.018Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 171,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:42.470Z",
+      "message": "出售 公孙瓒，获得 1 金币。"
+    },
+    {
+      "sequence": 172,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:50.876Z",
+      "message": "拖拽购买 吕布 到 2 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 173,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:52.807Z",
+      "message": "拖拽叠加 张郃，当前为 2 级 1 经验。"
+    },
+    {
+      "sequence": 174,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:54.908Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 175,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:38:59.034Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 176,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:04.024Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 177,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:08.161Z",
+      "message": "张郃已锁定。"
+    },
+    {
+      "sequence": 178,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:10.900Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 179,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:11.950Z",
+      "message": "张角已锁定。"
+    },
+    {
+      "sequence": 180,
+      "round": 13,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:13.627Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 181,
+      "round": 13,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:39:21.511Z",
+      "message": "战斗失败，生命 -1。"
+    },
+    {
+      "sequence": 182,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:23.657Z",
+      "message": "第 14 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 183,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:23.658Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 184,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:32.924Z",
+      "message": "使用计策 开悟，目标为 袁绍：袁绍经验值 +1，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 185,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:35.335Z",
+      "message": "袁术 将 传国玉玺 交给 吕布。"
+    },
+    {
+      "sequence": 186,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:36.437Z",
+      "message": "吕布 与 袁绍 交换装备：传国玉玺 / 百厄角。"
+    },
+    {
+      "sequence": 187,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:37.864Z",
+      "message": "出售 袁术，获得 2 金币。"
+    },
+    {
+      "sequence": 188,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:39.233Z",
+      "message": "拖拽购买 张角 到 5 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 189,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:40.203Z",
+      "message": "张角 合并到 1 号位，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 190,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:41.896Z",
+      "message": "拖拽购买 张郃 到 5 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 191,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:44.586Z",
+      "message": "张郃 插入 4 号阵容位，向右挤动至 5 号空位。"
+    },
+    {
+      "sequence": 192,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:45.662Z",
+      "message": "张郃 合并到 4 号位，升级为 2 级。"
+    },
+    {
+      "sequence": 193,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:49.407Z",
+      "message": "张郃 升到 2 级：选择 吕布 作为升级奖励，购买费用 3 金币。"
+    },
+    {
+      "sequence": 194,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:52.445Z",
+      "message": "拖拽购买 徐晃 到 5 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 195,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:54.722Z",
+      "message": "吕布已锁定。"
+    },
+    {
+      "sequence": 196,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:56.918Z",
+      "message": "吕布 插入 4 号阵容位，向左挤动至 2 号空位。"
+    },
+    {
+      "sequence": 197,
+      "round": 14,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:39:59.012Z",
+      "message": "张郃 插入 4 号阵容位，向左挤动至 3 号空位。"
+    },
+    {
+      "sequence": 198,
+      "round": 14,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:40:00.039Z",
+      "message": "战斗失败，生命 -1。"
+    },
+    {
+      "sequence": 199,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:02.010Z",
+      "message": "第 15 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 200,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:02.011Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 201,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:04.765Z",
+      "message": "出售 徐晃，获得 1 金币。"
+    },
+    {
+      "sequence": 202,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:07.067Z",
+      "message": "拖拽购买 吕布 到 5 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 203,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:09.370Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 204,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:15.562Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 205,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:18.925Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 206,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:22.419Z",
+      "message": "吕布 合并到 3 号位，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 207,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:24.659Z",
+      "message": "拖拽购买 文丑 到 5 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 208,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:25.721Z",
+      "message": "出售 文丑，获得 1 金币。"
+    },
+    {
+      "sequence": 209,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:27.708Z",
+      "message": "拖拽购买 吕布 到 5 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 210,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:29.361Z",
+      "message": "吕布 合并到 3 号位，升级为 2 级。"
+    },
+    {
+      "sequence": 211,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:31.999Z",
+      "message": "吕布 升到 2 级：跳过本次升级奖励。"
+    },
+    {
+      "sequence": 212,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:33.961Z",
+      "message": "吕布 移动到 5 号阵容位。"
+    },
+    {
+      "sequence": 213,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:35.153Z",
+      "message": "交换 2 号与 4 号阵容位。"
+    },
+    {
+      "sequence": 214,
+      "round": 15,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:41:36.251Z",
+      "message": "张角 移动到 3 号阵容位。"
+    },
+    {
+      "sequence": 215,
+      "round": 15,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:41:37.415Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 216,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:26.863Z",
+      "message": "第 16 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 217,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:26.863Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 218,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:29.779Z",
+      "message": "拖拽购买 张郃 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 219,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:30.655Z",
+      "message": "张郃 合并到 2 号位，升级为 3 级。"
+    },
+    {
+      "sequence": 220,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:33.614Z",
+      "message": "张郃 升到 3 级：跳过本次升级奖励。"
+    },
+    {
+      "sequence": 221,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:35.224Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 222,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:40.010Z",
+      "message": "拖拽购买 汉献帝 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 223,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:41.829Z",
+      "message": "拖拽叠加 张角，升级为 2 级。"
+    },
+    {
+      "sequence": 224,
+      "round": 16,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:42:45.746Z",
+      "message": "张角 升到 2 级：跳过本次升级奖励。"
+    },
+    {
+      "sequence": 225,
+      "round": 16,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:42:48.558Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 226,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:34.978Z",
+      "message": "第 17 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 227,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:34.978Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 228,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:37.738Z",
+      "message": "出售 汉献帝，获得 1 金币。"
+    },
+    {
+      "sequence": 229,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:38.794Z",
+      "message": "拖拽购买 袁绍 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 230,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:39.586Z",
+      "message": "袁绍 合并到 4 号位，升级为 2 级。"
+    },
+    {
+      "sequence": 231,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:43.354Z",
+      "message": "袁绍 升到 2 级：选择 张角 作为升级奖励，购买费用 3 金币。"
+    },
+    {
+      "sequence": 232,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:45.305Z",
+      "message": "拖拽购买 张角 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 233,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:48.162Z",
+      "message": "张郃 将 绝影 交给 张角。"
+    },
+    {
+      "sequence": 234,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:50.022Z",
+      "message": "出售 张郃，获得 3 金币。"
+    },
+    {
+      "sequence": 235,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:51.654Z",
+      "message": "拖拽购买 张角 到 2 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 236,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:57.116Z",
+      "message": "开悟已锁定。"
+    },
+    {
+      "sequence": 237,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:43:58.368Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 238,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:00.583Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 239,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:05.246Z",
+      "message": "吕布 将 百厄角 交给 张角。"
+    },
+    {
+      "sequence": 240,
+      "round": 17,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:07.096Z",
+      "message": "购买装备 蚩尤古盾，由 吕布 佩戴；真实效果已接入。"
+    },
+    {
+      "sequence": 241,
+      "round": 17,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:44:08.067Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 242,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:44.354Z",
+      "message": "第 18 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 243,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:44.354Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 244,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:46.792Z",
+      "message": "张角 合并到 2 号位，当前为 1 级 1 经验。"
+    },
+    {
+      "sequence": 245,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:48.346Z",
+      "message": "使用计策 开悟，目标为 张角：张角经验值 +1，当前为 2 级 0 经验，并触发升级。"
+    },
+    {
+      "sequence": 246,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:52.206Z",
+      "message": "张角 升到 2 级：选择 袁绍 作为升级奖励，购买费用 3 金币。"
+    },
+    {
+      "sequence": 247,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:54.182Z",
+      "message": "拖拽购买 袁绍 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 248,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:44:57.475Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 249,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:45:03.144Z",
+      "message": "袁绍 插入 4 号阵容位，向左挤动至 1 号空位。"
+    },
+    {
+      "sequence": 250,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:45:04.314Z",
+      "message": "袁绍 合并到 3 号位，当前为 2 级 1 经验。"
+    },
+    {
+      "sequence": 251,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:45:08.831Z",
+      "message": "袁绍 移动到 4 号阵容位。"
+    },
+    {
+      "sequence": 252,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:45:09.413Z",
+      "message": "张角 移动到 3 号阵容位。"
+    },
+    {
+      "sequence": 253,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:45:10.074Z",
+      "message": "张角 移动到 2 号阵容位。"
+    },
+    {
+      "sequence": 254,
+      "round": 18,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:45:20.459Z",
+      "message": "拖拽购买 汉献帝 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 255,
+      "round": 18,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:45:24.347Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 256,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:10.109Z",
+      "message": "第 19 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 257,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:10.109Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 258,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:12.849Z",
+      "message": "出售 汉献帝，获得 1 金币。"
+    },
+    {
+      "sequence": 259,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:16.047Z",
+      "message": "拖拽购买 公孙瓒 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 260,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:18.467Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 261,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:22.601Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 262,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:24.673Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 263,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:26.621Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 264,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:28.059Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 265,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:30.503Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 266,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:33.577Z",
+      "message": "出售 公孙瓒，获得 1 金币。"
+    },
+    {
+      "sequence": 267,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:34.910Z",
+      "message": "拖拽购买 公孙瓒 到 1 号阵容槽（1级0经验）。"
+    },
+    {
+      "sequence": 268,
+      "round": 19,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:46:43.064Z",
+      "message": "吕布 插入 1 号阵容位，向右挤动至 5 号空位。"
+    },
+    {
+      "sequence": 269,
+      "round": 19,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:46:44.240Z",
+      "message": "战斗胜利，奖杯 +1。"
+    },
+    {
+      "sequence": 270,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:47:53.742Z",
+      "message": "第 20 回合开始，获得 10 金币。"
+    },
+    {
+      "sequence": 271,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:47:53.742Z",
+      "message": "商店已生成本回合内容。"
+    },
+    {
+      "sequence": 272,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:47:59.855Z",
+      "message": "使用计策 开悟，目标为 吕布：吕布经验值 +1，当前为 2 级 1 经验。"
+    },
+    {
+      "sequence": 273,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:48:00.646Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 274,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:48:01.779Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 275,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:48:03.391Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 276,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:48:06.522Z",
+      "message": "使用计策 开悟，目标为 吕布：吕布经验值 +1，当前为 2 级 2 经验。"
+    },
+    {
+      "sequence": 277,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:48:07.442Z",
+      "message": "消耗 1 金币刷新商店。"
+    },
+    {
+      "sequence": 278,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:48:09.075Z",
+      "message": "开悟已锁定。"
+    },
+    {
+      "sequence": 279,
+      "round": 20,
+      "phase": "shop",
+      "recordedAt": "2026-07-31T07:48:11.176Z",
+      "message": "袁绍 插入 2 号阵容位，向右挤动至 5 号空位。"
+    },
+    {
+      "sequence": 280,
+      "round": 20,
+      "phase": "battle",
+      "recordedAt": "2026-07-31T07:48:12.626Z",
+      "message": "战斗胜利，奖杯 +1。"
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "recordedAt": "2026-07-31T07:28:48.203Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-5",
+          "name": "诸葛瑾",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 3,
+          "health": 3,
+          "faction": "吴",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "吴"
+          ],
+          "skillEffectId": "hero.zhugejin.hongya",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-6",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 2,
+          "health": 1,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-7",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 3,
+          "health": 1,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": true
+        },
+        {
+          "slot": 5,
+          "empty": true
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 0,
+          "level": 0
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 1,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:37.572Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 2,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:43.469Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 3,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:44.887Z",
+          "message": "拖拽购买 甄姬 到 2 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 4,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:44.888Z",
+          "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+        },
+        {
+          "sequence": 5,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:45.763Z",
+          "message": "拖拽购买 甄姬 到 3 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 6,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:45.763Z",
+          "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+        },
+        {
+          "sequence": 7,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:45.763Z",
+          "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+        },
+        {
+          "sequence": 8,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:46.880Z",
+          "message": "拖拽购买 诸葛瑾 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 9,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:46.880Z",
+          "message": "甄姬【洛神】：诸葛瑾获得 +1 攻击"
+        },
+        {
+          "sequence": 10,
+          "round": 1,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:46.880Z",
+          "message": "甄姬【洛神】：诸葛瑾获得 +1 攻击"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "recordedAt": "2026-07-31T07:29:04.387Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-5",
+          "name": "诸葛瑾",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 3,
+          "health": 3,
+          "faction": "吴",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "吴"
+          ],
+          "skillEffectId": "hero.zhugejin.hongya",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-6",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 2,
+          "health": 1,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-7",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 3,
+          "health": 1,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-17",
+          "name": "华雄",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 5,
+          "health": 2,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-11",
+          "name": "华雄",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 5,
+          "health": 2,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 1,
+          "level": 0
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 12,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:49.492Z",
+          "message": "第 2 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 13,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:49.492Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 14,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:51.853Z",
+          "message": "拖拽购买 华雄 到 5 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 15,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:51.854Z",
+          "message": "甄姬【洛神】：华雄获得 +1 攻击"
+        },
+        {
+          "sequence": 16,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:51.854Z",
+          "message": "甄姬【洛神】：华雄获得 +1 攻击"
+        },
+        {
+          "sequence": 17,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:55.441Z",
+          "message": "演练已锁定。"
+        },
+        {
+          "sequence": 18,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:56.174Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 19,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:57.412Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 20,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:58.969Z",
+          "message": "拖拽购买 华雄 到 4 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 21,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:58.969Z",
+          "message": "甄姬【洛神】：华雄获得 +1 攻击"
+        },
+        {
+          "sequence": 22,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:28:58.969Z",
+          "message": "甄姬【洛神】：华雄获得 +1 攻击"
+        },
+        {
+          "sequence": 23,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:01.059Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 24,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:01.978Z",
+          "message": "华雄已锁定。"
+        },
+        {
+          "sequence": 25,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:02.552Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 26,
+          "round": 2,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:03.772Z",
+          "message": "演练已解除锁定。"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "recordedAt": "2026-07-31T07:29:30.345Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-27",
+          "name": "乐进",
+          "tier": 3,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 5,
+          "health": 3,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.yuejin.xiandeng-xianzhen",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-6",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 2,
+          "health": 1,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [
+            "群"
+          ],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-7",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 3,
+          "health": 1,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [
+            "群"
+          ],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-25",
+          "name": "陈宫",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 3,
+          "health": 2,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.chengong.baiji-duomou",
+          "equipment": null
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-11",
+          "name": "华雄",
+          "tier": 1,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 2,
+          "level": 1
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 3,
+          "level": 2
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 28,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:05.959Z",
+          "message": "第 3 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 29,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:05.959Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 30,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:08.248Z",
+          "message": "华雄 合并到 5 号位，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 31,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:10.329Z",
+          "message": "拖拽叠加 华雄，升级为 2 级。"
+        },
+        {
+          "sequence": 32,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:14.185Z",
+          "message": "华雄 升到 2 级：选择 乐进 作为升级奖励，购买费用 3 金币。"
+        },
+        {
+          "sequence": 33,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:16.037Z",
+          "message": "拖拽购买 陈宫 到 4 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 34,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:16.039Z",
+          "message": "陈宫【百计多谋】：对甄姬使用了1阶计策口才"
+        },
+        {
+          "sequence": 35,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:16.039Z",
+          "message": "甄姬【洛神】：陈宫获得 +1 攻击"
+        },
+        {
+          "sequence": 36,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:16.039Z",
+          "message": "甄姬【洛神】：陈宫获得 +1 攻击"
+        },
+        {
+          "sequence": 37,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:19.060Z",
+          "message": "出售 诸葛瑾，获得 1 金币。"
+        },
+        {
+          "sequence": 38,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:20.373Z",
+          "message": "拖拽购买 乐进 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 39,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:20.373Z",
+          "message": "甄姬【洛神】：乐进获得 +1 攻击"
+        },
+        {
+          "sequence": 40,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:20.373Z",
+          "message": "甄姬【洛神】：乐进获得 +1 攻击"
+        },
+        {
+          "sequence": 41,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:21.859Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 42,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:22.788Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 43,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:25.143Z",
+          "message": "颜良已锁定。"
+        },
+        {
+          "sequence": 44,
+          "round": 3,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:26.232Z",
+          "message": "颜良已锁定。"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "recordedAt": "2026-07-31T07:30:23.582Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-33",
+          "name": "颜良",
+          "tier": 2,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 6,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yanliang.yongguan-sanjun",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-36",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 3,
+          "health": 1,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-7",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 4,
+          "health": 2,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-34",
+          "name": "颜良",
+          "tier": 2,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 5,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yanliang.yongguan-sanjun",
+          "equipment": null
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-11",
+          "name": "华雄",
+          "tier": 1,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 2,
+          "level": 1
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 46,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:58.447Z",
+          "message": "第 4 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 47,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:29:58.447Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 48,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:01.556Z",
+          "message": "甄姬 合并到 3 号位，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 49,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:04.087Z",
+          "message": "拖拽购买 甄姬 到 2 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 50,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:04.087Z",
+          "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+        },
+        {
+          "sequence": 51,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:04.087Z",
+          "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+        },
+        {
+          "sequence": 52,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:09.954Z",
+          "message": "出售 陈宫，获得 1 金币。"
+        },
+        {
+          "sequence": 53,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:11.604Z",
+          "message": "拖拽购买 颜良 到 4 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 54,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:11.604Z",
+          "message": "甄姬【洛神】：颜良获得 +1 攻击"
+        },
+        {
+          "sequence": 55,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:11.604Z",
+          "message": "甄姬【洛神】：颜良获得 +1 攻击"
+        },
+        {
+          "sequence": 56,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:16.243Z",
+          "message": "出售 乐进，获得 1 金币。"
+        },
+        {
+          "sequence": 57,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:17.368Z",
+          "message": "拖拽购买 颜良 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 58,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:17.368Z",
+          "message": "甄姬【洛神】：颜良获得 +1 攻击"
+        },
+        {
+          "sequence": 59,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:17.368Z",
+          "message": "甄姬【洛神】：颜良获得 +1 攻击"
+        },
+        {
+          "sequence": 60,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:19.069Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 61,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:20.673Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 62,
+          "round": 4,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:21.461Z",
+          "message": "消耗 1 金币刷新商店。"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "recordedAt": "2026-07-31T07:31:07.099Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-33",
+          "name": "颜良",
+          "tier": 2,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 8,
+          "health": 6,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yanliang.yongguan-sanjun",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-51",
+          "name": "徐晃",
+          "tier": 3,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 6,
+          "health": 4,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.xuhuang.changqu-zhiru",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-56",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-34",
+          "name": "颜良",
+          "tier": 2,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 9,
+          "health": 7,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yanliang.yongguan-sanjun",
+          "equipment": null
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-11",
+          "name": "华雄",
+          "tier": 1,
+          "level": 2,
+          "experience": 1,
+          "copies": 4,
+          "bonusExperience": 0,
+          "attack": 8,
+          "health": 5,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 3,
+          "level": 2
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 64,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:38.041Z",
+          "message": "第 5 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 65,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:38.042Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 66,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:42.190Z",
+          "message": "甄姬 合并到 3 号位，升级为 2 级。"
+        },
+        {
+          "sequence": 67,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:45.216Z",
+          "message": "甄姬 升到 2 级：选择 公孙瓒 作为升级奖励，购买费用 3 金币。"
+        },
+        {
+          "sequence": 68,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:47.005Z",
+          "message": "拖拽购买 徐晃 到 2 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 69,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:47.005Z",
+          "message": "甄姬【洛神】：徐晃获得 +2 攻击"
+        },
+        {
+          "sequence": 70,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:52.442Z",
+          "message": "出售 甄姬，获得 2 金币。"
+        },
+        {
+          "sequence": 71,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:55.156Z",
+          "message": "拖拽购买 公孙瓒 到 3 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 72,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:30:59.749Z",
+          "message": "拖拽叠加 华雄，当前为 2 级 1 经验。"
+        },
+        {
+          "sequence": 73,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:03.629Z",
+          "message": "使用计策 举贤，由 3 号阵容位触发：从最高等级“群”羁绊中选中公孙瓒，分别永久 +2/+1。"
+        },
+        {
+          "sequence": 74,
+          "round": 5,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:06.386Z",
+          "message": "绝影已锁定。"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "recordedAt": "2026-07-31T07:31:39.544Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-58",
+          "name": "汉献帝",
+          "tier": 2,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 1,
+          "health": 1,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.hanxiandi.piaoyao",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-51",
+          "name": "徐晃",
+          "tier": 3,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 5,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [
+            "群"
+          ],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.xuhuang.changqu-zhiru",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-56",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-34",
+          "name": "颜良",
+          "tier": 2,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 11,
+          "health": 9,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yanliang.yongguan-sanjun",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-11",
+          "name": "华雄",
+          "tier": 1,
+          "level": 2,
+          "experience": 1,
+          "copies": 4,
+          "bonusExperience": 0,
+          "attack": 9,
+          "health": 6,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 5,
+          "level": 4
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 76,
+          "round": 6,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:20.354Z",
+          "message": "第 6 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 77,
+          "round": 6,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:20.354Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 78,
+          "round": 6,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:24.874Z",
+          "message": "颜良 合并到 4 号位，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 79,
+          "round": 6,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:25.994Z",
+          "message": "购买装备 绝影，由 颜良 佩戴；真实效果已接入。"
+        },
+        {
+          "sequence": 80,
+          "round": 6,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:28.032Z",
+          "message": "拖拽购买 汉献帝 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 81,
+          "round": 6,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:30.019Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 82,
+          "round": 6,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:35.124Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 83,
+          "round": 6,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:38.156Z",
+          "message": "使用计策 口才，目标为 徐晃：徐晃的全部同名卡牌获得本回合“群”羁绊。"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "recordedAt": "2026-07-31T07:32:29.442Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-51",
+          "name": "徐晃",
+          "tier": 3,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 5,
+          "faction": "魏",
+          "extraFactions": [
+            "群"
+          ],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.xuhuang.changqu-zhiru",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-56",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-82",
+          "name": "张郃",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 8,
+          "health": 6,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-34",
+          "name": "颜良",
+          "tier": 2,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 13,
+          "health": 11,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yanliang.yongguan-sanjun",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-11",
+          "name": "华雄",
+          "tier": 1,
+          "level": 2,
+          "experience": 1,
+          "copies": 4,
+          "bonusExperience": 0,
+          "attack": 9,
+          "health": 6,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 5,
+          "level": 4
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 85,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:50.824Z",
+          "message": "第 7 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 86,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:50.824Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 87,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:58.021Z",
+          "message": "购买装备 百厄角，由 公孙瓒 佩戴；真实效果已接入。"
+        },
+        {
+          "sequence": 88,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:31:59.155Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 89,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:02.018Z",
+          "message": "出售 汉献帝，获得 1 金币。"
+        },
+        {
+          "sequence": 90,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:03.325Z",
+          "message": "拖拽购买 张郃 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 91,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:08.019Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 92,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:13.294Z",
+          "message": "使用计策 歃血盟书，目标为 徐晃：徐晃的全部同名卡牌本局永久获得“群”羁绊。"
+        },
+        {
+          "sequence": 93,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:18.212Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 94,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:21.428Z",
+          "message": "徐晃已锁定。"
+        },
+        {
+          "sequence": 95,
+          "round": 7,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:25.550Z",
+          "message": "张郃 插入 3 号阵容位，向左挤动至 1 号空位。"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "recordedAt": "2026-07-31T07:33:55.603Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-104",
+          "name": "甄姬",
+          "tier": 1,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 2,
+          "health": 1,
+          "faction": "魏",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏"
+          ],
+          "skillEffectId": "hero.zhenji.luoshen",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-51",
+          "name": "徐晃",
+          "tier": 3,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 8,
+          "health": 6,
+          "faction": "魏",
+          "extraFactions": [
+            "群"
+          ],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.xuhuang.changqu-zhiru",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-56",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-82",
+          "name": "张郃",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 16,
+          "health": 10,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-11",
+          "name": "华雄",
+          "tier": 1,
+          "level": 2,
+          "experience": 1,
+          "copies": 4,
+          "bonusExperience": 0,
+          "attack": 9,
+          "health": 6,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 2,
+          "level": 1
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 4,
+          "level": 3
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 97,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:59.241Z",
+          "message": "第 8 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 98,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:32:59.241Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 99,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:32.004Z",
+          "message": "颜良 将 绝影 交给 张郃。"
+        },
+        {
+          "sequence": 100,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:34.216Z",
+          "message": "出售 颜良，获得 1 金币。"
+        },
+        {
+          "sequence": 101,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:37.369Z",
+          "message": "拖拽购买 徐晃 到 4 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 102,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:39.349Z",
+          "message": "徐晃 合并到 1 号位，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 103,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:41.061Z",
+          "message": "拖拽购买 乐进 到 4 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 104,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:42.803Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 105,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:44.547Z",
+          "message": "出售 乐进，获得 1 金币。"
+        },
+        {
+          "sequence": 106,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:46.477Z",
+          "message": "拖拽购买 甄姬 到 4 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 107,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:46.478Z",
+          "message": "甄姬【洛神】：甄姬获得 +1 攻击"
+        },
+        {
+          "sequence": 108,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:48.189Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 109,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:50.939Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 110,
+          "round": 8,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:33:53.910Z",
+          "message": "甄姬 插入 1 号阵容位，向右挤动至 4 号空位。"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "recordedAt": "2026-07-31T07:35:23.093Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-149",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 5,
+          "health": 3,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-51",
+          "name": "徐晃",
+          "tier": 3,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 8,
+          "health": 6,
+          "faction": "魏",
+          "extraFactions": [
+            "群"
+          ],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.xuhuang.changqu-zhiru",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-56",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 7,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-82",
+          "name": "张郃",
+          "tier": 4,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 19,
+          "health": 12,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-11",
+          "name": "华雄",
+          "tier": 1,
+          "level": 2,
+          "experience": 1,
+          "copies": 4,
+          "bonusExperience": 0,
+          "attack": 9,
+          "health": 6,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.huaxiong.xiaoyong",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 4,
+          "level": 3
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 112,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:34:28.625Z",
+          "message": "第 9 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 113,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:34:28.625Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 114,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:34:51.245Z",
+          "message": "拖拽叠加 张郃，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 115,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:34:53.802Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 116,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:34:57.463Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 117,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:00.015Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 118,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:02.378Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 119,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:08.373Z",
+          "message": "出售 甄姬，获得 1 金币。"
+        },
+        {
+          "sequence": 120,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:15.718Z",
+          "message": "拖拽购买 公孙瓒 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 121,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:18.191Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 122,
+          "round": 9,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:19.606Z",
+          "message": "袁术已锁定。"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "recordedAt": "2026-07-31T07:36:38.167Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-191",
+          "name": "董卓",
+          "tier": 5,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 6,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.dongzhuo.baonue",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-51",
+          "name": "徐晃",
+          "tier": 3,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 8,
+          "health": 6,
+          "faction": "魏",
+          "extraFactions": [
+            "群"
+          ],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.xuhuang.changqu-zhiru",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-56",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 8,
+          "health": 5,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-82",
+          "name": "张郃",
+          "tier": 4,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 25,
+          "health": 15,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-157",
+          "name": "袁术",
+          "tier": 5,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 5,
+          "health": 3,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshu.yuxi",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 5,
+          "level": 4
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 124,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:50.320Z",
+          "message": "第 10 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 125,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:50.320Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 126,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:57.495Z",
+          "message": "出售 华雄，获得 2 金币。"
+        },
+        {
+          "sequence": 127,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:59.319Z",
+          "message": "拖拽购买 袁术 到 5 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 128,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:35:59.319Z",
+          "message": "袁术【玉玺】：获得并佩戴传国玉玺，当前阵亡效果共结算2次"
+        },
+        {
+          "sequence": 129,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:03.633Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 130,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:07.505Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 131,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:11.929Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 132,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:20.784Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 133,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:24.851Z",
+          "message": "公孙瓒 合并到 3 号位，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 134,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:26.440Z",
+          "message": "拖拽购买 董卓 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 135,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:27.928Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 136,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:31.931Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 137,
+          "round": 10,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:36.040Z",
+          "message": "开悟已锁定。"
+        }
+      ]
+    },
+    {
+      "round": 11,
+      "recordedAt": "2026-07-31T07:37:37.183Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": true
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-56",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 8,
+          "health": 5,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-51",
+          "name": "徐晃",
+          "tier": 3,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 9,
+          "health": 8,
+          "faction": "魏",
+          "extraFactions": [
+            "群"
+          ],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.xuhuang.changqu-zhiru",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-82",
+          "name": "张郃",
+          "tier": 4,
+          "level": 2,
+          "experience": 0,
+          "copies": 2,
+          "bonusExperience": 1,
+          "attack": 30,
+          "health": 18,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-157",
+          "name": "袁术",
+          "tier": 5,
+          "level": 1,
+          "experience": 1,
+          "copies": 1,
+          "bonusExperience": 1,
+          "attack": 6,
+          "health": 4,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshu.yuxi",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 4,
+          "level": 3
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 139,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:58.699Z",
+          "message": "第 11 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 140,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:36:58.699Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 141,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:02.627Z",
+          "message": "使用计策 开悟，目标为 张郃：张郃经验值 +1，当前为 2 级 0 经验，并触发升级。"
+        },
+        {
+          "sequence": 142,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:07.548Z",
+          "message": "张郃 升到 2 级：选择 孙权 作为升级奖励，购买费用 3 金币。"
+        },
+        {
+          "sequence": 143,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:12.934Z",
+          "message": "使用计策 开悟，目标为 袁术：袁术经验值 +1，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 144,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:13.967Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 145,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:21.653Z",
+          "message": "出售 董卓，获得 1 金币。"
+        },
+        {
+          "sequence": 146,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:22.880Z",
+          "message": "拖拽购买 徐晃 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 147,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:23.555Z",
+          "message": "徐晃 合并到 2 号位，升级为 2 级。"
+        },
+        {
+          "sequence": 148,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:27.610Z",
+          "message": "徐晃 升到 2 级：跳过本次升级奖励。"
+        },
+        {
+          "sequence": 149,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:29.472Z",
+          "message": "徐晃 插入 3 号阵容位，向左挤动至 2 号空位。"
+        },
+        {
+          "sequence": 150,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:33.257Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 151,
+          "round": 11,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:35.244Z",
+          "message": "张角已锁定。"
+        }
+      ]
+    },
+    {
+      "round": 12,
+      "recordedAt": "2026-07-31T07:38:13.088Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 16,
+          "health": 9,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-56",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 10,
+          "health": 7,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 11,
+          "health": 11,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-82",
+          "name": "张郃",
+          "tier": 4,
+          "level": 2,
+          "experience": 0,
+          "copies": 2,
+          "bonusExperience": 1,
+          "attack": 44,
+          "health": 26,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-157",
+          "name": "袁术",
+          "tier": 5,
+          "level": 2,
+          "experience": 0,
+          "copies": 2,
+          "bonusExperience": 1,
+          "attack": 13,
+          "health": 11,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshu.yuxi",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 5,
+          "level": 4
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 153,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:39.851Z",
+          "message": "第 12 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 154,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:39.852Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 155,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:43.183Z",
+          "message": "拖拽购买 张角 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 156,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:44.530Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 157,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:47.946Z",
+          "message": "出售 徐晃，获得 2 金币。"
+        },
+        {
+          "sequence": 158,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:49.618Z",
+          "message": "拖拽购买 袁术 到 3 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 159,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:49.618Z",
+          "message": "袁术【玉玺】：获得并佩戴传国玉玺，当前阵亡效果共结算2次"
+        },
+        {
+          "sequence": 160,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:50.490Z",
+          "message": "袁术 合并到 5 号位，升级为 2 级。"
+        },
+        {
+          "sequence": 161,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:53.495Z",
+          "message": "袁术 升到 2 级：选择 袁绍 作为升级奖励，购买费用 3 金币。"
+        },
+        {
+          "sequence": 162,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:37:56.554Z",
+          "message": "拖拽购买 袁绍 到 3 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 163,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:00.356Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 164,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:04.692Z",
+          "message": "公孙瓒 将 百厄角 交给 袁绍。"
+        },
+        {
+          "sequence": 165,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:06.550Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 166,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:08.319Z",
+          "message": "张郃已锁定。"
+        },
+        {
+          "sequence": 167,
+          "round": 12,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:10.390Z",
+          "message": "吕布已锁定。"
+        }
+      ]
+    },
+    {
+      "round": 13,
+      "recordedAt": "2026-07-31T07:39:21.451Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 20,
+          "health": 13,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-258",
+          "name": "吕布",
+          "tier": 6,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 23,
+          "health": 21,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.lvbu.tianxia-wushuang",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 15,
+          "health": 15,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-82",
+          "name": "张郃",
+          "tier": 4,
+          "level": 2,
+          "experience": 1,
+          "copies": 3,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 35,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-157",
+          "name": "袁术",
+          "tier": 5,
+          "level": 2,
+          "experience": 0,
+          "copies": 2,
+          "bonusExperience": 1,
+          "attack": 17,
+          "health": 15,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshu.yuxi",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 5,
+          "level": 4
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 169,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:35.018Z",
+          "message": "第 13 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 170,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:35.018Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 171,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:42.470Z",
+          "message": "出售 公孙瓒，获得 1 金币。"
+        },
+        {
+          "sequence": 172,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:50.876Z",
+          "message": "拖拽购买 吕布 到 2 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 173,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:52.807Z",
+          "message": "拖拽叠加 张郃，当前为 2 级 1 经验。"
+        },
+        {
+          "sequence": 174,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:54.908Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 175,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:38:59.034Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 176,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:04.024Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 177,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:08.161Z",
+          "message": "张郃已锁定。"
+        },
+        {
+          "sequence": 178,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:10.900Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 179,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:11.950Z",
+          "message": "张角已锁定。"
+        },
+        {
+          "sequence": 180,
+          "round": 13,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:13.627Z",
+          "message": "消耗 1 金币刷新商店。"
+        }
+      ]
+    },
+    {
+      "round": 14,
+      "recordedAt": "2026-07-31T07:39:59.956Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 27,
+          "health": 20,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 1,
+          "experience": 1,
+          "copies": 1,
+          "bonusExperience": 1,
+          "attack": 22,
+          "health": 22,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-258",
+          "name": "吕布",
+          "tier": 6,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 29,
+          "health": 27,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.lvbu.tianxia-wushuang",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-282",
+          "name": "张郃",
+          "tier": 4,
+          "level": 2,
+          "experience": 2,
+          "copies": 4,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 46,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-300",
+          "name": "徐晃",
+          "tier": 3,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 16,
+          "health": 16,
+          "faction": "魏",
+          "extraFactions": [
+            "群"
+          ],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "魏",
+            "群"
+          ],
+          "skillEffectId": "hero.xuhuang.changqu-zhiru",
+          "equipment": null
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 1,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 5,
+          "level": 4
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 182,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:23.657Z",
+          "message": "第 14 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 183,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:23.658Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 184,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:32.924Z",
+          "message": "使用计策 开悟，目标为 袁绍：袁绍经验值 +1，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 185,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:35.335Z",
+          "message": "袁术 将 传国玉玺 交给 吕布。"
+        },
+        {
+          "sequence": 186,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:36.437Z",
+          "message": "吕布 与 袁绍 交换装备：传国玉玺 / 百厄角。"
+        },
+        {
+          "sequence": 187,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:37.864Z",
+          "message": "出售 袁术，获得 2 金币。"
+        },
+        {
+          "sequence": 188,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:39.233Z",
+          "message": "拖拽购买 张角 到 5 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 189,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:40.203Z",
+          "message": "张角 合并到 1 号位，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 190,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:41.896Z",
+          "message": "拖拽购买 张郃 到 5 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 191,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:44.586Z",
+          "message": "张郃 插入 4 号阵容位，向右挤动至 5 号空位。"
+        },
+        {
+          "sequence": 192,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:45.662Z",
+          "message": "张郃 合并到 4 号位，升级为 2 级。"
+        },
+        {
+          "sequence": 193,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:49.407Z",
+          "message": "张郃 升到 2 级：选择 吕布 作为升级奖励，购买费用 3 金币。"
+        },
+        {
+          "sequence": 194,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:52.445Z",
+          "message": "拖拽购买 徐晃 到 5 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 195,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:54.722Z",
+          "message": "吕布已锁定。"
+        },
+        {
+          "sequence": 196,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:56.918Z",
+          "message": "吕布 插入 4 号阵容位，向左挤动至 2 号空位。"
+        },
+        {
+          "sequence": 197,
+          "round": 14,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:39:59.012Z",
+          "message": "张郃 插入 4 号阵容位，向左挤动至 3 号空位。"
+        }
+      ]
+    },
+    {
+      "round": 15,
+      "recordedAt": "2026-07-31T07:41:37.364Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": true
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-282",
+          "name": "张郃",
+          "tier": 4,
+          "level": 2,
+          "experience": 2,
+          "copies": 4,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 1,
+          "experience": 1,
+          "copies": 2,
+          "bonusExperience": 0,
+          "attack": 33,
+          "health": 26,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 1,
+          "experience": 1,
+          "copies": 1,
+          "bonusExperience": 1,
+          "attack": 28,
+          "health": 28,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-258",
+          "name": "吕布",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 37,
+          "health": 35,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.lvbu.tianxia-wushuang",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 4,
+          "level": 3
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 199,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:02.010Z",
+          "message": "第 15 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 200,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:02.011Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 201,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:04.765Z",
+          "message": "出售 徐晃，获得 1 金币。"
+        },
+        {
+          "sequence": 202,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:07.067Z",
+          "message": "拖拽购买 吕布 到 5 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 203,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:09.370Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 204,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:15.562Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 205,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:18.925Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 206,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:22.419Z",
+          "message": "吕布 合并到 3 号位，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 207,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:24.659Z",
+          "message": "拖拽购买 文丑 到 5 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 208,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:25.721Z",
+          "message": "出售 文丑，获得 1 金币。"
+        },
+        {
+          "sequence": 209,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:27.708Z",
+          "message": "拖拽购买 吕布 到 5 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 210,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:29.361Z",
+          "message": "吕布 合并到 3 号位，升级为 2 级。"
+        },
+        {
+          "sequence": 211,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:31.999Z",
+          "message": "吕布 升到 2 级：跳过本次升级奖励。"
+        },
+        {
+          "sequence": 212,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:33.961Z",
+          "message": "吕布 移动到 5 号阵容位。"
+        },
+        {
+          "sequence": 213,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:35.153Z",
+          "message": "交换 2 号与 4 号阵容位。"
+        },
+        {
+          "sequence": 214,
+          "round": 15,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:41:36.251Z",
+          "message": "张角 移动到 3 号阵容位。"
+        }
+      ]
+    },
+    {
+      "round": 16,
+      "recordedAt": "2026-07-31T07:42:48.506Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-343",
+          "name": "汉献帝",
+          "tier": 2,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 17,
+          "health": 17,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.hanxiandi.piaoyao",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-282",
+          "name": "张郃",
+          "tier": 4,
+          "level": 3,
+          "experience": 0,
+          "copies": 5,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhanghe.qiaobian",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 40,
+          "health": 33,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 1,
+          "experience": 1,
+          "copies": 1,
+          "bonusExperience": 1,
+          "attack": 34,
+          "health": 34,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-258",
+          "name": "吕布",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 44,
+          "health": 42,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.lvbu.tianxia-wushuang",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 5,
+          "level": 4
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 216,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:26.863Z",
+          "message": "第 16 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 217,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:26.863Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 218,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:29.779Z",
+          "message": "拖拽购买 张郃 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 219,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:30.655Z",
+          "message": "张郃 合并到 2 号位，升级为 3 级。"
+        },
+        {
+          "sequence": 220,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:33.614Z",
+          "message": "张郃 升到 3 级：跳过本次升级奖励。"
+        },
+        {
+          "sequence": 221,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:35.224Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 222,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:40.010Z",
+          "message": "拖拽购买 汉献帝 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 223,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:41.829Z",
+          "message": "拖拽叠加 张角，升级为 2 级。"
+        },
+        {
+          "sequence": 224,
+          "round": 16,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:42:45.746Z",
+          "message": "张角 升到 2 级：跳过本次升级奖励。"
+        }
+      ]
+    },
+    {
+      "round": 17,
+      "recordedAt": "2026-07-31T07:44:08.000Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-353",
+          "name": "张角",
+          "tier": 6,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 31,
+          "health": 24,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-347",
+          "name": "张角",
+          "tier": 6,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 27,
+          "health": 20,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 50,
+          "health": 45,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 2,
+          "bonusExperience": 1,
+          "attack": 47,
+          "health": 47,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-258",
+          "name": "吕布",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.lvbu.tianxia-wushuang",
+          "equipment": {
+            "name": "蚩尤古盾",
+            "tier": 6,
+            "effectId": "equipment.black-tortoise-shield",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 3,
+          "level": 2
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 226,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:34.978Z",
+          "message": "第 17 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 227,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:34.978Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 228,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:37.738Z",
+          "message": "出售 汉献帝，获得 1 金币。"
+        },
+        {
+          "sequence": 229,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:38.794Z",
+          "message": "拖拽购买 袁绍 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 230,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:39.586Z",
+          "message": "袁绍 合并到 4 号位，升级为 2 级。"
+        },
+        {
+          "sequence": 231,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:43.354Z",
+          "message": "袁绍 升到 2 级：选择 张角 作为升级奖励，购买费用 3 金币。"
+        },
+        {
+          "sequence": 232,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:45.305Z",
+          "message": "拖拽购买 张角 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 233,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:48.162Z",
+          "message": "张郃 将 绝影 交给 张角。"
+        },
+        {
+          "sequence": 234,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:50.022Z",
+          "message": "出售 张郃，获得 3 金币。"
+        },
+        {
+          "sequence": 235,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:51.654Z",
+          "message": "拖拽购买 张角 到 2 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 236,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:57.116Z",
+          "message": "开悟已锁定。"
+        },
+        {
+          "sequence": 237,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:43:58.368Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 238,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:00.583Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 239,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:05.246Z",
+          "message": "吕布 将 百厄角 交给 张角。"
+        },
+        {
+          "sequence": 240,
+          "round": 17,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:07.096Z",
+          "message": "购买装备 蚩尤古盾，由 吕布 佩戴；真实效果已接入。"
+        }
+      ]
+    },
+    {
+      "round": 18,
+      "recordedAt": "2026-07-31T07:45:24.293Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-375",
+          "name": "汉献帝",
+          "tier": 2,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 18,
+          "health": 18,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.hanxiandi.piaoyao",
+          "equipment": null
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-347",
+          "name": "张角",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 2,
+          "bonusExperience": 1,
+          "attack": 43,
+          "health": 36,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 2,
+          "experience": 1,
+          "copies": 3,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-258",
+          "name": "吕布",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.lvbu.tianxia-wushuang",
+          "equipment": {
+            "name": "蚩尤古盾",
+            "tier": 6,
+            "effectId": "equipment.black-tortoise-shield",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 4,
+          "level": 3
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 242,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:44.354Z",
+          "message": "第 18 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 243,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:44.354Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 244,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:46.792Z",
+          "message": "张角 合并到 2 号位，当前为 1 级 1 经验。"
+        },
+        {
+          "sequence": 245,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:48.346Z",
+          "message": "使用计策 开悟，目标为 张角：张角经验值 +1，当前为 2 级 0 经验，并触发升级。"
+        },
+        {
+          "sequence": 246,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:52.206Z",
+          "message": "张角 升到 2 级：选择 袁绍 作为升级奖励，购买费用 3 金币。"
+        },
+        {
+          "sequence": 247,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:54.182Z",
+          "message": "拖拽购买 袁绍 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 248,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:44:57.475Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 249,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:45:03.144Z",
+          "message": "袁绍 插入 4 号阵容位，向左挤动至 1 号空位。"
+        },
+        {
+          "sequence": 250,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:45:04.314Z",
+          "message": "袁绍 合并到 3 号位，当前为 2 级 1 经验。"
+        },
+        {
+          "sequence": 251,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:45:08.831Z",
+          "message": "袁绍 移动到 4 号阵容位。"
+        },
+        {
+          "sequence": 252,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:45:09.413Z",
+          "message": "张角 移动到 3 号阵容位。"
+        },
+        {
+          "sequence": 253,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:45:10.074Z",
+          "message": "张角 移动到 2 号阵容位。"
+        },
+        {
+          "sequence": 254,
+          "round": 18,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:45:20.459Z",
+          "message": "拖拽购买 汉献帝 到 1 号阵容槽（1级0经验）。"
+        }
+      ]
+    },
+    {
+      "round": 19,
+      "recordedAt": "2026-07-31T07:46:44.187Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-258",
+          "name": "吕布",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.lvbu.tianxia-wushuang",
+          "equipment": {
+            "name": "蚩尤古盾",
+            "tier": 6,
+            "effectId": "equipment.black-tortoise-shield",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-422",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 22,
+          "health": 20,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": null
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-347",
+          "name": "张角",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 2,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 44,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 2,
+          "experience": 1,
+          "copies": 3,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 4,
+          "level": 3
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 256,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:10.109Z",
+          "message": "第 19 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 257,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:10.109Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 258,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:12.849Z",
+          "message": "出售 汉献帝，获得 1 金币。"
+        },
+        {
+          "sequence": 259,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:16.047Z",
+          "message": "拖拽购买 公孙瓒 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 260,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:18.467Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 261,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:22.601Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 262,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:24.673Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 263,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:26.621Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 264,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:28.059Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 265,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:30.503Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 266,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:33.577Z",
+          "message": "出售 公孙瓒，获得 1 金币。"
+        },
+        {
+          "sequence": 267,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:34.910Z",
+          "message": "拖拽购买 公孙瓒 到 1 号阵容槽（1级0经验）。"
+        },
+        {
+          "sequence": 268,
+          "round": 19,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:46:43.064Z",
+          "message": "吕布 插入 1 号阵容位，向右挤动至 5 号空位。"
+        }
+      ]
+    },
+    {
+      "round": 20,
+      "recordedAt": "2026-07-31T07:48:12.563Z",
+      "lineup": [
+        {
+          "slot": 1,
+          "empty": false,
+          "id": "hero-258",
+          "name": "吕布",
+          "tier": 6,
+          "level": 2,
+          "experience": 2,
+          "copies": 3,
+          "bonusExperience": 2,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.lvbu.tianxia-wushuang",
+          "equipment": {
+            "name": "蚩尤古盾",
+            "tier": 6,
+            "effectId": "equipment.black-tortoise-shield",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 2,
+          "empty": false,
+          "id": "hero-247",
+          "name": "袁绍",
+          "tier": 6,
+          "level": 2,
+          "experience": 1,
+          "copies": 3,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.yuanshao.haoling-qunxiong",
+          "equipment": {
+            "name": "传国玉玺",
+            "tier": 5,
+            "effectId": "equipment.imperial-jade-seal",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 3,
+          "empty": false,
+          "id": "hero-422",
+          "name": "公孙瓒",
+          "tier": 4,
+          "level": 1,
+          "experience": 0,
+          "copies": 1,
+          "bonusExperience": 0,
+          "attack": 22,
+          "health": 20,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.gongsunzan.baima-yicong",
+          "equipment": null
+        },
+        {
+          "slot": 4,
+          "empty": false,
+          "id": "hero-347",
+          "name": "张角",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 2,
+          "bonusExperience": 1,
+          "attack": 50,
+          "health": 44,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": {
+            "name": "绝影",
+            "tier": 3,
+            "effectId": "equipment.iron-armor",
+            "remainingUses": null
+          }
+        },
+        {
+          "slot": 5,
+          "empty": false,
+          "id": "hero-228",
+          "name": "张角",
+          "tier": 6,
+          "level": 2,
+          "experience": 0,
+          "copies": 3,
+          "bonusExperience": 0,
+          "attack": 50,
+          "health": 50,
+          "faction": "群",
+          "extraFactions": [],
+          "temporaryExtraFactions": [],
+          "effectiveBonds": [
+            "群"
+          ],
+          "skillEffectId": "hero.zhangjiao.wulei-hongding",
+          "equipment": {
+            "name": "百厄角",
+            "tier": 4,
+            "effectId": "equipment.calamity-blade",
+            "remainingUses": null
+          }
+        }
+      ],
+      "bonds": [
+        {
+          "faction": "魏",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "蜀",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "吴",
+          "count": 0,
+          "level": 0
+        },
+        {
+          "faction": "群",
+          "count": 4,
+          "level": 3
+        }
+      ],
+      "operations": [
+        {
+          "sequence": 270,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:47:53.742Z",
+          "message": "第 20 回合开始，获得 10 金币。"
+        },
+        {
+          "sequence": 271,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:47:53.742Z",
+          "message": "商店已生成本回合内容。"
+        },
+        {
+          "sequence": 272,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:47:59.855Z",
+          "message": "使用计策 开悟，目标为 吕布：吕布经验值 +1，当前为 2 级 1 经验。"
+        },
+        {
+          "sequence": 273,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:48:00.646Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 274,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:48:01.779Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 275,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:48:03.391Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 276,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:48:06.522Z",
+          "message": "使用计策 开悟，目标为 吕布：吕布经验值 +1，当前为 2 级 2 经验。"
+        },
+        {
+          "sequence": 277,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:48:07.442Z",
+          "message": "消耗 1 金币刷新商店。"
+        },
+        {
+          "sequence": 278,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:48:09.075Z",
+          "message": "开悟已锁定。"
+        },
+        {
+          "sequence": 279,
+          "round": 20,
+          "phase": "shop",
+          "recordedAt": "2026-07-31T07:48:11.176Z",
+          "message": "袁绍 插入 2 号阵容位，向右挤动至 5 号空位。"
+        }
+      ]
+    }
+  ],
+  "finalLife": 92,
+  "finalTrophies": 12
+}

@@ -1,0 +1,361 @@
+{
+  "schema_version": "1.0",
+  "project": "新改版羁绊系统",
+  "updated": "2026-07-31",
+  "documents": [
+    {
+      "id": "harness.agent-entry",
+      "path": "AGENTS.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "control",
+      "summary": "仓库内 Agent 的强制入口与不可绕过的文档路由约束。",
+      "authoritative_for": [
+        "Agent 启动流程",
+        "路由系统入口"
+      ],
+      "depends_on": [
+        "harness.router",
+        "harness.routes",
+        "harness.manifest"
+      ]
+    },
+    {
+      "id": "harness.router",
+      "path": ".harness/ROUTER.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "control",
+      "summary": "阅读、检索、证据、冲突和停止条件的规范。",
+      "authoritative_for": [
+        "文档阅读协议",
+        "检索协议",
+        "冲突处理"
+      ],
+      "depends_on": [
+        "harness.routes",
+        "harness.manifest"
+      ]
+    },
+    {
+      "id": "harness.manual",
+      "path": ".harness/README.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "control",
+      "summary": "面向维护者的 Harness 使用与维护说明。",
+      "authoritative_for": [
+        "Harness 维护流程"
+      ],
+      "depends_on": [
+        "harness.router",
+        "harness.routes",
+        "harness.manifest"
+      ]
+    },
+    {
+      "id": "harness.manifest",
+      "path": ".harness/manifest.json",
+      "format": "json",
+      "status": "active",
+      "authority": "control",
+      "summary": "统一文档清单、状态、权威范围与依赖。",
+      "authoritative_for": [
+        "文档登记",
+        "文档权威元数据",
+        "文档依赖"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "harness.routes",
+      "path": ".harness/routes.json",
+      "format": "json",
+      "status": "active",
+      "authority": "control",
+      "summary": "任务分类和最小阅读集合的机器可读路由表。",
+      "authoritative_for": [
+        "任务路由",
+        "阅读集合",
+        "检索范围"
+      ],
+      "depends_on": [
+        "harness.manifest"
+      ]
+    },
+    {
+      "id": "harness.changelog",
+      "path": ".harness/CHANGELOG.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "record",
+      "summary": "文档体系和语义性文档变更记录。",
+      "authoritative_for": [
+        "文档治理变更历史"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "gameplay.bond-spec",
+      "path": "羁绊系统说明.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "primary",
+      "summary": "当前羁绊系统的机制规范，包括计数、等级、额外羁绊、战斗副本和四阵营规则。",
+      "authoritative_for": [
+        "羁绊机制与计数",
+        "羁绊等级语义",
+        "额外羁绊",
+        "商店阵容与战斗副本",
+        "升级奖励规则",
+        "原缘分系统移除项"
+      ],
+      "not_authoritative_for": [
+        "武将与计策的最终具体数值",
+        "网页 Demo 当前已实现行为"
+      ],
+      "depends_on": [
+        "data.balance-readable",
+        "gameplay.skill-resolution"
+      ],
+      "supersedes_in_scope": [
+        "gameplay.early-design"
+      ]
+    },
+    {
+      "id": "gameplay.skill-resolution",
+      "path": "技能结算规则.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "primary",
+      "summary": "通用技能事件、同时攻击、同时机动态排序、伤害管线、连锁触发和第一版验收规则。",
+      "authoritative_for": [
+        "通用技能事件与触发时机",
+        "同时攻击结算顺序",
+        "同时机武将技能动态排序",
+        "效果队列与连锁触发",
+        "战斗伤害管线"
+      ],
+      "not_authoritative_for": [
+        "武将、装备、计策和羁绊的具体数值",
+        "卡牌升级、装备穿戴和计策拖拽交互",
+        "正式敌方阵容生成规则"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "gameplay.card-upgrade-demo",
+      "path": "卡牌升级规则.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "implementation-rule",
+      "summary": "网页 Demo 当前的同名卡叠加、等级经验、属性分层、阵容拖拽挤位排序、武将卡关键区域与阵容密度布局、装备穿戴/交换、计策拖拽目标、拖拽出售和代码修改入口。",
+      "authoritative_for": [
+        "网页 Demo 卡牌叠加",
+        "网页 Demo 1/2/3 级阈值",
+        "网页 Demo 拖拽升级交互",
+        "网页 Demo 阵容拖拽挤位排序",
+        "网页 Demo 同名合并属性归并",
+        "网页 Demo 单装备槽与换装交互",
+        "网页 Demo 计策拖拽目标分类与使用流程",
+        "网页 Demo 拖拽原卡持续显示与跟随预览",
+        "网页 Demo 拖拽出售区域与出售收益",
+        "网页 Demo 武将卡攻血与费用区域布局",
+        "网页 Demo 五卡阵容缩放与间距布局"
+      ],
+      "not_authoritative_for": [
+        "完整游戏的升级奖励",
+        "最终战斗规则"
+      ],
+      "depends_on": [
+        "data.balance-readable",
+        "gameplay.skill-resolution",
+        "implementation.app",
+        "implementation.data-copy"
+      ]
+    },
+    {
+      "id": "project.demo-readme",
+      "path": "README.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "operational",
+      "summary": "网页 Demo 的运行方式、已实现范围和基础循环说明。",
+      "authoritative_for": [
+        "本地运行入口",
+        "Demo 范围说明"
+      ],
+      "not_authoritative_for": [
+        "最终羁绊规则",
+        "最终卡牌数据"
+      ],
+      "depends_on": [
+        "gameplay.skill-resolution",
+        "implementation.app",
+        "implementation.page",
+        "implementation.data-copy",
+        "project.opponent-pool-guide",
+        "implementation.opponent-pool-bundle"
+      ]
+    },
+    {
+      "id": "project.opponent-pool-guide",
+      "path": "opponent-data/README.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "operational",
+      "summary": "网页 Demo 对手回放 JSON 的放置位置、文件要求、运行时数据生成方式和受约束抽取规则。",
+      "authoritative_for": [
+        "对手回放 JSON 放置与校验流程",
+        "对手数据池运行时生成流程",
+        "网页 Demo 对手数据池抽取约束"
+      ],
+      "not_authoritative_for": [
+        "武将、装备、计策和羁绊的正式具体数值",
+        "正式敌方匹配规则"
+      ],
+      "depends_on": [
+        "implementation.app",
+        "data.opponent-pool-source",
+        "implementation.opponent-pool-bundle",
+        "tooling.opponent-pool-builder"
+      ]
+    },
+    {
+      "id": "gameplay.early-design",
+      "path": "设计文档.md",
+      "format": "markdown",
+      "status": "reference",
+      "authority": "reference",
+      "summary": "早期新版羁绊构筑方向、演示卡池和扩展思路。",
+      "authoritative_for": [
+        "历史设计背景",
+        "尚未定案的扩展方向"
+      ],
+      "not_authoritative_for": [
+        "当前羁绊规则",
+        "当前具体数值",
+        "当前网页实现"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "data.balance-readable",
+      "path": "游戏数据速查.md",
+      "format": "markdown",
+      "status": "active",
+      "authority": "primary",
+      "summary": "武将、装备、计策和四种羁绊具体数据的唯一主数据源，包含网页效果 ID 与目标类型。",
+      "authoritative_for": [
+        "武将数值",
+        "武将技能数据",
+        "装备数据",
+        "计策数据",
+        "四种羁绊的具体效果数值",
+        "效果 ID 与计策目标类型"
+      ],
+      "not_authoritative_for": [
+        "覆盖技能结算规则",
+        "覆盖网页 Demo 当前行为"
+      ],
+      "depends_on": []
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "implementation.app",
+      "path": "app.js",
+      "type": "code",
+      "status": "active",
+      "use_for": [
+        "核对网页 Demo 当前业务行为",
+        "定位功能修改入口"
+      ]
+    },
+    {
+      "id": "implementation.page",
+      "path": "index.html",
+      "type": "code",
+      "status": "active",
+      "use_for": [
+        "核对页面结构和入口"
+      ]
+    },
+    {
+      "id": "implementation.data-copy",
+      "path": "game-data.js",
+      "type": "code",
+      "status": "active",
+      "use_for": [
+        "核对网页 Demo 的静态卡牌数据副本",
+        "核对装备与计策的网页交互元数据"
+      ]
+    },
+    {
+      "id": "data.opponent-pool-source",
+      "path": "opponent-data",
+      "type": "data-directory",
+      "status": "active",
+      "use_for": [
+        "维护网页 Demo 对手回放池的源 JSON",
+        "核对对手数据是否覆盖完整 20 回合"
+      ]
+    },
+    {
+      "id": "implementation.opponent-pool-bundle",
+      "path": "opponent-data/opponent-data.js",
+      "type": "generated-data",
+      "status": "active",
+      "use_for": [
+        "核对浏览器实际加载的对手数据池",
+        "验证对手池生成结果"
+      ]
+    },
+    {
+      "id": "tooling.opponent-pool-builder",
+      "path": "scripts/build-opponent-pool.ps1",
+      "type": "tooling",
+      "status": "active",
+      "use_for": [
+        "校验对手回放 JSON",
+        "重新生成浏览器运行时对手数据池"
+      ]
+    },
+    {
+      "id": "implementation.styles",
+      "path": "styles.css",
+      "type": "code",
+      "status": "active",
+      "use_for": [
+        "核对页面布局和交互表现"
+      ]
+    },
+    {
+      "id": "assets.runtime",
+      "path": "res",
+      "type": "asset-directory",
+      "status": "active",
+      "use_for": [
+        "核对网页实际引用的 UI、武将和计策资源"
+      ]
+    },
+    {
+      "id": "assets.hero-source",
+      "path": "hero_icon",
+      "type": "asset-directory",
+      "status": "active",
+      "use_for": [
+        "查找完整武将头像源文件"
+      ]
+    },
+    {
+      "id": "assets.item-source",
+      "path": "item_icon",
+      "type": "asset-directory",
+      "status": "active",
+      "use_for": [
+        "查找完整道具图标源文件"
+      ]
+    }
+  ]
+}

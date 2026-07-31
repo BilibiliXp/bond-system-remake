@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="传国玉玺">
+  <defs>
+    <linearGradient id="jade" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d8f2c8"/>
+      <stop offset=".45" stop-color="#62b783"/>
+      <stop offset="1" stop-color="#176348"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff1a8"/>
+      <stop offset=".5" stop-color="#d5a52e"/>
+      <stop offset="1" stop-color="#7f5312"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#071d16" flood-opacity=".75"/>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="59" fill="#17251f" stroke="#d7ad45" stroke-width="4"/>
+  <g filter="url(#shadow)">
+    <path d="M42 46c3-17 11-27 22-27 7 0 11 5 11 11 9-3 17 2 18 10-7-2-12 0-15 6 8 1 14 6 15 14-8-5-15-5-22-1H47c-5-4-10-8-16-9 3-4 7-6 11-4Z" fill="url(#gold)" stroke="#5d3c0c" stroke-width="3" stroke-linejoin="round"/>
+    <rect x="34" y="51" width="60" height="53" rx="8" fill="url(#jade)" stroke="#f4d477" stroke-width="4"/>
+    <path d="M43 64h42M43 78h42M51 57v39M65 57v39M79 57v39" stroke="#d8f2c8" stroke-opacity=".38" stroke-width="2"/>
+    <path d="M48 88c9-10 23-10 32 0M53 71c7-7 15-7 22 0" fill="none" stroke="#f8e8a6" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

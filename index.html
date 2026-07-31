@@ -2,9 +2,9 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>三国自走棋商店 Demo</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260731-15" />
   </head>
   <body>
     <main class="viewport-shell">
@@ -20,40 +20,76 @@
           <span id="lifeText">5</span>
         </div>
 
-        <div class="hud-brush trophy-brush">
+        <div class="hud-brush flag-brush">
           <img src="./res/ShopPanel/profile_brush_bg.png" alt="" />
-          <strong id="trophyText">0 / 10</strong>
+          <img class="hud-icon flag-icon" src="./res/ShopPanel/lMgqXGXA_transparent.png" alt="" />
+          <span class="hud-caption">旗帜</span>
+          <strong id="flagText">0 / 10</strong>
         </div>
 
         <div class="hud-brush gold-brush">
           <img src="./res/ShopPanel/profile_brush_bg.png" alt="" />
-          <img class="gold-icon" src="./res/ShopPanel/金币图标_右上角.png" alt="" />
-          <strong id="goldText">100</strong>
+          <img class="hud-icon gold-icon" src="./res/ShopPanel/金币图标_右上角.png" alt="" />
+          <span class="hud-caption">金币</span>
+          <strong id="goldText">10</strong>
         </div>
 
-        <div class="round-level" id="tierText">商店规则 固定</div>
-        <div class="round-label">第 <strong id="roundText">1</strong> 回合 · <strong id="phaseText">商店</strong></div>
+        <div class="hud-brush tier-brush">
+          <img src="./res/ShopPanel/profile_brush_bg.png" alt="" />
+          <img class="hud-icon" src="./res/ShopPanel/商店阶级图标.png" alt="" />
+          <span class="hud-caption">商店阶级</span>
+          <strong id="tierText">1阶商店</strong>
+        </div>
 
-        <button id="resetButton" class="menu-button" type="button" aria-label="重置演示">
-          <img src="./res/ShopPanel/menu_button.png" alt="" />
-        </button>
+        <div class="hud-brush round-brush">
+          <img src="./res/ShopPanel/profile_brush_bg.png" alt="" />
+          <img class="hud-icon" src="./res/ShopPanel/回合图标.png" alt="" />
+          <span class="hud-caption">回合阶段</span>
+          <div class="round-value">
+            <span>第 <strong id="roundText">1</strong> 回合</span>
+            <em id="phaseText">商店</em>
+          </div>
+        </div>
 
-        <aside class="fate-panel" aria-label="当前生效羁绊">
-          <img class="panel-image" src="./res/ShopPanel/左侧区域面板_透明.png" alt="" />
-          <h2>当前生效羁绊</h2>
+        <div class="codex-entry">
+          <button
+            id="codexButton"
+            class="codex-entry-button"
+            type="button"
+            aria-label="打开图鉴"
+            aria-haspopup="dialog"
+            aria-controls="codexOverlay"
+            title="图鉴"
+          >
+            <img src="./res/ShopPanel/codex_button.svg" alt="" />
+          </button>
+        </div>
+
+        <aside class="fate-panel" aria-label="当前羁绊">
+          <h2>当前羁绊</h2>
           <div id="bondList" class="bond-list" aria-live="polite"></div>
+          <p class="bond-tip">2人激活 · 每增加1人，羁绊提升1级</p>
         </aside>
 
         <section class="team-panel" aria-label="己方阵容">
-          <img class="team-panel-bg" src="./res/ShopPanel/阵容面板_透明.png" alt="" />
           <h2>己方阵容</h2>
           <div id="lineupGrid" class="lineup-grid" aria-label="己方阵容槽位"></div>
         </section>
 
         <section class="shop-panel" aria-label="商店">
-          <img class="shop-panel-bg" src="./res/ShopPanel/下方商店面板_无文字_原图笔触_半透明.png" alt="" />
           <h2>商店</h2>
+          <p class="shop-tip">
+            <strong>商店规则：</strong>
+            <span id="shopTipText">当前商店阶数 - 1阶 · 3武将 + 1道具；鼠标右键可以锁定指定的卡牌</span>
+          </p>
           <div id="shopGrid" class="shop-grid" aria-label="商店槽位"></div>
+          <div id="sellZone" class="sell-zone" aria-hidden="true">
+            <div class="sell-zone-content">
+              <strong>出售区域</strong>
+              <span>拖入并松手即可出售</span>
+              <em>武将获得等同等级的金币 · 装备不获得金币</em>
+            </div>
+          </div>
         </section>
 
         <button id="refreshButton" class="shop-action refresh-action" type="button">
@@ -69,7 +105,253 @@
       </section>
     </main>
 
+    <div id="rewardOverlay" class="modal-overlay reward-overlay" hidden>
+      <section class="modal-card reward-dialog" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+        <p class="modal-kicker">武将升级奖励</p>
+        <h2 id="rewardTitle">选择升级奖励</h2>
+        <p>选择一张免费武将卡加入商店，也可以跳过本次奖励。</p>
+        <div id="rewardOptions" class="reward-options"></div>
+        <div class="reward-actions">
+          <button id="rewardSkipButton" class="modal-secondary" type="button">跳过</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="stratagemChoiceOverlay" class="modal-overlay stratagem-choice-overlay" hidden>
+      <section
+        class="modal-card stratagem-choice-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="stratagemChoiceTitle"
+      >
+        <p class="modal-kicker">计策目标选择</p>
+        <h2 id="stratagemChoiceTitle">选择羁绊</h2>
+        <p id="stratagemChoiceDescription"></p>
+        <div id="stratagemChoiceOptions" class="stratagem-choice-options"></div>
+        <div class="reward-actions">
+          <button id="stratagemChoiceCancelButton" class="modal-secondary" type="button">
+            取消使用
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div id="codexOverlay" class="modal-overlay codex-overlay" hidden>
+      <section
+        class="modal-card codex-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="codexTitle"
+      >
+        <header class="codex-header">
+          <div>
+            <p class="modal-kicker">全卡牌资料</p>
+            <h2 id="codexTitle">图鉴</h2>
+            <p>按类型、阶数与羁绊查看卡牌；悬浮或聚焦卡牌可查看详细介绍。</p>
+          </div>
+          <button id="codexCloseButton" class="codex-close-button" type="button" aria-label="关闭图鉴">
+            ×
+          </button>
+        </header>
+
+        <div class="codex-filter-panel" aria-label="图鉴筛选">
+          <div class="codex-filter-group">
+            <span class="codex-filter-label">类型</span>
+            <div id="codexTypeFilters" class="codex-filter-options">
+              <button type="button" data-codex-type="全部" aria-pressed="true">全部</button>
+              <button type="button" data-codex-type="武将" aria-pressed="false">武将</button>
+              <button type="button" data-codex-type="装备" aria-pressed="false">装备</button>
+              <button type="button" data-codex-type="计策" aria-pressed="false">计策</button>
+            </div>
+          </div>
+          <div class="codex-filter-group">
+            <span class="codex-filter-label">阶数</span>
+            <div id="codexTierFilters" class="codex-filter-options codex-tier-options">
+              <button type="button" data-codex-tier="全部" aria-pressed="true">全部</button>
+              <button type="button" data-codex-tier="1" aria-pressed="false">1</button>
+              <button type="button" data-codex-tier="2" aria-pressed="false">2</button>
+              <button type="button" data-codex-tier="3" aria-pressed="false">3</button>
+              <button type="button" data-codex-tier="4" aria-pressed="false">4</button>
+              <button type="button" data-codex-tier="5" aria-pressed="false">5</button>
+              <button type="button" data-codex-tier="6" aria-pressed="false">6</button>
+            </div>
+          </div>
+          <div id="codexFactionFilterGroup" class="codex-filter-group">
+            <span class="codex-filter-label">羁绊</span>
+            <div id="codexFactionFilters" class="codex-filter-options codex-faction-options">
+              <button type="button" data-codex-faction="全部" aria-pressed="true">全部</button>
+              <button type="button" data-codex-faction="魏" aria-pressed="false">魏</button>
+              <button type="button" data-codex-faction="蜀" aria-pressed="false">蜀</button>
+              <button type="button" data-codex-faction="吴" aria-pressed="false">吴</button>
+              <button type="button" data-codex-faction="群" aria-pressed="false">群</button>
+              <button type="button" data-codex-faction="无" aria-pressed="false">无</button>
+            </div>
+          </div>
+          <p id="codexCount" class="codex-count" aria-live="polite"></p>
+        </div>
+
+        <div id="codexGrid" class="codex-grid" aria-label="图鉴卡牌"></div>
+      </section>
+    </div>
+
+    <div id="battleOverlay" class="modal-overlay battle-overlay" hidden>
+      <section class="modal-card battle-dialog" role="dialog" aria-modal="true" aria-labelledby="battleTitle">
+        <p class="modal-kicker">战斗结算 · 羁绊与装备技能</p>
+        <h2 id="battleTitle">战斗结算</h2>
+        <p id="battleSummary"></p>
+        <div class="battle-view-switch" role="tablist" aria-label="战斗展示方式">
+          <button
+            id="battleAnimationTab"
+            class="battle-view-tab active"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="battleAnimation"
+          >
+            战斗动画
+          </button>
+          <button
+            id="battleReportTab"
+            class="battle-view-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="battleLog"
+          >
+            查看战报
+          </button>
+        </div>
+        <section id="battleAnimation" class="battle-animation" role="tabpanel" aria-live="polite">
+          <div class="battle-animation-command">
+            <div class="battle-operation-panel" aria-label="战斗动画主操作">
+              <button
+                id="battleAnimationReplay"
+                class="battle-operation-button operation-replay"
+                type="button"
+                aria-label="从头回溯战斗动画"
+              >
+                <span class="battle-operation-label">回溯</span>
+                <small>从头播放</small>
+              </button>
+              <button
+                id="battleAnimationPlay"
+                class="battle-operation-button operation-play"
+                type="button"
+              >
+                <span class="battle-operation-label">暂停</span>
+                <small>播放控制</small>
+              </button>
+              <div class="battle-animation-speed" aria-label="战斗动画倍速">
+                <button
+                  id="battleAnimationFastForward"
+                  class="battle-operation-button operation-fast-forward"
+                  type="button"
+                  aria-label="切换战斗动画倍速，当前1倍速"
+                >
+                  <span class="battle-operation-label">快进</span>
+                  <output id="battleAnimationSpeedValue" for="battleAnimationSpeed">1×</output>
+                </button>
+                <input
+                  id="battleAnimationSpeed"
+                  type="range"
+                  min="0"
+                  max="3"
+                  step="1"
+                  value="0"
+                  aria-valuetext="1倍速"
+                  aria-describedby="battleAnimationSpeedTicks"
+                />
+                <div id="battleAnimationSpeedTicks" class="battle-animation-speed-ticks" aria-hidden="true">
+                  <span>1×</span>
+                  <span>2×</span>
+                  <span>3×</span>
+                  <span>5×</span>
+                </div>
+              </div>
+              <button
+                id="battleAnimationSkip"
+                class="battle-operation-button operation-skip"
+                type="button"
+                aria-label="跳到本场战斗动画结尾"
+              >
+                <span class="battle-operation-label">跳过</span>
+                <small>直达结算</small>
+              </button>
+            </div>
+          </div>
+          <div class="battle-animation-stage-shell">
+            <div id="battleAnimationStage" class="battle-animation-stage"></div>
+          </div>
+          <div class="battle-animation-details" aria-label="战斗详情">
+            <div class="battle-animation-heading">
+              <button id="battleAnimationPrevious" type="button" aria-label="上一个动画节点">
+                <span aria-hidden="true">‹</span> 上一步
+              </button>
+              <div>
+                <span id="battleAnimationPhase" class="battle-animation-phase">战斗开始</span>
+                <strong>战斗详情</strong>
+                <span id="battleAnimationProgress" class="battle-animation-progress">1 / 1</span>
+              </div>
+              <button id="battleAnimationNext" type="button" aria-label="下一个动画节点">
+                下一步 <span aria-hidden="true">›</span>
+              </button>
+            </div>
+            <div id="battleAnimationEvents" class="battle-animation-events"></div>
+          </div>
+        </section>
+        <details id="battleLineupPanel" class="battle-lineup-panel">
+          <summary>
+            <span>双方阵容与当前快照</span>
+            <small id="battleLineupHint">展开查看完整卡牌</small>
+          </summary>
+          <div id="battleTeams" class="battle-teams"></div>
+        </details>
+        <div id="battleLog" class="battle-log" role="tabpanel" aria-live="polite" hidden></div>
+        <div class="battle-actions">
+          <button id="nextExchangeButton" class="modal-secondary" type="button">
+            查看第1轮交锋
+          </button>
+          <button id="continueButton" class="modal-primary" type="button">进入下一回合</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="gameResultOverlay" class="modal-overlay game-result-overlay" hidden>
+      <section
+        id="gameResultDialog"
+        class="game-result-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gameResultTitle"
+        aria-describedby="gameResultMessage"
+      >
+        <div class="game-result-ink game-result-ink-left" aria-hidden="true"></div>
+        <div class="game-result-ink game-result-ink-right" aria-hidden="true"></div>
+        <div id="gameResultSeal" class="game-result-seal" aria-hidden="true">胜</div>
+        <p id="gameResultKicker" class="game-result-kicker">战局终结</p>
+        <h2 id="gameResultTitle">问鼎中原</h2>
+        <p id="gameResultMessage" class="game-result-message"></p>
+
+        <div id="gameResultStats" class="game-result-stats" aria-label="本局最终数据"></div>
+
+        <section class="game-result-lineup-panel" aria-labelledby="gameResultLineupTitle">
+          <header>
+            <div>
+              <span>FINAL LINEUP</span>
+              <h3 id="gameResultLineupTitle">最终阵容</h3>
+            </div>
+            <p id="gameResultBondSummary"></p>
+          </header>
+          <div id="gameResultLineup" class="game-result-lineup"></div>
+        </section>
+
+        <button id="gameResultRestartButton" class="game-result-restart" type="button">再来一局</button>
+      </section>
+    </div>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="./app.js"></script>
+    <script src="./game-data.js?v=20260730-1"></script>
+    <script src="./opponent-data/opponent-data.js?v=20260731-1"></script>
+    <script src="./app.js?v=20260731-14"></script>
   </body>
 </html>

@@ -1,0 +1,13 @@
+# Local Codex working files
+.codex-scratch-*/
+.codex-tmp/
+
+# Local backups and generated review output
+backups/
+outputs/
+
+# Common editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
