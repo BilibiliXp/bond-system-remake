@@ -4,10 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>三国自走棋商店 Demo</title>
-    <link rel="stylesheet" href="./styles.css?v=20260731-20" />
+    <link rel="stylesheet" href="./styles.css?v=20260803-1" />
   </head>
-  <body>
-    <main class="viewport-shell">
+  <body class="app-loading">
+    <section id="loadingScreen" class="loading-screen" aria-live="polite" aria-busy="true">
+      <div class="loading-card">
+        <p class="loading-kicker">三国自走棋</p>
+        <h1>正在整备战场</h1>
+        <p id="loadingStatus" class="loading-status">正在清点资源…</p>
+        <div
+          id="loadingProgressTrack"
+          class="loading-progress-track"
+          role="progressbar"
+          aria-label="游戏资源加载进度"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <span id="loadingProgressBar" class="loading-progress-bar"></span>
+        </div>
+        <div class="loading-progress-meta">
+          <strong id="loadingPercent">0%</strong>
+          <span id="loadingCount">准备中</span>
+        </div>
+        <div id="loadingActions" class="loading-actions" hidden>
+          <button id="loadingRetryButton" type="button">重新加载</button>
+          <button id="loadingContinueButton" class="loading-continue" type="button">仍然进入</button>
+        </div>
+      </div>
+    </section>
+
+    <main id="gameViewport" class="viewport-shell" aria-hidden="true" inert>
       <section class="shop-stage" aria-label="商店界面">
         <img class="stage-background" src="./res/ShopPanel/背景.jpg" alt="" />
 
@@ -364,6 +391,6 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="./game-data.js?v=20260730-1"></script>
     <script src="./opponent-data/opponent-data.js?v=20260731-1"></script>
-    <script src="./app.js?v=20260731-15"></script>
+    <script src="./app.js?v=20260803-1"></script>
   </body>
 </html>

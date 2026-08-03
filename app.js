@@ -626,6 +626,16 @@ let battleAnimationTimer = 0;
 let battleAnimationPlaybackSpeed = BATTLE_ANIMATION_SPEEDS[0];
 
 const elements = {
+  loadingScreen: document.querySelector("#loadingScreen"),
+  loadingStatus: document.querySelector("#loadingStatus"),
+  loadingProgressTrack: document.querySelector("#loadingProgressTrack"),
+  loadingProgressBar: document.querySelector("#loadingProgressBar"),
+  loadingPercent: document.querySelector("#loadingPercent"),
+  loadingCount: document.querySelector("#loadingCount"),
+  loadingActions: document.querySelector("#loadingActions"),
+  loadingRetryButton: document.querySelector("#loadingRetryButton"),
+  loadingContinueButton: document.querySelector("#loadingContinueButton"),
+  gameViewport: document.querySelector("#gameViewport"),
   roundText: document.querySelector("#roundText"),
   phaseText: document.querySelector("#phaseText"),
   tierText: document.querySelector("#tierText"),
@@ -698,6 +708,173 @@ const elements = {
   stratagemChoiceOptions: document.querySelector("#stratagemChoiceOptions"),
   stratagemChoiceCancelButton: document.querySelector("#stratagemChoiceCancelButton"),
 };
+
+const RUNTIME_IMAGE_ASSETS = [
+  "res/HeroCard/star.png",
+  "res/ShopPanel/exp-bar-base.png",
+  "res/ShopPanel/exp-bar-fill.png",
+  "res/HeroCard/coin_no_diamond_preview2.png",
+  "res/HeroCard/wave.png",
+  "res/HeroCard/atk_bk.png",
+  "res/HeroCard/hp_bk.png",
+  "res/item_icon/50100010.png",
+];
+const ASSET_LOAD_TIMEOUT = 30000;
+let failedAssetUrls = [];
+let applicationStarted = false;
+
+function normalizeAssetUrl(assetUrl, baseUrl = document.baseURI) {
+  if (!assetUrl || assetUrl.startsWith("data:")) return "";
+  try {
+    return new URL(assetUrl, baseUrl).href;
+  } catch (error) {
+    console.warn("无法识别资源地址：", assetUrl, error);
+    return "";
+  }
+}
+
+function collectCssAssetUrls() {
+  const assetUrls = [];
+  const collectFromRules = (rules, baseUrl) => {
+    Array.from(rules ?? []).forEach((rule) => {
+      const cssText = rule.cssText ?? "";
+      const urlPattern = /url\(\s*(['"]?)(.*?)\1\s*\)/giu;
+      for (const match of cssText.matchAll(urlPattern)) {
+        assetUrls.push(normalizeAssetUrl(match[2], baseUrl));
+      }
+      if (rule.cssRules) collectFromRules(rule.cssRules, baseUrl);
+    });
+  };
+
+  Array.from(document.styleSheets).forEach((styleSheet) => {
+    try {
+      collectFromRules(styleSheet.cssRules, styleSheet.href || document.baseURI);
+    } catch (error) {
+      console.warn("无法读取样式表中的资源列表：", styleSheet.href, error);
+    }
+  });
+  return assetUrls;
+}
+
+function collectGameAssetUrls() {
+  const htmlImages = Array.from(document.images, (image) => image.currentSrc || image.src);
+  const heroImages = Object.values(HERO_IMAGE_BY_NAME);
+  const cardImages = Object.values(CARD_POOLS)
+    .flat()
+    .map((card) => card.image)
+    .filter(Boolean);
+  return Array.from(
+    new Set(
+      [
+        ...htmlImages,
+        ...collectCssAssetUrls(),
+        ...heroImages,
+        ...cardImages,
+        ...RUNTIME_IMAGE_ASSETS,
+      ]
+        .map((assetUrl) => normalizeAssetUrl(assetUrl))
+        .filter(Boolean),
+    ),
+  );
+}
+
+function updateLoadingProgress(completed, total, status = "正在加载图片资源…") {
+  const percent = total > 0 ? Math.round((completed / total) * 100) : 100;
+  if (elements.loadingStatus) elements.loadingStatus.textContent = status;
+  if (elements.loadingProgressBar) elements.loadingProgressBar.style.width = `${percent}%`;
+  if (elements.loadingPercent) elements.loadingPercent.textContent = `${percent}%`;
+  if (elements.loadingCount) {
+    elements.loadingCount.textContent = total > 0 ? `${completed} / ${total}` : "无需加载";
+  }
+  elements.loadingProgressTrack?.setAttribute("aria-valuenow", String(percent));
+}
+
+function loadImageAsset(assetUrl) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    let settled = false;
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      image.onload = null;
+      image.onerror = null;
+      resolve({ url: assetUrl, ok });
+    };
+    const timeoutId = window.setTimeout(() => finish(false), ASSET_LOAD_TIMEOUT);
+    image.decoding = "async";
+    image.onload = () => finish(true);
+    image.onerror = () => finish(false);
+    image.src = assetUrl;
+    if (image.complete) finish(image.naturalWidth > 0);
+  });
+}
+
+async function preloadGameAssets(assetUrls = collectGameAssetUrls()) {
+  const uniqueUrls = Array.from(new Set(assetUrls.filter(Boolean)));
+  let completed = 0;
+  updateLoadingProgress(0, uniqueUrls.length);
+  const results = await Promise.all(
+    uniqueUrls.map(async (assetUrl) => {
+      const result = await loadImageAsset(assetUrl);
+      completed += 1;
+      updateLoadingProgress(completed, uniqueUrls.length);
+      return result;
+    }),
+  );
+  return results.filter((result) => !result.ok).map((result) => result.url);
+}
+
+function revealApplication({ withMissingAssets = false } = {}) {
+  if (applicationStarted) return;
+  applicationStarted = true;
+  refreshShop({ free: true });
+
+  const runtimeSearchParams = new URLSearchParams(window.location.search);
+  if (runtimeSearchParams.has("battle-animation-test")) {
+    mountBattleAnimationRegressionResults();
+  } else if (runtimeSearchParams.has("game-rules-test")) {
+    mountGameRuleRegressionResults();
+  } else if (runtimeSearchParams.has("battle-animation-preview")) {
+    mountBattleAnimationPreview();
+  } else if (["victory", "defeat"].includes(runtimeSearchParams.get("game-result-preview"))) {
+    mountGameResultPreview(runtimeSearchParams.get("game-result-preview"));
+  }
+
+  elements.gameViewport?.removeAttribute("inert");
+  elements.gameViewport?.setAttribute("aria-hidden", "false");
+  document.body.classList.remove("app-loading");
+  elements.loadingScreen?.setAttribute("aria-busy", "false");
+  elements.loadingScreen?.classList.add("is-complete");
+  if (withMissingAssets) {
+    window.setTimeout(() => showToast("部分图片加载失败，已按你的选择继续进入。"), 360);
+  }
+  window.setTimeout(() => elements.loadingScreen?.remove(), 400);
+}
+
+async function startAssetPreload(assetUrls) {
+  if (elements.loadingActions) elements.loadingActions.hidden = true;
+  elements.loadingScreen?.setAttribute("aria-busy", "true");
+  failedAssetUrls = await preloadGameAssets(assetUrls);
+  if (failedAssetUrls.length === 0) {
+    updateLoadingProgress(1, 1, "资源整备完成，正在进入…");
+    window.setTimeout(() => revealApplication(), 180);
+    return;
+  }
+
+  updateLoadingProgress(
+    failedAssetUrls.length,
+    failedAssetUrls.length,
+    `${failedAssetUrls.length} 项资源加载失败，请重试。`,
+  );
+  elements.loadingScreen?.setAttribute("aria-busy", "false");
+  if (elements.loadingActions) elements.loadingActions.hidden = false;
+}
+
+elements.loadingRetryButton?.addEventListener("click", () => startAssetPreload(failedAssetUrls));
+elements.loadingContinueButton?.addEventListener("click", () => {
+  revealApplication({ withMissingAssets: true });
+});
 
 function isPageFullscreen() {
   return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
@@ -11314,15 +11491,11 @@ function mountGameRuleRegressionResults() {
   document.body.append(output);
 }
 
-refreshShop({ free: true });
-
 const runtimeSearchParams = new URLSearchParams(window.location.search);
-if (runtimeSearchParams.has("battle-animation-test")) {
-  mountBattleAnimationRegressionResults();
-} else if (runtimeSearchParams.has("game-rules-test")) {
-  mountGameRuleRegressionResults();
-} else if (runtimeSearchParams.has("battle-animation-preview")) {
-  mountBattleAnimationPreview();
-} else if (["victory", "defeat"].includes(runtimeSearchParams.get("game-result-preview"))) {
-  mountGameResultPreview(runtimeSearchParams.get("game-result-preview"));
+const skipAssetPreload =
+  runtimeSearchParams.has("battle-animation-test") || runtimeSearchParams.has("game-rules-test");
+if (skipAssetPreload) {
+  revealApplication();
+} else {
+  startAssetPreload();
 }
