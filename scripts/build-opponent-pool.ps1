@@ -36,6 +36,12 @@ $sessionIds = [System.Collections.Generic.HashSet[string]]::new(
   [System.StringComparer]::Ordinal
 )
 $requiredRounds = 1..20
+$bondFactions = @(
+  [string][char]0x9B4F,
+  [string][char]0x8700,
+  [string][char]0x5434,
+  [string][char]0x7FA4
+)
 
 foreach ($file in $files) {
   $raw = [System.IO.File]::ReadAllText($file.FullName, $utf8)
@@ -76,17 +82,44 @@ foreach ($file in $files) {
     if (-not ($round.lineup -is [System.Array]) -or $round.lineup.Count -ne 5) {
       throw "$($file.Name): round $($round.round) must contain 5 lineup slots."
     }
+    $unlockedFivePersonBonds = @(
+      if ($round.PSObject.Properties.Name -contains "unlockedFivePersonBonds") {
+        $round.unlockedFivePersonBonds
+      }
+    )
+    $invalidUnlockedFactions = @(
+      $unlockedFivePersonBonds | Where-Object { $_ -notin $bondFactions }
+    )
+    if ($invalidUnlockedFactions.Count -gt 0) {
+      throw "$($file.Name): round $($round.round) contains invalid unlockedFivePersonBonds values: $($invalidUnlockedFactions -join ",")."
+    }
+    if ([int]$round.round -ge 11) {
+      $missingFivePersonUnlocks = @(
+        $round.bonds |
+          Where-Object { [int]$_.count -ge 5 -and $_.faction -notin $unlockedFivePersonBonds } |
+          ForEach-Object { $_.faction }
+      )
+      if ($missingFivePersonUnlocks.Count -gt 0) {
+        throw "$($file.Name): round $($round.round) must unlock five-person effects for: $($missingFivePersonUnlocks -join ",")."
+      }
+    }
   }
 
   $runtimeRounds = @(
     $sourceRounds |
       Sort-Object round |
       ForEach-Object {
+        $unlockedFivePersonBonds = @(
+          if ($_.PSObject.Properties.Name -contains "unlockedFivePersonBonds") {
+            $_.unlockedFivePersonBonds
+          }
+        )
         [pscustomobject]@{
           round = [int]$_.round
           recordedAt = $_.recordedAt
           lineup = $_.lineup
           bonds = $_.bonds
+          unlockedFivePersonBonds = $unlockedFivePersonBonds
         }
       }
   )

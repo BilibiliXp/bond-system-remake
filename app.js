@@ -58,8 +58,8 @@ const MAX_UNIT_LEVEL = 3;
 const MAX_EFFECT_CHAIN_STEPS = 500;
 const WU_OPENING_BURN_PRIORITY = Number.MAX_SAFE_INTEGER;
 const PLAYER_DATA_TEST_MAX_ROUND = 20;
-const PLAYER_STARTING_LIFE = 100;
-const PLAYER_MAX_LIFE = 100;
+const PLAYER_STARTING_LIFE = 5;
+const PLAYER_MAX_LIFE = 5;
 const ROUND_THREE_LIFE_RECOVERY_ROUND = 3;
 const ROUND_THREE_LIFE_RECOVERY = 1;
 const ROUND_REWARD_ROUNDS = [3, 7, 11];
@@ -73,7 +73,7 @@ const ROUND_REWARD_CARD_NAMES = Object.freeze({
   7: ["白玉龟", "阎魔帆", "筹措军资", "厉兵秣马"],
   11: ["众志成城", "合纵连横", "方天画戟", "黄天令旗"],
 });
-const FLAG_VICTORY_TARGET = 100;
+const FLAG_VICTORY_TARGET = 10;
 const PLAYER_DATA_TEST_ENEMY_COUNT = 5;
 const PLAYER_DATA_TEST_ENEMY_STAT_MULTIPLIER = 2.5;
 const PLAYER_DATA_TEST_STORAGE_KEY = "bond-system.player-lineup-test.v1";
@@ -1525,10 +1525,8 @@ function applyBattleResultToGameState(gameState, result) {
   }
 }
 
-function getGameOutcome(life, flags, round = 0) {
-  if (life <= 0) return "defeat";
-  if (flags >= FLAG_VICTORY_TARGET) return "victory";
-  return round >= PLAYER_DATA_TEST_MAX_ROUND ? "test-complete" : null;
+function getGameOutcome(life, flags) {
+  return life <= 0 ? "defeat" : flags >= FLAG_VICTORY_TARGET ? "victory" : null;
 }
 
 function createPlayerDataTestSession({ opponentPool = [], opponentSchedule = [] } = {}) {
@@ -2095,7 +2093,7 @@ function finishShopPresentationSequence() {
           : "战斗平局，生命与旗帜不变。",
     );
     const playerDataComplete = completePlayerDataTestSession();
-    state.gameOutcome = getGameOutcome(state.life, state.flags, state.round);
+    state.gameOutcome = getGameOutcome(state.life, state.flags);
     // 终局只在玩家看完最后一场战斗并主动点击“游戏结算”后展示。
     state.gameOver = false;
     if (playerDataComplete) {
@@ -12944,7 +12942,7 @@ function renderBattle() {
   elements.battleTitle.textContent = resultLabel;
   elements.battleSummary.textContent =
     state.playerDataTest?.status === "completed"
-      ? "第 20 回合玩家阵容数据已记录并导出；查看完本场战斗后即可完成本局测试。"
+      ? "第 20 回合玩家阵容数据已记录并导出；本局继续按生命与旗帜条件进行。"
       : "本场使用商店阵容的独立副本；结算完成后不会回写任何战斗状态。";
   renderBattleTeams(battle);
   elements.battleLog.innerHTML = renderBattleReport(battle, battle.selectedExchange);
@@ -12979,8 +12977,7 @@ function renderGameResult() {
   const outcome = state.gameOver ? state.gameOutcome : null;
   const isVictory = outcome === "victory";
   const isDefeat = outcome === "defeat";
-  const isTestComplete = outcome === "test-complete";
-  const hasOutcome = isVictory || isDefeat || isTestComplete;
+  const hasOutcome = isVictory || isDefeat;
   document.body.classList.toggle("game-result-visible", hasOutcome);
   elements.gameResultOverlay.hidden = !hasOutcome;
   if (!hasOutcome) {
@@ -12992,21 +12989,13 @@ function renderGameResult() {
   elements.gameResultDialog.classList.toggle("victory", isVictory);
   elements.gameResultDialog.classList.toggle("defeat", isDefeat);
   elements.gameResultKicker.textContent = isVictory
-    ? "百旗定鼎 · 战局终结"
-    : isDefeat
-      ? "心火尽灭 · 战局终结"
-      : "二十回合 · 测试完成";
-  elements.gameResultTitle.textContent = isVictory
-    ? "问鼎中原"
-    : isDefeat
-      ? "本局落败"
-      : "测试完成";
-  elements.gameResultSeal.textContent = isVictory ? "胜" : isDefeat ? "败" : "成";
+    ? "十旗定鼎 · 战局终结"
+    : "心火尽灭 · 战局终结";
+  elements.gameResultTitle.textContent = isVictory ? "问鼎中原" : "本局落败";
+  elements.gameResultSeal.textContent = isVictory ? "胜" : "败";
   elements.gameResultMessage.textContent = isVictory
     ? `第 ${state.round} 回合集齐 ${FLAG_VICTORY_TARGET} 面旗帜，你赢得了本局。`
-    : isDefeat
-      ? `生命在第 ${state.round} 回合归零，本局征途到此为止。`
-      : `第 ${PLAYER_DATA_TEST_MAX_ROUND} 回合战斗已经结算，玩家阵容测试数据已完成。`;
+    : `生命在第 ${state.round} 回合归零，本局征途到此为止。`;
 
   const stats = [
     ["最终回合", state.round],
@@ -15820,6 +15809,36 @@ function runBattleAnimationRegressionTests() {
     );
   });
 
+  test("对手数据第11回合起的5人羁绊使用5人效果", () => {
+    const pool = getOpponentDataPool();
+    let verifiedFivePersonBonds = 0;
+    pool.forEach((entry) => {
+      entry.session.rounds
+        .filter((round) => round.round >= 11)
+        .forEach((round) => {
+          const unlockedFactions = round.unlockedFivePersonBonds ?? [];
+          (round.bonds ?? [])
+            .filter((bond) => bond.count >= 5)
+            .forEach((bond) => {
+              assert(
+                unlockedFactions.includes(bond.faction),
+                `${entry.label} 第${round.round}回合没有解锁${bond.faction}5人效果`,
+              );
+              assert(
+                bond.level === 5,
+                `${entry.label} 第${round.round}回合${bond.faction}旧兼容档位不是5`,
+              );
+              assert(
+                getBondEffectCount(bond.count, bond.faction, unlockedFactions) === 5,
+                `${entry.label} 第${round.round}回合${bond.faction}没有按5人效果结算`,
+              );
+              verifiedFivePersonBonds += 1;
+            });
+        });
+    });
+    assert(verifiedFivePersonBonds > 0, "第11回合后的对手数据没有可验证的5人羁绊");
+  });
+
   return {
     passed: tests.every((entry) => entry.passed),
     tests,
@@ -17107,23 +17126,23 @@ function mountGameRuleRegressionResults() {
     assert(position.placement === "below", "顶部边缘的道具详情没有向下方空位避让");
   });
 
-  test("测试模式新局初始为100生命、0旗帜", () => {
+  test("玩家模式新局初始为5生命、0旗帜", () => {
     const initial = createInitialState();
-    assert(initial.life === 100, `初始生命应为100，实际为${initial.life}`);
+    assert(initial.life === 5, `初始生命应为5，实际为${initial.life}`);
     assert(initial.flags === 0, `初始旗帜应为0，实际为${initial.flags}`);
   });
-  test("第3回合恢复1生命且不超过100", () => {
-    assert(getLifeAfterRoundStart(99, 3) === 100, "第3回合未正确恢复1生命");
-    assert(getLifeAfterRoundStart(100, 3) === 100, "第3回合生命超过100点上限");
-    assert(getLifeAfterRoundStart(99, 2) === 99, "非第3回合错误恢复生命");
+  test("第3回合恢复1生命且不超过5", () => {
+    assert(getLifeAfterRoundStart(3, 3) === 4, "第3回合未正确恢复1生命");
+    assert(getLifeAfterRoundStart(5, 3) === 5, "第3回合生命超过5点上限");
+    assert(getLifeAfterRoundStart(3, 2) === 3, "非第3回合错误恢复生命");
   });
-  test("胜利加1旗帜并在100旗帜时获胜", () => {
-    const progress = { life: 92, flags: 99, battleRecord: { wins: 99, losses: 3, draws: 0 } };
+  test("胜利加1旗帜并在10旗帜时获胜", () => {
+    const progress = { life: 2, flags: 9, battleRecord: { wins: 9, losses: 3, draws: 0 } };
     applyBattleResultToGameState(progress, "win");
-    assert(progress.flags === 100, `旗帜应为100，实际为${progress.flags}`);
-    assert(progress.life === 92, "胜利不应扣除生命");
-    assert(progress.battleRecord.wins === 100, "胜场统计未增加");
-    assert(getGameOutcome(progress.life, progress.flags) === "victory", "100旗帜未判定胜利");
+    assert(progress.flags === 10, `旗帜应为10，实际为${progress.flags}`);
+    assert(progress.life === 2, "胜利不应扣除生命");
+    assert(progress.battleRecord.wins === 10, "胜场统计未增加");
+    assert(getGameOutcome(progress.life, progress.flags) === "victory", "10旗帜未判定胜利");
   });
   test("失败减1生命并在归零时失败", () => {
     const progress = { life: 1, flags: 4, battleRecord: { wins: 4, losses: 4, draws: 0 } };
@@ -17140,11 +17159,10 @@ function mountGameRuleRegressionResults() {
     assert(progress.battleRecord.draws === 1, "平局统计未增加");
     assert(getGameOutcome(progress.life, progress.flags) === null, "普通进度被错误判定为终局");
   });
-  test("测试模式在第20回合结束", () => {
-    assert(getGameOutcome(90, 12, 19) === null, "第19回合被错误判定为测试完成");
+  test("第20回合数据完成不强制结束玩家对局", () => {
     assert(
-      getGameOutcome(90, 12, PLAYER_DATA_TEST_MAX_ROUND) === "test-complete",
-      "第20回合未判定为测试完成",
+      getGameOutcome(5, 9, PLAYER_DATA_TEST_MAX_ROUND) === null,
+      "第20回合被错误判定为玩家对局结束",
     );
   });
   test("第3、7、11回合均从对应4张奖励卡中随机展示3张且必须三选一", () => {

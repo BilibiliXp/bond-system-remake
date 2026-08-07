@@ -4434,7 +4434,7 @@
         {
           "faction": "魏",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "蜀",
@@ -4502,6 +4502,9 @@
           "recordedAt": "2026-07-31T07:05:02.464Z",
           "message": "贾诩 插入 5 号阵容位，向左挤动至 3 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "魏"
       ]
     },
     {
@@ -4638,7 +4641,7 @@
         {
           "faction": "魏",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "蜀",
@@ -4748,6 +4751,9 @@
           "recordedAt": "2026-07-31T07:06:54.137Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "魏"
       ]
     },
     {
@@ -4884,7 +4890,7 @@
         {
           "faction": "魏",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "蜀",
@@ -4973,6 +4979,9 @@
           "recordedAt": "2026-07-31T07:08:43.674Z",
           "message": "荀彧已锁定。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "魏"
       ]
     },
     {
@@ -5219,7 +5228,8 @@
           "recordedAt": "2026-07-31T07:13:29.612Z",
           "message": "曹操已锁定。"
         }
-      ]
+      ],
+      "unlockedFivePersonBonds": []
     },
     {
       "round": 15,
@@ -5493,7 +5503,8 @@
           "recordedAt": "2026-07-31T07:15:18.580Z",
           "message": "荀彧 插入 3 号阵容位，向右挤动至 4 号空位。"
         }
-      ]
+      ],
+      "unlockedFivePersonBonds": []
     },
     {
       "round": 16,
@@ -5629,7 +5640,7 @@
         {
           "faction": "魏",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "蜀",
@@ -5760,6 +5771,9 @@
           "recordedAt": "2026-07-31T07:18:37.725Z",
           "message": "贾诩已锁定。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "魏"
       ]
     },
     {
@@ -5896,7 +5910,7 @@
         {
           "faction": "魏",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "蜀",
@@ -5999,6 +6013,9 @@
           "recordedAt": "2026-07-31T07:20:15.698Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "魏"
       ]
     },
     {
@@ -6135,7 +6152,7 @@
         {
           "faction": "魏",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "蜀",
@@ -6231,6 +6248,9 @@
           "recordedAt": "2026-07-31T07:23:26.968Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "魏"
       ]
     },
     {
@@ -6367,7 +6387,7 @@
         {
           "faction": "魏",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "蜀",
@@ -6463,6 +6483,9 @@
           "recordedAt": "2026-07-31T07:25:30.198Z",
           "message": "贾诩 插入 5 号阵容位，向左挤动至 3 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "魏"
       ]
     },
     {
@@ -6599,7 +6622,7 @@
         {
           "faction": "魏",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "蜀",
@@ -6695,6 +6718,9 @@
           "recordedAt": "2026-07-31T07:27:04.128Z",
           "message": "荀彧 升到 3 级：跳过本次升级奖励。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "魏"
       ]
     }
   ],

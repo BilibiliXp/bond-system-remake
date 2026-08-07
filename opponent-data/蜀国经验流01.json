@@ -4148,7 +4148,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -4288,6 +4288,9 @@
           "recordedAt": "2026-07-31T03:11:00.118Z",
           "message": "诸葛亮已锁定。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -4409,7 +4412,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -4486,6 +4489,9 @@
           "recordedAt": "2026-07-31T03:15:42.014Z",
           "message": "刘备已锁定。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -4607,7 +4613,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -4670,6 +4676,9 @@
           "recordedAt": "2026-07-31T03:16:22.254Z",
           "message": "刘备 插入 3 号阵容位，向左挤动至 2 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -4791,7 +4800,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -4896,6 +4905,9 @@
           "recordedAt": "2026-07-31T03:18:36.345Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -5017,7 +5029,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -5101,6 +5113,9 @@
           "recordedAt": "2026-07-31T03:21:36.037Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -5222,7 +5237,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -5306,6 +5321,9 @@
           "recordedAt": "2026-07-31T03:24:10.262Z",
           "message": "赵云 插入 4 号阵容位，向左挤动至 2 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -5427,7 +5445,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -5504,6 +5522,9 @@
           "recordedAt": "2026-07-31T03:25:14.220Z",
           "message": "刘备 插入 4 号阵容位，向左挤动至 2 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -5625,7 +5646,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -5723,6 +5744,9 @@
           "recordedAt": "2026-07-31T03:25:48.801Z",
           "message": "关羽 插入 4 号阵容位，向左挤动至 2 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -5844,7 +5868,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -5935,6 +5959,9 @@
           "recordedAt": "2026-07-31T03:26:28.318Z",
           "message": "刘备 插入 2 号阵容位，向右挤动至 3 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     },
     {
@@ -6056,7 +6083,7 @@
         {
           "faction": "蜀",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "吴",
@@ -6168,6 +6195,9 @@
           "recordedAt": "2026-07-31T03:29:20.690Z",
           "message": "刘备 插入 3 号阵容位，向右挤动至 4 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "蜀"
       ]
     }
   ],

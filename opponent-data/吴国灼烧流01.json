@@ -3865,7 +3865,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -3937,6 +3937,9 @@
           "recordedAt": "2026-07-31T06:34:42.645Z",
           "message": "吕蒙 插入 5 号阵容位，向左挤动至 3 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -4063,7 +4066,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -4177,6 +4180,9 @@
           "recordedAt": "2026-07-31T06:35:54.692Z",
           "message": "百厄刃已锁定。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -4308,7 +4314,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -4387,6 +4393,9 @@
           "recordedAt": "2026-07-31T06:37:00.190Z",
           "message": "甘宁 插入 3 号阵容位，向右挤动至 5 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -4528,7 +4537,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -4607,6 +4616,9 @@
           "recordedAt": "2026-07-31T06:37:46.952Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -4753,7 +4765,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -4839,6 +4851,9 @@
           "recordedAt": "2026-07-31T06:38:30.797Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -4985,7 +5000,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -5071,6 +5086,9 @@
           "recordedAt": "2026-07-31T06:39:59.605Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -5212,7 +5230,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -5319,6 +5337,9 @@
           "recordedAt": "2026-07-31T06:41:14.716Z",
           "message": "陆逊已锁定。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -5465,7 +5486,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -5544,6 +5565,9 @@
           "recordedAt": "2026-07-31T06:41:44.762Z",
           "message": "孙权 将 百厄刃 交给 周瑜。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -5690,7 +5714,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -5755,6 +5779,9 @@
           "recordedAt": "2026-07-31T06:43:32.913Z",
           "message": "孙权 插入 3 号阵容位，向右挤动至 4 号空位。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     },
     {
@@ -5901,7 +5928,7 @@
         {
           "faction": "吴",
           "count": 5,
-          "level": 4
+          "level": 5
         },
         {
           "faction": "群",
@@ -5966,6 +5993,9 @@
           "recordedAt": "2026-07-31T06:44:36.165Z",
           "message": "消耗 1 金币刷新商店。"
         }
+      ],
+      "unlockedFivePersonBonds": [
+        "吴"
       ]
     }
   ],
