@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>三国自走棋商店 Demo</title>
-    <link rel="stylesheet" href="./styles.css?v=20260803-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260807-7" />
   </head>
   <body class="app-loading">
     <section id="loadingScreen" class="loading-screen" aria-live="polite" aria-busy="true">
@@ -44,14 +44,14 @@
           <img src="./res/ShopPanel/爱心图标_左上角_透明.png" alt="" />
           <img src="./res/ShopPanel/爱心图标_左上角_透明.png" alt="" />
           <img src="./res/ShopPanel/爱心图标_左上角_透明.png" alt="" />
-          <span id="lifeText">5</span>
+          <span id="lifeText">100</span>
         </div>
 
         <div class="hud-brush flag-brush">
           <img src="./res/ShopPanel/profile_brush_bg.png" alt="" />
           <img class="hud-icon flag-icon" src="./res/ShopPanel/lMgqXGXA_transparent.png" alt="" />
           <span class="hud-caption">旗帜</span>
-          <strong id="flagText">0 / 10</strong>
+          <strong id="flagText">0 / 100</strong>
         </div>
 
         <div class="hud-brush gold-brush">
@@ -107,7 +107,6 @@
         <aside class="fate-panel" aria-label="当前羁绊">
           <h2>当前羁绊</h2>
           <div id="bondList" class="bond-list" aria-live="polite"></div>
-          <p class="bond-tip">2人激活 · 每增加1人，羁绊提升1级</p>
         </aside>
 
         <section class="team-panel" aria-label="己方阵容">
@@ -144,14 +143,51 @@
       </section>
     </main>
 
+    <div id="roundRewardCollapsedBar" class="round-reward-collapsed-bar" hidden>
+      <button
+        id="roundRewardExpandButton"
+        class="reward-skip-button round-reward-expand-button"
+        type="button"
+        aria-controls="roundRewardOverlay"
+      >
+        <span class="reward-skip-label">展开回合奖励</span>
+      </button>
+    </div>
+
+    <div id="roundRewardOverlay" class="modal-overlay reward-overlay round-reward-overlay" hidden>
+      <section class="modal-card reward-dialog" role="dialog" aria-modal="true" aria-labelledby="roundRewardTitle">
+        <header class="reward-header">
+          <h2 id="roundRewardTitle" class="reward-title">前期奖励</h2>
+        </header>
+        <div id="roundRewardOptions" class="reward-options"></div>
+        <div class="reward-actions">
+          <button
+            id="roundRewardCollapseButton"
+            class="reward-skip-button"
+            type="button"
+            aria-controls="roundRewardOverlay"
+          >
+            <span class="reward-skip-label">收起</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
     <div id="rewardOverlay" class="modal-overlay reward-overlay" hidden>
       <section class="modal-card reward-dialog" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
-        <p class="modal-kicker">武将升级奖励</p>
-        <h2 id="rewardTitle">选择升级奖励</h2>
-        <p>选择一张免费武将卡加入商店，也可以跳过本次奖励。</p>
+        <header class="reward-header">
+          <h2 id="rewardTitle" class="reward-title">武将升级奖励</h2>
+        </header>
         <div id="rewardOptions" class="reward-options"></div>
         <div class="reward-actions">
-          <button id="rewardSkipButton" class="modal-secondary" type="button">跳过</button>
+          <button
+            id="rewardSkipButton"
+            class="modal-secondary reward-skip-button"
+            type="button"
+            aria-label="跳过本次升级奖励"
+          >
+            <span class="reward-skip-label">跳过</span>
+          </button>
         </div>
       </section>
     </div>
@@ -389,8 +425,8 @@
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="./game-data.js?v=20260730-1"></script>
+    <script src="./game-data.js?v=20260807-3"></script>
     <script src="./opponent-data/opponent-data.js?v=20260731-1"></script>
-    <script src="./app.js?v=20260803-1"></script>
+    <script src="./app.js?v=20260807-14"></script>
   </body>
 </html>

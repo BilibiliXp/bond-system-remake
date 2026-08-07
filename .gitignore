@@ -5,6 +5,10 @@
 # Local backups and generated review output
 backups/
 outputs/
+tmp/
+
+# Microsoft Office lock files
+~$*.xlsx
 
 # Common editor and OS files
 .DS_Store

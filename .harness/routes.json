@@ -166,7 +166,7 @@
     },
     {
       "id": "skill_resolution",
-      "intent": "解释或修改技能事件、触发时机、同时攻击、触发顺序、伤害管线、连锁触发和效果优先级。",
+      "intent": "解释或修改技能事件、触发时机、同时攻击、触发顺序、伤害管线、单状态槽、状态覆盖、连锁触发和效果优先级。",
       "keywords": [
         "技能结算",
         "事件队列",
@@ -178,7 +178,20 @@
         "动态排序",
         "优先触发",
         "连锁触发",
-        "事件链"
+        "事件链",
+        "负面状态",
+        "正面状态",
+        "状态槽",
+        "单状态槽",
+        "灼烧",
+        "破胆",
+        "畏惧",
+        "连锁",
+        "震慑",
+        "反间",
+        "无双",
+        "休整",
+        "技能禁用"
       ],
       "required": [
         {
@@ -192,8 +205,8 @@
           "doc_id": "gameplay.bond-spec",
           "read": "sections",
           "sections": [
-            "5. 商店阵容与战斗副本",
-            "6. 四种羁绊效果"
+            "7. 商店阵容与战斗副本",
+            "8. 四种羁绊结算规则"
           ]
         },
         {
@@ -219,6 +232,12 @@
           "symbols": [
             "cloneBattleUnit",
             "simulateBasicBattle",
+            "applyNegativeStatus",
+            "applyPositiveStatus",
+            "replaceUnitStatus",
+            "replaceNegativeStatus",
+            "isUnitSkillDisabled",
+            "summonZhangHeHero",
             "useStratagemOnLineup",
             "buyEquipmentToLineup"
           ]
@@ -329,7 +348,8 @@
         "平衡",
         "游戏数据速查",
         "数据表",
-        "Markdown"
+        "Markdown",
+        "羁绊与卡牌能力"
       ],
       "required": [
         {
@@ -345,9 +365,10 @@
           "read": "sections",
           "sections": [
             "1. 系统概述",
-            "4. 羁绊人数与等级",
-            "6. 四种羁绊效果",
-            "7. 武将技能中的羁绊条件"
+            "2. 羁绊计数",
+            "5. 友军与系统效果口径",
+            "8. 四种羁绊结算规则",
+            "9. 人数最多的已激活羁绊"
           ]
         },
         {
@@ -390,7 +411,7 @@
     },
     {
       "id": "bond_rules",
-      "intent": "解释或修改羁绊计数、等级、额外羁绊、同名同步、战斗快照、阵营效果和缘分移除。",
+      "intent": "解释或修改羁绊不同名计数、2/3/4/5 人效果、众志成城解锁、盟书卡、额外羁绊、同名同步、战斗快照和阵营效果。",
       "keywords": [
         "羁绊",
         "缘分",
@@ -401,7 +422,12 @@
         "群",
         "额外羁绊",
         "战斗副本",
-        "羁绊等级"
+        "羁绊人数",
+        "5人效果",
+        "盟书",
+        "3回合奖励",
+        "7回合奖励",
+        "11回合奖励"
       ],
       "required": [
         {
@@ -436,10 +462,15 @@
             "BOND_RULES",
             "getBondCounts",
             "getBondEntries",
+            "getBondEffectCount",
             "getEffectiveUnitBonds",
             "addExtraBond",
             "getWuOpeningTargets",
-            "resolveWuOpeningBurn"
+            "resolveWuOpeningBurn",
+            "queueRoundReward",
+            "chooseRoundRewardCard",
+            "getHighestBondFactions",
+            "selectHeroBondChoice"
           ]
         }
       ],
@@ -470,6 +501,9 @@
         "Prefab",
         "攻击图标",
         "血量图标",
+        "技能描述面板",
+        "属性词图标",
+        "攻血图标",
         "金币图标",
         "阵容间距",
         "卡牌拥挤",
@@ -506,7 +540,8 @@
           "doc_id": "gameplay.bond-spec",
           "read": "sections",
           "sections": [
-            "4. 羁绊人数与等级"
+            "2. 羁绊计数",
+            "4. 第 3、7、11 回合奖励、盟书与商店九格"
           ]
         }
       ],
@@ -579,8 +614,9 @@
           "doc_id": "gameplay.bond-spec",
           "read": "sections",
           "sections": [
-            "3. 武将羁绊",
-            "4. 羁绊人数与等级"
+            "2. 羁绊计数",
+            "3. 初始、永久与临时羁绊",
+            "4. 第 3、7、11 回合奖励、盟书与商店九格"
           ]
         }
       ],
@@ -625,7 +661,9 @@
         "实现",
         "修改功能",
         "接入",
-        "扩展"
+        "扩展",
+        "回合奖励",
+        "盟书"
       ],
       "required": [
         {

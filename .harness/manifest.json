@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "project": "新改版羁绊系统",
-  "updated": "2026-07-31",
+  "updated": "2026-08-07",
   "documents": [
     {
       "id": "harness.agent-entry",
@@ -101,10 +101,12 @@
       "format": "markdown",
       "status": "active",
       "authority": "primary",
-      "summary": "当前羁绊系统的机制规范，包括计数、等级、额外羁绊、战斗副本和四阵营规则。",
+      "summary": "当前羁绊系统的机制规范，包括不同名计数、2/3/4/5 人最高档效果、众志成城解锁、盟书卡、额外羁绊、战斗副本和四阵营规则。",
       "authoritative_for": [
         "羁绊机制与计数",
-        "羁绊等级语义",
+        "羁绊人数档位与最高效果语义",
+        "众志成城与 5 人效果解锁",
+        "盟书卡使用规则",
         "额外羁绊",
         "商店阵容与战斗副本",
         "升级奖励规则",
@@ -128,13 +130,15 @@
       "format": "markdown",
       "status": "active",
       "authority": "primary",
-      "summary": "通用技能事件、同时攻击、同时机动态排序、伤害管线、连锁触发和第一版验收规则。",
+      "summary": "通用技能事件、同时攻击、动态排序、伤害管线、单状态槽、无双覆盖特例、连锁原子替换、召唤和复杂技能口径。",
       "authoritative_for": [
         "通用技能事件与触发时机",
         "同时攻击结算顺序",
         "同时机武将技能动态排序",
         "效果队列与连锁触发",
-        "战斗伤害管线"
+        "战斗伤害管线",
+        "单状态槽、状态覆盖与状态传播",
+        "战斗召唤语义"
       ],
       "not_authoritative_for": [
         "武将、装备、计策和羁绊的具体数值",
@@ -149,7 +153,7 @@
       "format": "markdown",
       "status": "active",
       "authority": "implementation-rule",
-      "summary": "网页 Demo 当前的同名卡叠加、等级经验、属性分层、阵容拖拽挤位排序、武将卡关键区域与阵容密度布局、装备穿戴/交换、计策拖拽目标、拖拽出售和代码修改入口。",
+      "summary": "网页 Demo 当前的同名卡叠加、等级经验、五格阵容、九格共用商店、装备/计策/出售交互，以及第 3/7/11 回合奖励与盟书卡操作。",
       "authoritative_for": [
         "网页 Demo 卡牌叠加",
         "网页 Demo 1/2/3 级阈值",
@@ -162,6 +166,8 @@
         "网页 Demo 拖拽出售区域与出售收益",
         "网页 Demo 武将卡攻血与费用区域布局",
         "网页 Demo 五卡阵容缩放与间距布局"
+        ,
+        "网页 Demo 第 3/7/11 回合奖励阻塞、九格入店与盟书卡交互"
       ],
       "not_authoritative_for": [
         "完整游戏的升级奖励",
@@ -180,10 +186,11 @@
       "format": "markdown",
       "status": "active",
       "authority": "operational",
-      "summary": "网页 Demo 的运行方式、已实现范围和基础循环说明。",
+      "summary": "网页 Demo 的运行方式、已实现范围、基础循环和技能描述面板表现说明。",
       "authoritative_for": [
         "本地运行入口",
-        "Demo 范围说明"
+        "Demo 范围说明",
+        "网页 Demo 技能描述面板表现"
       ],
       "not_authoritative_for": [
         "最终羁绊规则",
@@ -245,13 +252,15 @@
       "format": "markdown",
       "status": "active",
       "authority": "primary",
-      "summary": "武将、装备、计策和四种羁绊具体数据的唯一主数据源，包含网页效果 ID 与目标类型。",
+      "summary": "新版正式武将、装备、计策、四种羁绊、衍生单位、状态和回合奖励具体数据的唯一主数据源，包含网页效果 ID 与目标类型。",
       "authoritative_for": [
         "武将数值",
         "武将技能数据",
         "装备数据",
         "计策数据",
         "四种羁绊的具体效果数值",
+        "衍生战斗单位与状态数值",
+        "第 3/7/11 回合奖励与盟书卡数据",
         "效果 ID 与计策目标类型"
       ],
       "not_authoritative_for": [
@@ -289,6 +298,19 @@
       "use_for": [
         "核对网页 Demo 的静态卡牌数据副本",
         "核对装备与计策的网页交互元数据"
+      ]
+    },
+    {
+      "id": "data.balance-import-input",
+      "path": "羁绊与卡牌能力.xlsx",
+      "type": "spreadsheet-input",
+      "status": "reference",
+      "use_for": [
+        "追溯 2026-08-05 新版正式数据的一次性导入来源"
+      ],
+      "not_for": [
+        "后续代码读取",
+        "覆盖游戏数据速查.md 的权威数据"
       ]
     },
     {

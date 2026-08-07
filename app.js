@@ -56,12 +56,24 @@ const STRATAGEM_COST = 3;
 const MAX_UNIT_BONDS = 2;
 const MAX_UNIT_LEVEL = 3;
 const MAX_EFFECT_CHAIN_STEPS = 500;
+const WU_OPENING_BURN_PRIORITY = Number.MAX_SAFE_INTEGER;
 const PLAYER_DATA_TEST_MAX_ROUND = 20;
-const PLAYER_STARTING_LIFE = 5;
-const PLAYER_MAX_LIFE = 5;
+const PLAYER_STARTING_LIFE = 100;
+const PLAYER_MAX_LIFE = 100;
 const ROUND_THREE_LIFE_RECOVERY_ROUND = 3;
 const ROUND_THREE_LIFE_RECOVERY = 1;
-const FLAG_VICTORY_TARGET = 10;
+const ROUND_REWARD_ROUNDS = [3, 7, 11];
+const ROUND_REWARD_TITLES = Object.freeze({
+  3: "前期奖励",
+  7: "中期奖励",
+  11: "后期奖励",
+});
+const ROUND_REWARD_CARD_NAMES = Object.freeze({
+  3: ["帅印", "虎符", "百厄角", "龙方壶"],
+  7: ["白玉龟", "阎魔帆", "筹措军资", "厉兵秣马"],
+  11: ["众志成城", "合纵连横", "方天画戟", "黄天令旗"],
+});
+const FLAG_VICTORY_TARGET = 100;
 const PLAYER_DATA_TEST_ENEMY_COUNT = 5;
 const PLAYER_DATA_TEST_ENEMY_STAT_MULTIPLIER = 2.5;
 const PLAYER_DATA_TEST_STORAGE_KEY = "bond-system.player-lineup-test.v1";
@@ -74,6 +86,7 @@ const BONUS_ANIMATION_DURATION = 900;
 const BONUS_ANIMATION_STAGGER = 120;
 const UPGRADE_ANIMATION_DURATION = 1050;
 const UPGRADE_ANIMATION_STAGGER = 160;
+const SHOP_SKILL_ANIMATION_DURATION = 900;
 const BOND_UPGRADE_ANIMATION_DURATION = 1450;
 const UNIT_LEVEL_COPY_THRESHOLDS = {
   1: 1,
@@ -81,22 +94,47 @@ const UNIT_LEVEL_COPY_THRESHOLDS = {
   3: 6,
 };
 const BOND_FACTIONS = ["魏", "蜀", "吴", "群"];
-const NEGATIVE_STATUS_POOL = ["burn", "intimidated", "counterplot"];
+const NEGATIVE_STATUS_POOL = [
+  "burn",
+  "broken-morale",
+  "fear",
+  "chain",
+  "intimidated",
+  "counterplot",
+];
+const NEGATIVE_STATUS_IDS = [...NEGATIVE_STATUS_POOL];
+const POSITIVE_STATUS_IDS = ["unparalleled", "rest"];
 const STATUS_LABELS = {
   burn: "灼烧",
+  "broken-morale": "破胆",
+  fear: "畏惧",
+  chain: "连锁",
   intimidated: "震慑",
   counterplot: "反间",
   unparalleled: "无双",
   rest: "休整",
   "skill-disabled": "技能禁用",
 };
+const STATUS_DESCRIPTIONS = {
+  burn: "每次任意普通攻击完成后受到 1 点真实伤害；再次获得任意负面状态时，新状态先覆盖旧灼烧并触发 6 点真实引燃伤害；引燃后只清除状态槽中当前的灼烧。",
+  "broken-morale": "受到的普通攻击伤害和技能普通伤害 +5；不增加真实伤害。",
+  fear: "普通攻击造成的伤害 -3，最低为 0；不减少技能或真实伤害。",
+  chain: "受到其他负面状态时，全部连锁单位的连锁会统一替换为该状态；该批替换不会再次触发连锁传播。",
+  intimidated: "下一次普通攻击伤害变为 0；触发后状态保留并标记为已消耗。",
+  counterplot: "阵亡后，在施加者一方最前方以 LV1、3/3 召唤自身。",
+  unparalleled: "免疫后续负面状态；只有新的正面状态可以覆盖无双；普通攻击会对目标后方单位造成追加伤害。",
+  rest: "其他友军完成普通攻击后，自身获得生命；将获得负面状态时，清除休整并阻止该负面状态。",
+  "skill-disabled": "本轮武将技能无法触发；装备、羁绊、状态与系统效果仍可生效。",
+};
 const STATUS_PRESENTATION_ORDER = [
   "burn",
+  "broken-morale",
+  "fear",
+  "chain",
   "intimidated",
   "counterplot",
   "unparalleled",
   "rest",
-  "skill-disabled",
 ];
 const EVENT_DISPLAY_NAMES = {
   "battle:start": "战斗开始",
@@ -108,6 +146,7 @@ const EVENT_DISPLAY_NAMES = {
   "battle:end": "战斗结束",
   "round:start": "回合开始",
   "round:end": "回合结束",
+  "stratagem:use": "使用计策",
   "card:purchase": "购买",
   "unit:recruit": "招募",
   "unit:summon": "召唤",
@@ -117,11 +156,13 @@ const EVENT_DISPLAY_NAMES = {
   "unit:death": "武将阵亡",
   "unit:revive": "武将复活",
   "status:apply": "获得状态",
-  "bond:level-change": "羁绊等级变化",
+  "bond:count-change": "羁绊人数变化",
 };
 const GLOBAL_STATUS_EFFECT_LABELS = {
   "status.burn-tick": STATUS_LABELS.burn,
   "status.rest-recovery": STATUS_LABELS.rest,
+  "status.broken-morale-damage": STATUS_LABELS["broken-morale"],
+  "status.fear-damage": STATUS_LABELS.fear,
   "status.intimidated-damage": STATUS_LABELS.intimidated,
   "status.unparalleled-cleave": STATUS_LABELS.unparalleled,
   "status.counterplot-revive": STATUS_LABELS.counterplot,
@@ -134,6 +175,171 @@ const BOND_VISUAL_COLORS = {
   群: "#ffd65c",
 };
 const BATTLE_ANIMATION_SPEEDS = [1, 2, 3, 5];
+const GAME_AUDIO_ENABLED = false;
+
+const AUDIO_CUES = Object.freeze({
+  shopMusic: { src: "res/Audio/bg_arena.wav", volume: 0.16, loop: true },
+  battleMusic: { src: "res/Audio/bg_battleContest.wav", volume: 0.18, loop: true },
+  uiConfirm: { src: "res/Audio/BtnCheck.wav", volume: 0.48, cooldownMs: 80 },
+  uiCancel: { src: "res/Audio/BtnUnCheck.wav", volume: 0.44, cooldownMs: 80 },
+  uiTab: { src: "res/Audio/BtnClickTab.wav", volume: 0.36, cooldownMs: 70 },
+  uiError: { src: "res/Audio/BtnTips.wav", volume: 0.52, cooldownMs: 180 },
+  codexOpen: { src: "res/Audio/BtnInfoBarHeroEntry.wav", volume: 0.56, cooldownMs: 160 },
+  shopRefresh: { src: "res/Audio/BtnDealCard.wav", volume: 0.66, cooldownMs: 120 },
+  heroRecruit: { src: "res/Audio/BtnBuyResourceCrit.wav", volume: 0.58, cooldownMs: 120 },
+  heroLevel2: { src: "res/Audio/BtnTurnSilverCard.wav", volume: 0.64, cooldownMs: 160 },
+  heroLevel3: { src: "res/Audio/BtnTurnGoldCard.wav", volume: 0.68, cooldownMs: 180 },
+  equipmentEquip: { src: "res/Audio/BtnEnhanceTreasure.wav", volume: 0.58, cooldownMs: 140 },
+  equipmentSwap: {
+    src: "res/Audio/BtnReplaceTreasurePurify.wav",
+    volume: 0.54,
+    cooldownMs: 120,
+  },
+  stratagemUse: { src: "res/Audio/StudyTech.wav", volume: 0.62, cooldownMs: 140 },
+  cardMove: { src: "res/Audio/BtnMoveCard.wav", volume: 0.5, cooldownMs: 80 },
+  heroSell: { src: "res/Audio/BtnHeroRetreat.wav", volume: 0.56, cooldownMs: 180 },
+  equipmentSell: { src: "res/Audio/BtnDecomposeStar.wav", volume: 0.52, cooldownMs: 160 },
+  shopSkill: { src: "res/Audio/towerdef_skill2.wav", volume: 0.52, cooldownMs: 100 },
+  bondGain: { src: "res/Audio/BtnGainPresidentSkill.wav", volume: 0.62, cooldownMs: 180 },
+  rewardClaim: { src: "res/Audio/GetReward.wav", volume: 0.66, cooldownMs: 180 },
+  nextRound: { src: "res/Audio/BtnGoOn.wav", volume: 0.58, cooldownMs: 180 },
+  battleEnter: { src: "res/Audio/BtnCommonFight.wav", volume: 0.64, cooldownMs: 240 },
+  battleReady: { src: "res/Audio/MarchHorse.wav", volume: 0.42, cooldownMs: 500 },
+  battleClash: { src: "res/Audio/BtnBattleContest.wav", volume: 0.5, cooldownMs: 180 },
+  battleDamage: {
+    src: "res/Audio/towerdef_monsterhurt.wav",
+    volume: 0.48,
+    cooldownMs: 45,
+    poolSize: 5,
+  },
+  battleDeath: { src: "res/Audio/towerdef_wallhurt.wav", volume: 0.58, cooldownMs: 120 },
+  battleSkill1: { src: "res/Audio/towerdef_skill1.wav", volume: 0.52, cooldownMs: 90 },
+  battleSkill2: { src: "res/Audio/towerdef_skill2.wav", volume: 0.52, cooldownMs: 90 },
+  battleSkill3: { src: "res/Audio/towerdef_skill3.wav", volume: 0.52, cooldownMs: 90 },
+  battleSkill4: { src: "res/Audio/towerdef_skill4.wav", volume: 0.52, cooldownMs: 90 },
+  battleSkill5: { src: "res/Audio/towerdef_skill5.wav", volume: 0.52, cooldownMs: 90 },
+  battleSpeed: { src: "res/Audio/BtnCommonSpeedup.wav", volume: 0.44, cooldownMs: 140 },
+  battleVictory: { src: "res/Audio/GetReward.wav", volume: 0.68, cooldownMs: 500 },
+  battleDefeat: { src: "res/Audio/BtnHeroRetreat.wav", volume: 0.56, cooldownMs: 500 },
+  gameVictory: { src: "res/Audio/fireworks.wav", volume: 0.56, cooldownMs: 1000 },
+});
+const AUDIO_SCENE_CUES = Object.freeze({
+  shop: "shopMusic",
+  battle: "battleMusic",
+});
+const audioRuntime = {
+  unlocked: false,
+  scene: null,
+  music: null,
+  musicCue: null,
+  pools: new Map(),
+  lastPlayedAt: new Map(),
+  warnedSources: new Set(),
+  lastGameOutcomeKey: null,
+};
+
+function createGameAudio(cue) {
+  const audio = new Audio(cue.src);
+  audio.preload = cue.loop ? "auto" : "metadata";
+  audio.loop = Boolean(cue.loop);
+  audio.volume = cue.volume ?? 1;
+  return audio;
+}
+
+function warnGameAudioOnce(cue, error) {
+  if (
+    error?.name === "AbortError" ||
+    error?.name === "NotAllowedError" ||
+    audioRuntime.warnedSources.has(cue.src)
+  ) {
+    return;
+  }
+  audioRuntime.warnedSources.add(cue.src);
+  console.warn(`音效加载或播放失败：${cue.src}`, error);
+}
+
+function resumeGameMusic() {
+  if (!GAME_AUDIO_ENABLED || !audioRuntime.unlocked || !audioRuntime.music?.paused) return;
+  const cue = AUDIO_CUES[audioRuntime.musicCue];
+  if (!cue) return;
+  audioRuntime.music.play().catch((error) => warnGameAudioOnce(cue, error));
+}
+
+function playAudioCue(cueName, { volumeScale = 1, playbackRate = 1 } = {}) {
+  if (!GAME_AUDIO_ENABLED) return false;
+  const cue = AUDIO_CUES[cueName];
+  if (!audioRuntime.unlocked || !cue || cue.loop) return false;
+  resumeGameMusic();
+
+  const now = performance.now();
+  const lastPlayedAt = audioRuntime.lastPlayedAt.get(cueName) ?? Number.NEGATIVE_INFINITY;
+  if (now - lastPlayedAt < (cue.cooldownMs ?? 0)) return false;
+  audioRuntime.lastPlayedAt.set(cueName, now);
+
+  const pool = audioRuntime.pools.get(cueName) ?? [];
+  let audio = pool.find((candidate) => candidate.paused || candidate.ended);
+  if (!audio && pool.length < (cue.poolSize ?? 3)) {
+    audio = createGameAudio(cue);
+    pool.push(audio);
+    audioRuntime.pools.set(cueName, pool);
+  }
+  audio ??= pool[0];
+  if (!audio) return false;
+
+  audio.pause();
+  audio.currentTime = 0;
+  audio.volume = Math.max(0, Math.min(1, (cue.volume ?? 1) * volumeScale));
+  audio.playbackRate = Math.max(0.5, Math.min(2, playbackRate));
+  audio.play().catch((error) => warnGameAudioOnce(cue, error));
+  return true;
+}
+
+function setGameAudioScene(scene) {
+  if (!GAME_AUDIO_ENABLED) {
+    if (audioRuntime.music) {
+      audioRuntime.music.pause();
+      audioRuntime.music.currentTime = 0;
+    }
+    return;
+  }
+  const cueName = AUDIO_SCENE_CUES[scene] ?? null;
+  const cue = cueName ? AUDIO_CUES[cueName] : null;
+  if (!audioRuntime.unlocked || !applicationStarted || !cue) return;
+  audioRuntime.scene = scene;
+
+  if (audioRuntime.musicCue === cueName && audioRuntime.music) {
+    if (audioRuntime.music.paused) {
+      audioRuntime.music.play().catch((error) => warnGameAudioOnce(cue, error));
+    }
+    return;
+  }
+
+  if (audioRuntime.music) {
+    audioRuntime.music.pause();
+    audioRuntime.music.currentTime = 0;
+  }
+  const music = createGameAudio(cue);
+  audioRuntime.music = music;
+  audioRuntime.musicCue = cueName;
+  music.play().catch((error) => warnGameAudioOnce(cue, error));
+}
+
+function syncGameAudioScene() {
+  setGameAudioScene(state?.phase === "battle" ? "battle" : "shop");
+}
+
+function unlockGameAudio() {
+  if (!GAME_AUDIO_ENABLED || audioRuntime.unlocked) return;
+  audioRuntime.unlocked = true;
+  document.removeEventListener("pointerdown", unlockGameAudio, true);
+  document.removeEventListener("keydown", unlockGameAudio, true);
+  syncGameAudioScene();
+}
+
+if (GAME_AUDIO_ENABLED) {
+  document.addEventListener("pointerdown", unlockGameAudio, { capture: true, passive: true });
+  document.addEventListener("keydown", unlockGameAudio, { capture: true });
+}
 
 const SHOP_PROGRESSION = [
   { maxRound: 2, tier: 1, heroSlots: 3, itemSlots: 1 },
@@ -146,7 +352,6 @@ const SHOP_PROGRESSION = [
 const SHOP_POSITION_COUNT = 9;
 // 槽位底图的笔触并非等距，以下坐标按 1920 × 1080 设计坐标逐格对齐。
 const SHOP_POSITION_X = [-757, -563, -369, -176, 18, 212, 405, 599, 792];
-const SHOP_OVERFLOW_SLOT_INDICES = [5, 6];
 
 const TEAM_SLOT_RECTS = [
   { x: -430, y: -22, w: 160, h: 231 },
@@ -219,6 +424,7 @@ const HERO_IMAGE_BY_NAME = {
   袁绍: "hero_icon/hero_yuanshao.png",
   骑兵: "hero_icon/hero_qibing.png",
   重骑兵: "hero_icon/hero_zhongqibing.png",
+  白马义从: "hero_icon/hero_qibing.png",
 };
 
 const BOND_RULES = {
@@ -227,10 +433,10 @@ const BOND_RULES = {
     label: "魏武遗风",
     effectIds: ["bond.wei-death"],
     effects: {
-      1: "每阵亡4名魏将，在己方最前方召唤1名骑兵。",
-      2: "每阵亡4名魏将，在己方最前方召唤2名骑兵。",
-      3: "每阵亡4名魏将，在己方最前方召唤1名重骑兵。",
-      4: "每阵亡4名魏将，在己方最前方召唤2名重骑兵。",
+      2: "每阵亡4名魏武将，在己方最前方召唤1名骑兵",
+      3: "每阵亡4名魏武将，在己方最前方召唤2名骑兵",
+      4: "每阵亡4名魏武将，在己方最前方召唤1名重骑兵",
+      5: "每阵亡4名魏武将，在己方最前方召唤2名重骑兵",
     },
   },
   蜀: {
@@ -238,10 +444,10 @@ const BOND_RULES = {
     label: "蜀汉再兴",
     effectIds: ["bond.shu-upgrade"],
     effects: {
-      1: "蜀将升级时，自身获得 +1/+1。",
-      2: "蜀将升级时，自身获得 +2/+2。",
-      3: "蜀将升级时，使全军 +1/+1。",
-      4: "蜀将升级时，使全军 +2/+2。",
+      2: "蜀武将升级时，自身获得 +1/+1",
+      3: "蜀武将升级时，自身获得 +2/+2",
+      4: "蜀武将升级时，使全军 +1/+1",
+      5: "蜀武将升级时，使全军 +2/+2",
     },
   },
   吴: {
@@ -249,24 +455,185 @@ const BOND_RULES = {
     label: "东吴业火",
     effectIds: ["bond.wu-battle-start"],
     effects: {
-      1: "战斗开始时，使随机2名敌军获得灼烧。",
-      2: "战斗开始时，使最后3名敌军获得灼烧。",
-      3: "战斗开始时，使最后4名敌军获得灼烧；引燃伤害 +2。",
-      4: "战斗开始时，使敌军全体灼烧；引燃伤害 +2；引燃不清除灼烧。",
+      2: "战斗开始时，使随机2名敌军获得灼烧",
+      3: "战斗开始时，使最后3名敌军获得灼烧",
+      4: "战斗开始时，使敌军全体获得灼烧",
+      5: "战斗开始时，使敌军全体获得灼烧；敌军被引燃且当前灼烧被清除后再次获得原灼烧",
     },
   },
   群: {
     name: "群",
     label: "群雄并起",
-    effectIds: ["bond.group-start-damage"],
+    effectIds: [],
     effects: {
-      1: "战斗开始阶段，我方造成的任意伤害 +1。",
-      2: "战斗开始阶段，我方造成的任意伤害 +2。",
-      3: "战斗开始阶段，我方造成的任意伤害 +3。",
-      4: "战斗开始阶段，我方造成的任意伤害 +4。",
+      2: "回合结束时，最前方的群武将 +1/+1",
+      3: "回合结束时，最前方的群武将 +2/+2",
+      4: "回合结束时，最前方的群武将 +4/+4",
+      5: "回合结束时，最前方的群武将 +8/+8",
     },
   },
 };
+
+const DERIVED_CONTENT_DEFINITIONS = [
+  {
+    id: "heavy-cavalry",
+    name: "重骑兵",
+    kind: "衍生单位",
+    keywords: ["重骑兵"],
+    attack: 5,
+    health: 5,
+    description: "攻击前，自身 +（2/2）",
+    internalRules: "拥有魏羁绊；自身每次攻击前按当前等级获得属性，1/2/3级分别 +2/+2、+4/+4、+6/+6",
+    effectId: "summon.heavy-cavalry-growth",
+    skill: "[衍生技] 攻击前，自身 +（2/2）",
+  },
+  {
+    id: "cavalry",
+    name: "骑兵",
+    kind: "衍生单位",
+    keywords: ["骑兵"],
+    attack: 2,
+    health: 1,
+    description: "无技能",
+    internalRules: "继承召唤者的基础阵营。马云禄召唤时等级随马云禄，1/2/3 级分别为 2/1、4/2、6/3",
+    effectId: null,
+    skill: "[无技能] 该衍生单位没有武将技能",
+  },
+  {
+    id: "white-horse",
+    name: "白马义从",
+    kind: "衍生单位",
+    keywords: ["白马义从"],
+    attack: 4,
+    health: 4,
+    description: "攻击前，对生命值最低的敌军造成（4）点伤害",
+    internalRules: "等级等于召唤者等级；基础攻血和技能伤害都随等级缩放；继承召唤者的全部当前羁绊",
+    effectId: "summon.white-horse-attack",
+    skill: "[白马突袭] 攻击前，对生命值最低的敌军造成（4）点伤害",
+  },
+  {
+    id: "fangshi",
+    name: "方士",
+    kind: "衍生单位",
+    keywords: ["方士"],
+    attack: 1,
+    health: 1,
+    description: "阵亡时，使随机 1 名友军 +（3/3）",
+    internalRules: "等级等于于吉等级；在于吉阵亡前的原位置召唤；继承于吉的全部当前羁绊",
+    effectId: "summon.fangshi-death",
+    skill: "[方术遗泽] 阵亡时，使随机 1 名友军 +（3/3）",
+  },
+  {
+    id: "imperial-edict",
+    name: "诏书",
+    kind: "衍生装备",
+    keywords: ["诏书"],
+    description: "抵挡最多 10 点伤害，或阻止 1 次负面状态并清空状态槽；生效后消失",
+  },
+  {
+    id: "imperial-jade-seal",
+    name: "传国玉玺",
+    kind: "衍生装备",
+    keywords: ["传国玉玺"],
+    description: "阵亡时，使商店中自身羁绊武将永久 +1/+1",
+  },
+  {
+    id: "burn",
+    name: STATUS_LABELS.burn,
+    kind: "负面状态",
+    keywords: [STATUS_LABELS.burn],
+    description: "每次任意普通攻击完成后受到 1 点真实伤害",
+  },
+  {
+    id: "ignite",
+    name: "引燃",
+    kind: "状态机制",
+    keywords: ["引燃"],
+    description: "已有灼烧的单位再次获得任意负面状态时触发 6 点真实伤害",
+  },
+  {
+    id: "broken-morale",
+    name: STATUS_LABELS["broken-morale"],
+    kind: "负面状态",
+    keywords: [STATUS_LABELS["broken-morale"]],
+    description: STATUS_DESCRIPTIONS["broken-morale"],
+  },
+  {
+    id: "fear",
+    name: STATUS_LABELS.fear,
+    kind: "负面状态",
+    keywords: [STATUS_LABELS.fear],
+    description: STATUS_DESCRIPTIONS.fear,
+  },
+  {
+    id: "chain",
+    name: STATUS_LABELS.chain,
+    kind: "负面状态",
+    keywords: [STATUS_LABELS.chain],
+    description: STATUS_DESCRIPTIONS.chain,
+  },
+  {
+    id: "intimidated",
+    name: STATUS_LABELS.intimidated,
+    kind: "负面状态",
+    keywords: [STATUS_LABELS.intimidated],
+    description: STATUS_DESCRIPTIONS.intimidated,
+  },
+  {
+    id: "counterplot",
+    name: STATUS_LABELS.counterplot,
+    kind: "负面状态",
+    keywords: [STATUS_LABELS.counterplot],
+    description: STATUS_DESCRIPTIONS.counterplot,
+  },
+  {
+    id: "skill-disabled",
+    name: STATUS_LABELS["skill-disabled"],
+    kind: "独立战斗效果",
+    keywords: [STATUS_LABELS["skill-disabled"], "本轮无法触发技能"],
+    description: STATUS_DESCRIPTIONS["skill-disabled"],
+  },
+  {
+    id: "unparalleled",
+    name: STATUS_LABELS.unparalleled,
+    kind: "正面状态",
+    keywords: [STATUS_LABELS.unparalleled],
+    description: STATUS_DESCRIPTIONS.unparalleled,
+  },
+  {
+    id: "rest",
+    name: STATUS_LABELS.rest,
+    kind: "正面状态",
+    keywords: [STATUS_LABELS.rest],
+    description: STATUS_DESCRIPTIONS.rest,
+  },
+  {
+    id: "negative-status",
+    name: "负面状态",
+    kind: "状态集合",
+    keywords: ["负面状态"],
+    description: "灼烧、破胆、畏惧、连锁、震慑与反间共用一个状态槽，新状态会覆盖旧状态；技能禁用是独立效果",
+  },
+];
+
+const DERIVED_CONTENT_ENTRY_BY_KEYWORD = new Map(
+  DERIVED_CONTENT_DEFINITIONS.flatMap((entry) =>
+    entry.keywords.map((keyword) => [keyword, entry]),
+  ),
+);
+const DERIVED_CONTENT_KEYWORD_PATTERN = new RegExp(
+  [...DERIVED_CONTENT_ENTRY_BY_KEYWORD.keys()]
+    .sort((left, right) => right.length - left.length)
+    .map(escapeRegExp)
+    .join("|"),
+  "g",
+);
+
+const DERIVED_UNIT_DEFINITION_BY_NAME = Object.fromEntries(
+  DERIVED_CONTENT_DEFINITIONS
+    .filter((entry) => entry.kind === "衍生单位")
+    .map((entry) => [entry.name, entry]),
+);
 
 function defineHeroEffect(trigger, target, data = {}, conditions = {}) {
   const triggers = Array.isArray(trigger) ? trigger : null;
@@ -283,68 +650,71 @@ function defineHeroEffect(trigger, target, data = {}, conditions = {}) {
 const HERO_EFFECT_DEFINITIONS = {
   "hero.zhenji.luoshen": defineHeroEffect("unit:summon", "summoned-ally"),
   "hero.pangde.xunjie": defineHeroEffect("unit:death", "nearest-ally-behind"),
-  "hero.madai.fuzhan": defineHeroEffect("unit:death", "owner-on-kill"),
+  "hero.huangzhong.laodang-yizhuang": defineHeroEffect("attack:after", "owner"),
   "hero.liaohua.sujiang": defineHeroEffect("experience:gain", "experienced-ally"),
-  "hero.mayunlu.xiliang-lienv": defineHeroEffect("battle:start", "owner"),
-  "hero.zhugejin.hongya": defineHeroEffect("status:apply", "random-other-ally"),
-  "hero.handang.yonglie": defineHeroEffect("attack:after", "random-enemy"),
+  "hero.mayunlu.xiliang-lienv": defineHeroEffect("unit:death", "ahead-of-owner"),
+  "hero.zhugejin.hongya": defineHeroEffect("round:end", "random-other-ally"),
+  "hero.huanggai.kurouji": defineHeroEffect("damage:after", "random-enemies"),
   "hero.huaxiong.xiaoyong": defineHeroEffect("battle:start", "front-enemies"),
-  "hero.chengong.baiji-duomou": defineHeroEffect("unit:recruit", "random-ally"),
+  "hero.chengong.baiji-duomou": defineHeroEffect("unit:recruit", "nearest-ally-ahead"),
   "hero.zuoci.bianhuan-moce": defineHeroEffect("unit:sell", "adjacent-allies"),
   "hero.xiahouyuan.qianli-benxi": defineHeroEffect("attack:after", "ahead-of-owner"),
   "hero.yujin.junji-yanming": defineHeroEffect("round:end", "nearest-allies-ahead"),
-  "hero.weiyan.caigao-qilie": defineHeroEffect("experience:gain", "owner"),
-  "hero.huangzhong.laodang-yizhuang": defineHeroEffect("round:end", "owner"),
+  "hero.weiyan.caigao-qilie": defineHeroEffect("unit:death", "owner"),
+  "hero.madai.fuzhan": defineHeroEffect("round:end", "nearest-ally-ahead"),
   "hero.chengpu.yuanxun": defineHeroEffect("unit:recruit", "nearest-ally-ahead"),
   "hero.xiaoqiao.huaron-yuemao": defineHeroEffect("attack:after", "nearest-ally-ahead"),
-  "hero.huanggai.kurouji": defineHeroEffect("damage:after", "random-enemies"),
-  "hero.yanliang.yongguan-sanjun": defineHeroEffect("unit:recruit", "owner"),
-  "hero.hanxiandi.piaoyao": defineHeroEffect("bond:level-change", "random-other-ally"),
-  "hero.diaochan.qingcheng": defineHeroEffect("round:end", "owner"),
-  "hero.xiahoudun.gangyong": defineHeroEffect("damage:after", "random-other-shared-bond-allies"),
-  "hero.yuejin.xiandeng-xianzhen": defineHeroEffect("attack:before", "ahead-of-owner"),
-  "hero.xuhuang.changqu-zhiru": defineHeroEffect("battle:start", "last-enemy"),
-  "hero.zhangfei.yanren-paoxiao": defineHeroEffect("attack:before", "attack-target"),
+  "hero.handang.zuoyou-kaigong": defineHeroEffect("attack:before", "random-debuffed-enemy"),
+  "hero.wenchou.yongguan-sanjun": defineHeroEffect("attack:after", "owner"),
+  "hero.hanxiandi.piaoyao": defineHeroEffect("unit:death", "random-unequipped-ally"),
+  "hero.diaochan.qingcheng": defineHeroEffect("attack:after", "random-enemies"),
+  "hero.xiahoudun.gangyong": defineHeroEffect("damage:after", "nearest-ally-behind"),
+  "hero.yuejin.xiandeng-xianzhen": defineHeroEffect("unit:death", "front-ally"),
+  "hero.xuhuang.changqu-zhiru": defineHeroEffect("attack:after", "last-enemy"),
+  "hero.zhangfei.yanren-paoxiao": defineHeroEffect("battle:start", "front-enemies"),
   "hero.xushu.jiancai": defineHeroEffect("battle:start", "nearest-ally-ahead"),
   "hero.taishici.jianwu-xufa": defineHeroEffect("battle:start", "highest-health-enemy"),
   "hero.zhoutai.roushen-tiebi": defineHeroEffect("damage:before", "owner"),
   "hero.lusu.lianhe": defineHeroEffect("round:start", "player"),
-  "hero.wenchou.hanyong": defineHeroEffect("damage:after", "owner"),
-  "hero.yuji.guhuo": defineHeroEffect("bond:level-change", "nearest-ally-ahead"),
-  "hero.xunyou.qice": defineHeroEffect("unit:summon", "summoned-shared-bond-ally"),
+  "hero.yanliang.yongguan-sanjun": defineHeroEffect("unit:death", "owner"),
+  "hero.yuji.guhuo": defineHeroEffect("unit:death", "owner-death-position"),
+  "hero.xunyou.qice": defineHeroEffect("stratagem:use", "adjacent-allies"),
   "hero.dianwei.guzhi-elai": defineHeroEffect(
     ["battle:start", "unit:death"],
     "consumed-unit-death-position",
   ),
   "hero.zhaoyun.longdan": defineHeroEffect("unit:upgrade", "owner"),
-  "hero.fazheng.yiyi-dailao": defineHeroEffect("unit:upgrade", "upgraded-ally"),
+  "hero.fazheng.yiyi-dailao": defineHeroEffect("battle:start", "nearest-ally-behind"),
   "hero.sunce.jiangdong-bawang": defineHeroEffect("battle:start", "owner"),
   "hero.lingtong.guoshi-zhifeng": defineHeroEffect("unit:recruit", "recruited-ally"),
   "hero.lvmeng.baiyi-dujiang": defineHeroEffect("attack:before", "front-enemies"),
-  "hero.gongsunzan.baima-yicong": defineHeroEffect("battle:start", "front-enemies"),
-  "hero.zhanghe.qiaobian": defineHeroEffect("bond:level-change", "owner"),
+  "hero.dongzhuo.baonue": defineHeroEffect("round:end", "random-nonbond-ally"),
+  "hero.zhanghe.qiaobian": defineHeroEffect("unit:death", "ahead-of-owner"),
   "hero.simahui.guangshi": defineHeroEffect("card:purchase", "selected-ally-and-bond"),
   "hero.jiaxu.fanjian": defineHeroEffect("battle:start", "random-enemies"),
   "hero.guojia.yiji-pingliao": defineHeroEffect("unit:death", "all-shared-bond-allies"),
-  "hero.zhangliao.weizhen-xiaoyao": defineHeroEffect("battle:start", "front-enemies"),
-  "hero.machao.hanqiang-pozhen": defineHeroEffect("experience:gain", "owner-and-random-enemy"),
-  "hero.pangtong.niepan": defineHeroEffect("unit:death", "random-other-allies"),
-  "hero.luxun.huoshao-lianying": defineHeroEffect("attack:after", "random-enemy"),
-  "hero.ganning.baiqi-jieying": defineHeroEffect("battle:start", "last-enemies"),
-  "hero.yuanshu.yuxi": defineHeroEffect("unit:recruit", "owner"),
-  "hero.dongzhuo.baonue": defineHeroEffect("round:end", "random-nonbond-ally"),
+  "hero.zhangliao.weizhen-xiaoyao": defineHeroEffect("battle:start", "all-enemies"),
+  "hero.machao.pozhen": defineHeroEffect("attack:before", "owner"),
+  "hero.pangtong.tiesuo-lianhuan": defineHeroEffect("battle:start", "random-enemies"),
+  "hero.luxun.huoshao-lianying": defineHeroEffect("attack:after", "all-burned-enemies"),
+  "hero.ganning.baiqi-jieying": defineHeroEffect("battle:start", "last-enemy"),
+  "hero.yuanshu.yuxi": defineHeroEffect("unit:summon", "owner"),
+  "hero.gongsunzan.baima-yicong": defineHeroEffect("unit:death", "ahead-of-owner"),
   "hero.huatuo.jijiu": defineHeroEffect("unit:death", "ahead-of-dead-target"),
   "hero.caocao.jianxiong": defineHeroEffect("unit:death", "random-other-ally"),
   "hero.xunyu.wangzuo-zhicai": defineHeroEffect("unit:summon", "summoned-shared-bond-ally"),
-  "hero.liubei.renze": defineHeroEffect("round:end", "nearest-shared-bond-ally-ahead"),
-  "hero.zhugeliang.yunchou": defineHeroEffect("attack:after", "random-other-allies"),
+  "hero.liubei.renze": defineHeroEffect("unit:summon", "summoned-shared-bond-ally"),
+  "hero.zhugeliang.yunchou": defineHeroEffect("attack:after", "random-enemy"),
   "hero.guanyu.weizhen-huaxia": defineHeroEffect("attack:after", "front-enemies"),
   "hero.sunquan.quanheng": defineHeroEffect("round:end", "nearest-shared-bond-allies"),
   "hero.zhouyu.fengzhu-huoshi": defineHeroEffect("damage:before", "enemy-burn-damage"),
   "hero.zhangjiao.wulei-hongding": defineHeroEffect("battle:start", "random-enemy"),
   "hero.lvbu.tianxia-wushuang": defineHeroEffect("attack:before", "owner"),
   "hero.yuanshao.haoling-qunxiong": defineHeroEffect("unit:recruit", "all-allies"),
+  "summon.white-horse-attack": defineHeroEffect("attack:before", "lowest-health-enemy"),
+  "summon.fangshi-death": defineHeroEffect("unit:death", "random-other-ally"),
 };
+HERO_EFFECT_DEFINITIONS["hero.zhouyu.fengzhu-huoshi"].priority = 440;
 
 const EFFECT_DEFINITIONS = {
   ...HERO_EFFECT_DEFINITIONS,
@@ -368,16 +738,16 @@ const EFFECT_DEFINITIONS = {
     target: "random-unit-in-highest-bond",
     priority: 0,
     operations: [
-      { type: "buff-random-highest-bond", count: 1, attack: 2, health: 1 },
+      { type: "buff-random-highest-bond", count: 1, attack: 2, health: 2 },
     ],
   },
   "stratagem.advance-together": {
     sourceType: "stratagem",
     trigger: "stratagem:use",
-    target: "random-units-in-highest-bond",
+    target: "frontmost-units-in-highest-bond",
     priority: 0,
     operations: [
-      { type: "buff-random-highest-bond", count: 2, attack: 1, health: 1 },
+      { type: "buff-frontmost-highest-bond", count: 2, attack: 1, health: 1 },
     ],
   },
   "stratagem.hidden-potential": {
@@ -385,7 +755,7 @@ const EFFECT_DEFINITIONS = {
     trigger: "stratagem:use",
     target: "all-units-in-inactive-bonds",
     priority: 0,
-    operations: [{ type: "buff-inactive-bonds", attack: 1, health: 1 }],
+    operations: [{ type: "buff-inactive-bonds", attack: 2, health: 2 }],
   },
   "stratagem.train-army": {
     sourceType: "stratagem",
@@ -399,13 +769,7 @@ const EFFECT_DEFINITIONS = {
     trigger: "stratagem:use",
     target: "selected-unit",
     priority: 0,
-    operations: [
-      {
-        type: "first-use-extra-bond-then-stats",
-        attack: 3,
-        health: 3,
-      },
-    ],
+    operations: [{ type: "modify-body-stats", attack: 3, health: 3 }],
   },
   "stratagem.united-force": {
     sourceType: "stratagem",
@@ -435,6 +799,41 @@ const EFFECT_DEFINITIONS = {
         healthPerPriorUse: 1,
       },
     ],
+  },
+  "reward.military-funds": {
+    sourceType: "stratagem",
+    trigger: "stratagem:use",
+    target: "player",
+    priority: 0,
+    operations: [{ type: "gain-gold", amount: 12 }],
+  },
+  "reward.ready-army": {
+    sourceType: "stratagem",
+    trigger: "stratagem:use",
+    target: "shop",
+    priority: 0,
+    operations: [{ type: "generate-shop-cards", names: ["聚势强军", "聚势强军"] }],
+  },
+  "reward.united-bond": {
+    sourceType: "stratagem",
+    trigger: "stratagem:use",
+    target: "highest-bond",
+    priority: 0,
+    operations: [{ type: "unlock-five-person-bond" }],
+  },
+  "reward.alliance-pacts": {
+    sourceType: "stratagem",
+    trigger: "stratagem:use",
+    target: "shop",
+    priority: 0,
+    operations: [{ type: "generate-shop-cards", names: ["盟书", "盟书", "盟书"] }],
+  },
+  "reward.alliance-scroll": {
+    sourceType: "stratagem",
+    trigger: "stratagem:use",
+    target: "selected-unit-and-bond",
+    priority: 0,
+    operations: [{ type: "add-extra-bond", temporary: false }],
   },
   "equipment.iron-armor": {
     sourceType: "equipment",
@@ -474,6 +873,65 @@ const EFFECT_DEFINITIONS = {
     },
     operations: [{ type: "apply-random-negative-status" }],
   },
+  "equipment.iron-shield": {
+    sourceType: "equipment",
+    trigger: "damage:before",
+    target: "owner",
+    priority: 225,
+    conditions: { targetIsOwner: true },
+    operations: [{ type: "block-damage-with-charges", amount: 10, charges: 1 }],
+  },
+  "equipment.commander-seal": {
+    sourceType: "equipment",
+    trigger: "unit:summon",
+    target: "allied-summoned-unit",
+    priority: 0,
+    operations: [{ type: "buff-allied-summon", attack: 1, health: 1 }],
+  },
+  "equipment.tiger-tally": {
+    sourceType: "equipment",
+    trigger: "battle:start",
+    target: "owner",
+    priority: 0,
+    operations: [{ type: "tiger-tally-opening", attack: 3, health: 3, experience: 1 }],
+  },
+  "equipment.dragon-square-pot": {
+    sourceType: "equipment",
+    trigger: "round:end",
+    target: "owner",
+    priority: 0,
+    operations: [{ type: "grow-without-active-bond", attack: 2, health: 2 }],
+  },
+  "equipment.white-jade-turtle": {
+    sourceType: "equipment",
+    trigger: "status:apply",
+    target: "owner",
+    priority: 300,
+    operations: [{ type: "cleanse-negative-and-grow", attack: 2, health: 2 }],
+  },
+  "equipment.yanmo-sail": {
+    sourceType: "equipment",
+    trigger: "unit:death",
+    target: "owner-death-position",
+    priority: 300,
+    conditions: { eventUnitIsOwner: true },
+    operations: [{ type: "revive-without-equipment", attack: 5, health: 5 }],
+  },
+  "equipment.fangtian-halberd": {
+    sourceType: "equipment",
+    trigger: "damage:before",
+    target: "owner-attack-exchange",
+    priority: 325,
+    operations: [{ type: "fangtian-attack-modifier", ratio: 0.3 }],
+  },
+  "equipment.yellow-heaven-banner": {
+    sourceType: "equipment",
+    trigger: "damage:before",
+    target: "owner-skill-damage",
+    priority: 325,
+    conditions: { damageTypes: ["skill"], sourceIsOwner: true },
+    operations: [{ type: "add-attack-ratio-damage", ratio: 0.2 }],
+  },
   "equipment.blood-armor": {
     sourceType: "equipment",
     triggers: ["status:apply", "damage:after"],
@@ -490,6 +948,16 @@ const EFFECT_DEFINITIONS = {
       eventUnitIsOwner: true,
     },
     operations: [{ type: "resolve-imperial-jade-seal-death" }],
+  },
+  "equipment.imperial-edict": {
+    sourceType: "equipment",
+    trigger: "damage:before",
+    target: "owner",
+    priority: 250,
+    conditions: {
+      targetIsOwner: true,
+    },
+    operations: [{ type: "block-damage-with-charges", amount: 10, charges: 1 }],
   },
   "equipment.black-tortoise-shield": {
     sourceType: "equipment",
@@ -513,17 +981,6 @@ const EFFECT_DEFINITIONS = {
     },
     operations: [{ type: "increase-damage-with-charges", amount: 20, charges: 1 }],
   },
-  "bond.group-start-damage": {
-    sourceType: "bond",
-    trigger: "damage:before",
-    target: "allied-damage",
-    priority: 10,
-    conditions: {
-      phase: "battle:start",
-      sourceSideIsOwnerSide: true,
-    },
-    operations: [{ type: "modify-damage-by-bond-level", faction: "群" }],
-  },
   "bond.wei-death": {
     sourceType: "bond",
     trigger: "unit:death",
@@ -542,7 +999,7 @@ const EFFECT_DEFINITIONS = {
     sourceType: "bond",
     trigger: "battle:start",
     target: "enemy-team",
-    priority: 10,
+    priority: WU_OPENING_BURN_PRIORITY,
     operations: [{ type: "apply-wu-opening-burn" }],
   },
   "status.burn-tick": {
@@ -559,11 +1016,25 @@ const EFFECT_DEFINITIONS = {
     priority: -90,
     operations: [{ type: "resolve-rest-recovery" }],
   },
+  "status.broken-morale-damage": {
+    sourceType: "status",
+    trigger: "damage:before",
+    target: "broken-morale-target",
+    priority: 450,
+    operations: [{ type: "resolve-broken-morale-damage" }],
+  },
+  "status.fear-damage": {
+    sourceType: "status",
+    trigger: "damage:before",
+    target: "fear-source",
+    priority: 450,
+    operations: [{ type: "resolve-fear-damage" }],
+  },
   "status.intimidated-damage": {
     sourceType: "status",
     trigger: "damage:before",
     target: "intimidated-source",
-    priority: 50,
+    priority: 500,
     operations: [{ type: "resolve-intimidated-damage" }],
   },
   "status.unparalleled-cleave": {
@@ -588,7 +1059,14 @@ const EFFECT_DEFINITIONS = {
     conditions: {
       ownerIsAttacker: true,
     },
-    operations: [{ type: "modify-battle-unit-stats", attack: 2, health: 2 }],
+    operations: [
+      {
+        type: "modify-battle-unit-stats",
+        attack: 2,
+        health: 2,
+        scaleWithOwnerLevel: true,
+      },
+    ],
   },
 };
 
@@ -613,13 +1091,15 @@ let lineupDragDirection = 0;
 let lineupDragDirectionAnchorX = null;
 let dragPreviewElement = null;
 let dragPreviewOrigin = null;
+let queuedShopSkillAnimations = [];
 let queuedShopBonusAnimations = [];
 let queuedShopUpgradeAnimations = [];
+let shopPresentationSequence = 0;
 let shopPresentationTimer = 0;
 let pendingEndTurnReportEntries = [];
 let resolvingEndTurn = false;
 const bondSelectionHintSources = new Map();
-let previousRenderedBondLevels = null;
+let previousRenderedBondEffectCounts = null;
 let queuedBondUpgradeCelebrations = [];
 let bondUpgradeAnimationTimer = 0;
 let battleAnimationTimer = 0;
@@ -699,9 +1179,15 @@ const elements = {
   gameResultBondSummary: document.querySelector("#gameResultBondSummary"),
   gameResultRestartButton: document.querySelector("#gameResultRestartButton"),
   rewardOverlay: document.querySelector("#rewardOverlay"),
-  rewardTitle: document.querySelector("#rewardTitle"),
   rewardOptions: document.querySelector("#rewardOptions"),
   rewardSkipButton: document.querySelector("#rewardSkipButton"),
+  shopStage: document.querySelector(".shop-stage"),
+  roundRewardOverlay: document.querySelector("#roundRewardOverlay"),
+  roundRewardTitle: document.querySelector("#roundRewardTitle"),
+  roundRewardOptions: document.querySelector("#roundRewardOptions"),
+  roundRewardCollapseButton: document.querySelector("#roundRewardCollapseButton"),
+  roundRewardCollapsedBar: document.querySelector("#roundRewardCollapsedBar"),
+  roundRewardExpandButton: document.querySelector("#roundRewardExpandButton"),
   stratagemChoiceOverlay: document.querySelector("#stratagemChoiceOverlay"),
   stratagemChoiceTitle: document.querySelector("#stratagemChoiceTitle"),
   stratagemChoiceDescription: document.querySelector("#stratagemChoiceDescription"),
@@ -718,6 +1204,9 @@ const RUNTIME_IMAGE_ASSETS = [
   "res/HeroCard/atk_bk.png",
   "res/HeroCard/hp_bk.png",
   "res/item_icon/50100010.png",
+  "res/StatIcon/attack.png",
+  "res/StatIcon/experience.png",
+  "res/StatIcon/health.png",
 ];
 const ASSET_LOAD_TIMEOUT = 30000;
 let failedAssetUrls = [];
@@ -871,8 +1360,12 @@ async function startAssetPreload(assetUrls) {
   if (elements.loadingActions) elements.loadingActions.hidden = false;
 }
 
-elements.loadingRetryButton?.addEventListener("click", () => startAssetPreload(failedAssetUrls));
+elements.loadingRetryButton?.addEventListener("click", () => {
+  playAudioCue("shopRefresh");
+  startAssetPreload(failedAssetUrls);
+});
 elements.loadingContinueButton?.addEventListener("click", () => {
+  playAudioCue("uiConfirm");
   revealApplication({ withMissingAssets: true });
 });
 
@@ -980,7 +1473,6 @@ function createOpponentPoolSchedule(
 }
 
 function createInitialState() {
-  const shopRule = getShopRule(1);
   const opponentPool = getOpponentDataPool();
   const opponentSchedule = createOpponentPoolSchedule(opponentPool);
   return {
@@ -989,7 +1481,7 @@ function createInitialState() {
     gold: TURN_GOLD,
     life: PLAYER_STARTING_LIFE,
     flags: 0,
-    shop: Array.from({ length: shopRule.heroSlots + shopRule.itemSlots }, () => null),
+    shop: Array.from({ length: SHOP_POSITION_COUNT }, () => null),
     lineup: Array.from({ length: LINEUP_SLOT_COUNT }, () => null),
     logs: [`第 1 回合开始，获得 ${TURN_GOLD} 金币。`],
     serial: 1,
@@ -997,6 +1489,9 @@ function createInitialState() {
     pendingRewards: [],
     pendingStratagemUse: null,
     pendingHeroBondChoice: null,
+    pendingRoundReward: null,
+    roundRewardCollapsed: false,
+    unlockedFivePersonBonds: [],
     stratagemUseCounts: {},
     heroBondDefinitions: {},
     shopBondBonuses: Object.fromEntries(
@@ -1030,8 +1525,10 @@ function applyBattleResultToGameState(gameState, result) {
   }
 }
 
-function getGameOutcome(life, flags) {
-  return life <= 0 ? "defeat" : flags >= FLAG_VICTORY_TARGET ? "victory" : null;
+function getGameOutcome(life, flags, round = 0) {
+  if (life <= 0) return "defeat";
+  if (flags >= FLAG_VICTORY_TARGET) return "victory";
+  return round >= PLAYER_DATA_TEST_MAX_ROUND ? "test-complete" : null;
 }
 
 function createPlayerDataTestSession({ opponentPool = [], opponentSchedule = [] } = {}) {
@@ -1145,8 +1642,9 @@ function recordCurrentPlayerLineup() {
     bonds: getBondEntries().map((entry) => ({
       faction: entry.faction,
       count: entry.count,
-      level: entry.level,
+      effectCount: entry.effectCount,
     })),
+    unlockedFivePersonBonds: [...(state.unlockedFivePersonBonds ?? [])],
     operations: session.operations
       .filter((entry) => entry.round === state.round)
       .map((entry) => ({ ...entry })),
@@ -1203,13 +1701,14 @@ function getTier(round) {
 }
 
 function isRefreshSlot(index, round) {
-  const rule = getShopRule(round);
-  return index >= 0 && index < rule.heroSlots + rule.itemSlots;
+  return index >= 0 && index < SHOP_POSITION_COUNT;
 }
 
 function createCard(type) {
   const tier = getTier(state.round);
-  const pool = CARD_POOLS[type].filter((card) => card.tier <= tier && !card.generatedOnly);
+  const pool = CARD_POOLS[type].filter(
+    (card) => card.tier <= tier && !card.generatedOnly && !card.rewardOnly,
+  );
   const base = pool[Math.floor(Math.random() * pool.length)];
   return createCardFromBase(base, type);
 }
@@ -1264,6 +1763,81 @@ function createCardFromBase(base, type) {
     syncShopHeroCardBonuses(card);
   }
   return card;
+}
+
+function compactSharedShopSlots() {
+  const heroes = state.shop.filter((card) => card?.type === "hero");
+  const items = state.shop.filter((card) => card && card.type !== "hero");
+  state.shop = Array.from({ length: SHOP_POSITION_COUNT }, () => null);
+  heroes.slice(0, SHOP_POSITION_COUNT).forEach((card, index) => {
+    state.shop[index] = card;
+  });
+  const availableItemCount = Math.min(items.length, SHOP_POSITION_COUNT - heroes.length);
+  if (availableItemCount > 0) {
+    items.slice(-availableItemCount).forEach((card, index) => {
+      state.shop[SHOP_POSITION_COUNT - availableItemCount + index] = card;
+    });
+  }
+}
+
+function addCardsToSharedShop(cards, sourceName = "卡牌") {
+  const added = [];
+  compactSharedShopSlots();
+  cards.filter(Boolean).forEach((card) => {
+    const isHero = card.type === "hero";
+    let occupiedCount = state.shop.filter(Boolean).length;
+    if (occupiedCount >= SHOP_POSITION_COUNT) {
+      if (isHero) {
+        const itemIndex = state.shop.findLastIndex((entry) => entry && entry.type !== "hero");
+        if (itemIndex < 0) {
+          addLog(`商店九格均为武将，${card.name}无法进入商店。`);
+          return;
+        }
+        const removed = state.shop[itemIndex];
+        state.shop[itemIndex] = null;
+        addLog(`商店九格已满：${removed.name}被新增武将卡挤出并移除。`);
+      } else {
+        const heroIndex = state.shop.findIndex((entry) => entry?.type === "hero");
+        if (heroIndex < 0) {
+          addLog(`商店九格均为道具，${card.name}无法进入商店。`);
+          return;
+        }
+        const removed = state.shop[heroIndex];
+        state.shop[heroIndex] = null;
+        addLog(`商店九格已满：${removed.name}被新增道具卡挤出并移除。`);
+      }
+      compactSharedShopSlots();
+      occupiedCount = state.shop.filter(Boolean).length;
+    }
+    if (occupiedCount >= SHOP_POSITION_COUNT) return;
+    if (isHero) {
+      const heroCount = state.shop.filter((entry) => entry?.type === "hero").length;
+      state.shop[heroCount] = card;
+    } else {
+      const itemCount = state.shop.filter((entry) => entry && entry.type !== "hero").length;
+      state.shop[SHOP_POSITION_COUNT - itemCount - 1] = card;
+    }
+    added.push(card);
+  });
+  if (added.length > 0) {
+    addLog(`${sourceName}进入商店：${added.map((card) => card.name).join("、")}。`);
+  }
+  return added;
+}
+
+function createFreeShopItemFromBase(base) {
+  const card = createCardFromBase({ ...base, cost: 0 }, "stratagem");
+  card.rewardItem = true;
+  card.isLocked = false;
+  return card;
+}
+
+function addFreeShopItemsByName(names, sourceName) {
+  const cards = names
+    .map((name) => CARD_POOLS.stratagem.find((entry) => entry.name === name))
+    .filter(Boolean)
+    .map(createFreeShopItemFromBase);
+  return addCardsToSharedShop(cards, sourceName);
 }
 
 function createHeroCardByFaction(faction) {
@@ -1430,10 +2004,30 @@ function formatBonusText(attack, health) {
   return "";
 }
 
+function getNextShopPresentationSequence() {
+  shopPresentationSequence += 1;
+  return shopPresentationSequence;
+}
+
+function queueShopSkillAnimation(candidate, trigger, explicitSkillName = "") {
+  const owner = candidate?.owner;
+  if (!owner?.id) return false;
+  queuedShopSkillAnimations.push({
+    sequence: getNextShopPresentationSequence(),
+    unitId: owner.id,
+    unitName: owner.name,
+    lineupIndex: getShopUnitIndex(owner),
+    skillName: explicitSkillName || getHeroSkillName(candidate.effectId, owner),
+    triggerName: getEventDisplayName(trigger),
+  });
+  return true;
+}
+
 function queueShopBonusAnimation(unit, attack, health, sourceName = "") {
   const text = formatBonusText(attack, health);
   if (!unit?.id || !text) return false;
   queuedShopBonusAnimations.push({
+    sequence: getNextShopPresentationSequence(),
     unitId: unit.id,
     text,
     sourceName,
@@ -1444,6 +2038,7 @@ function queueShopBonusAnimation(unit, attack, health, sourceName = "") {
 function queueShopUpgradeAnimation(unit, level, sourceName = "") {
   if (!unit?.id || !Number.isInteger(level)) return false;
   queuedShopUpgradeAnimations.push({
+    sequence: getNextShopPresentationSequence(),
     unitId: unit.id,
     unitName: unit.name,
     level,
@@ -1469,9 +2064,17 @@ function revealDeferredUpgradeReward() {
   renderRewardChoice();
 }
 
+function hasQueuedShopPresentations() {
+  return (
+    queuedShopSkillAnimations.length > 0 ||
+    queuedShopUpgradeAnimations.length > 0 ||
+    queuedShopBonusAnimations.length > 0
+  );
+}
+
 function finishShopPresentationSequence() {
   if (shopPresentationTimer) return;
-  if (queuedShopUpgradeAnimations.length > 0 || queuedShopBonusAnimations.length > 0) {
+  if (hasQueuedShopPresentations()) {
     playQueuedShopPresentations();
     return;
   }
@@ -1492,7 +2095,7 @@ function finishShopPresentationSequence() {
           : "战斗平局，生命与旗帜不变。",
     );
     const playerDataComplete = completePlayerDataTestSession();
-    state.gameOutcome = getGameOutcome(state.life, state.flags);
+    state.gameOutcome = getGameOutcome(state.life, state.flags, state.round);
     // 终局只在玩家看完最后一场战斗并主动点击“游戏结算”后展示。
     state.gameOver = false;
     if (playerDataComplete) {
@@ -1505,10 +2108,85 @@ function finishShopPresentationSequence() {
   revealDeferredUpgradeReward();
 }
 
+function getNextShopPresentationBatch() {
+  const queues = [
+    { kind: "skill", items: queuedShopSkillAnimations },
+    { kind: "upgrade", items: queuedShopUpgradeAnimations },
+    { kind: "bonus", items: queuedShopBonusAnimations },
+  ];
+  const nextQueue = queues
+    .filter((entry) => entry.items.length > 0)
+    .sort((left, right) => left.items[0].sequence - right.items[0].sequence)[0];
+  if (!nextQueue) return null;
+  if (nextQueue.kind === "skill") {
+    return { kind: nextQueue.kind, items: [nextQueue.items.shift()] };
+  }
+
+  const nextOtherSequence = Math.min(
+    ...queues
+      .filter((entry) => entry !== nextQueue && entry.items.length > 0)
+      .map((entry) => entry.items[0].sequence),
+    Number.POSITIVE_INFINITY,
+  );
+  const batchSize = nextQueue.items.findIndex(
+    (animation) => animation.sequence >= nextOtherSequence,
+  );
+  return {
+    kind: nextQueue.kind,
+    items: nextQueue.items.splice(0, batchSize < 0 ? nextQueue.items.length : batchSize),
+  };
+}
+
+function getShopPresentationTarget(animation) {
+  const slots = Array.from(elements.lineupGrid?.querySelectorAll(".lineup-slot") ?? []);
+  const targetSlot =
+    slots.find((slot) => slot.dataset.unitId === animation.unitId) ??
+    slots.find((slot) => Number(slot.dataset.lineupIndex) === animation.lineupIndex);
+  return {
+    slot: targetSlot ?? null,
+    card: targetSlot?.querySelector(".hero-card") ?? null,
+  };
+}
+
 function playQueuedShopPresentations() {
   if (shopPresentationTimer) return;
-  if (queuedShopUpgradeAnimations.length > 0) {
-    const animations = queuedShopUpgradeAnimations.splice(0);
+  const batch = getNextShopPresentationBatch();
+  if (!batch) {
+    window.setTimeout(finishShopPresentationSequence, 0);
+    return;
+  }
+
+  if (batch.kind === "skill") {
+    const animation = batch.items[0];
+    const { slot, card } = getShopPresentationTarget(animation);
+    const target = card ?? slot?.querySelector(".slot-body");
+    if (!target) {
+      window.setTimeout(playQueuedShopPresentations, 0);
+      return;
+    }
+
+    card?.classList.add("shop-skill-active");
+    playAudioCue("shopSkill");
+    const label = document.createElement("span");
+    label.className = "shop-skill-float";
+    label.innerHTML = getSkillTriggerTagMarkup(animation.skillName);
+    label.setAttribute("aria-label", `${animation.unitName}的${animation.skillName}触发`);
+    label.title = `${animation.triggerName}触发`;
+    target.append(label);
+
+    shopPresentationTimer = window.setTimeout(() => {
+      label.remove();
+      card?.classList.remove("shop-skill-active");
+      shopPresentationTimer = 0;
+      playQueuedShopPresentations();
+    }, SHOP_SKILL_ANIMATION_DURATION);
+    return;
+  }
+
+  if (batch.kind === "upgrade") {
+    const animations = batch.items;
+    const highestLevel = Math.max(...animations.map((animation) => animation.level));
+    playAudioCue(highestLevel >= 3 ? "heroLevel3" : "heroLevel2");
     animations.forEach((animation, index) => {
       const targetSlot = Array.from(elements.lineupGrid.querySelectorAll(".lineup-slot")).find(
         (slot) => slot.dataset.unitId === animation.unitId,
@@ -1541,11 +2219,7 @@ function playQueuedShopPresentations() {
     return;
   }
 
-  if (queuedShopBonusAnimations.length === 0) {
-    window.setTimeout(finishShopPresentationSequence, 0);
-    return;
-  }
-  const animations = queuedShopBonusAnimations.splice(0);
+  const animations = batch.items;
 
   animations.forEach((animation, index) => {
     const targetSlot = Array.from(elements.lineupGrid.querySelectorAll(".lineup-slot")).find(
@@ -1556,7 +2230,8 @@ function playQueuedShopPresentations() {
 
     const label = document.createElement("span");
     label.className = "bonus-float";
-    label.textContent = animation.text;
+    label.innerHTML = getFloatingAttributeTextMarkup(animation.text);
+    label.setAttribute("aria-label", getFloatingAttributeAccessibleText(animation.text));
     label.title = animation.sourceName;
     label.style.setProperty("--bonus-delay", `${index * BONUS_ANIMATION_STAGGER}ms`);
     target.append(label);
@@ -1580,11 +2255,10 @@ function getEventDisplayName(eventType) {
 }
 
 function getHeroSkillText(effectId, owner = null) {
-  return (
-    owner?.skill ??
-    CARD_POOLS.hero.find((hero) => hero.effectId === effectId)?.skill ??
-    ""
-  );
+  const ownerSkill = String(owner?.skill ?? "").trim();
+  const heroSkill = CARD_POOLS.hero.find((hero) => hero.effectId === effectId)?.skill ?? "";
+  const derivedUnit = DERIVED_UNIT_DEFINITION_BY_NAME[owner?.name];
+  return ownerSkill || heroSkill || derivedUnit?.skill || "";
 }
 
 function getHeroSkillLevel(owner) {
@@ -1619,12 +2293,12 @@ function resolveHeroSkillDisplay(skillText, level = 1, owner = null) {
     )}`;
   });
   text = text.replace(/（LV1）/g, () => markScaledValue(`LV${resolvedLevel}`));
-  text = text.replace(/（(\d+(?:\/\d+)?)(%)?）/g, (_match, rawValue, percentSign) => {
+  text = text.replace(/(\+?)（(\d+(?:\/\d+)?)(%)?）/g, (_match, plusSign, rawValue, percentSign) => {
     const scaledValue = rawValue
       .split("/")
       .map((value) => Number(value) * resolvedLevel)
       .join("/");
-    return markScaledValue(`${scaledValue}${percentSign || ""}`);
+    return markScaledValue(`${plusSign}${scaledValue}${percentSign || ""}`);
   });
 
   const plainText = text
@@ -1663,15 +2337,111 @@ function getHeroSkillName(effectId, owner = null) {
   return skillText.match(/^\[([^\]]+)\]/)?.[1] ?? "技能";
 }
 
-function getHeroSkillDescriptionDisplay(effectId, owner = null) {
-  const rawDescription = getHeroSkillText(effectId, owner)
+function getSkillDescriptionDisplay(skillText, level = 1, owner = null) {
+  const rawDescription = String(skillText ?? "")
     .replace(/^\[[^\]]+\]\s*/, "")
     .trim();
-  return resolveHeroSkillDisplay(rawDescription, getHeroSkillLevel(owner), owner);
+  const display = resolveHeroSkillDisplay(rawDescription, level, owner);
+  return {
+    ...display,
+    html: getStatDescriptionMarkup(getDerivedContentHighlightedMarkup(display.html)),
+  };
+}
+
+function getHeroSkillDescriptionDisplay(effectId, owner = null) {
+  const display = getSkillDescriptionDisplay(
+    getHeroSkillText(effectId, owner),
+    getHeroSkillLevel(owner),
+    owner,
+  );
+  return {
+    ...display,
+    html: getExperienceDescriptionMarkup(display.html),
+  };
 }
 
 function getHeroSkillDescription(effectId, owner = null) {
   return getHeroSkillDescriptionDisplay(effectId, owner).text;
+}
+
+function getDerivedContentEntries(values) {
+  const sourceText = (Array.isArray(values) ? values : [values])
+    .flat(Infinity)
+    .filter(Boolean)
+    .map(String)
+    .join("\n");
+  if (!sourceText) return [];
+
+  const candidates = DERIVED_CONTENT_DEFINITIONS.flatMap((entry) =>
+    entry.keywords.flatMap((keyword) => {
+      const matches = [];
+      let start = sourceText.indexOf(keyword);
+      while (start >= 0) {
+        matches.push({ entry, start, end: start + keyword.length, length: keyword.length });
+        start = sourceText.indexOf(keyword, start + keyword.length);
+      }
+      return matches;
+    }),
+  ).sort((left, right) => left.start - right.start || right.length - left.length);
+
+  const occupiedRanges = [];
+  const selectedIds = new Set();
+  const selectedEntries = [];
+  candidates.forEach((candidate) => {
+    if (selectedIds.has(candidate.entry.id)) return;
+    if (
+      occupiedRanges.some(
+        (range) => candidate.start < range.end && candidate.end > range.start,
+      )
+    ) {
+      return;
+    }
+    occupiedRanges.push({ start: candidate.start, end: candidate.end });
+    selectedIds.add(candidate.entry.id);
+    selectedEntries.push({ ...candidate.entry, firstIndex: candidate.start });
+  });
+  return selectedEntries.sort((left, right) => left.firstIndex - right.firstIndex);
+}
+
+function getDerivedContentHighlightedMarkup(markup) {
+  return String(markup ?? "").replace(DERIVED_CONTENT_KEYWORD_PATTERN, (keyword) => {
+    const entry = DERIVED_CONTENT_ENTRY_BY_KEYWORD.get(keyword);
+    return entry
+      ? `<span class="derived-content-term" data-derived-id="${escapeBattleReportHtml(entry.id)}">${keyword}</span>`
+      : keyword;
+  });
+}
+
+function createDerivedContentRailMarkup(entries, className = "") {
+  if (!entries.length) return "";
+  const derivedCount = Math.min(2, entries.length);
+  return `
+    <aside class="derived-detail-rail ${className}" style="--derived-count: ${derivedCount}" aria-label="衍生内容说明">
+      ${entries
+        .map((entry) => {
+          const descriptionDisplay = getSkillDescriptionDisplay(entry.description, 1);
+          const statsMarkup =
+            Number.isFinite(entry.attack) && Number.isFinite(entry.health)
+              ? `<span class="derived-detail-stats" aria-label="攻击力 ${entry.attack}，生命值 ${entry.health}">${getStatPairMarkup(`${entry.attack}/${entry.health}`)}</span>`
+              : "";
+          const kindMarkup = statsMarkup
+            ? ""
+            : `<span class="derived-detail-kind">${escapeBattleReportHtml(entry.kind)}</span>`;
+          return `
+            <section class="derived-detail-card card-detail-paper" data-derived-id="${escapeBattleReportHtml(entry.id)}">
+              <div class="card-detail-heading">
+                <strong class="card-detail-ink-tag">衍生</strong>
+                <span class="card-detail-title derived-detail-name">${escapeBattleReportHtml(entry.name)}</span>
+                ${statsMarkup}
+                ${kindMarkup}
+              </div>
+              <span class="derived-detail-description">${descriptionDisplay.html}</span>
+            </section>
+          `;
+        })
+        .join("")}
+    </aside>
+  `;
 }
 
 function isEffectImplemented(effectId) {
@@ -1712,22 +2482,22 @@ function shareAnyBond(left, right) {
   return getBaseUnitBonds(left).some((faction) => rightBonds.has(faction));
 }
 
-function getShopBondLevelSnapshot() {
-  return Object.fromEntries(getBondEntries().map((entry) => [entry.faction, entry.level]));
+function getShopBondCountSnapshot() {
+  return Object.fromEntries(getBondEntries().map((entry) => [entry.faction, entry.count]));
 }
 
-function dispatchShopBondLevelChanges(previousLevels) {
-  const currentLevels = getShopBondLevelSnapshot();
+function dispatchShopBondCountChanges(previousCounts) {
+  const currentCounts = getShopBondCountSnapshot();
   const changes = BOND_FACTIONS.map((faction) => ({
     faction,
-    previousLevel: previousLevels?.[faction] ?? 0,
-    level: currentLevels[faction] ?? 0,
-  })).filter((entry) => entry.previousLevel !== entry.level);
+    previousCount: previousCounts?.[faction] ?? 0,
+    count: currentCounts[faction] ?? 0,
+  })).filter((entry) => entry.previousCount !== entry.count);
   if (changes.length > 0) {
-    dispatchShopEvent("bond:level-change", {
+    dispatchShopEvent("bond:count-change", {
       changes,
-      decreased: changes.some((entry) => entry.level < entry.previousLevel),
-      increased: changes.some((entry) => entry.level > entry.previousLevel),
+      decreased: changes.some((entry) => entry.count < entry.previousCount),
+      increased: changes.some((entry) => entry.count > entry.previousCount),
     });
   }
 }
@@ -1739,54 +2509,71 @@ function isShopHeroEventApplicable(candidate, type, payload) {
   if (type === "card:purchase") return effectId === "hero.simahui.guangshi" && unit === owner;
   if (type === "unit:sell") return effectId === "hero.zuoci.bianhuan-moce" && unit === owner;
   if (type === "unit:recruit") {
-    if (["hero.chengong.baiji-duomou", "hero.chengpu.yuanxun", "hero.yuanshu.yuxi"].includes(effectId)) {
+    if (["hero.chengong.baiji-duomou", "hero.chengpu.yuanxun"].includes(effectId)) {
       return unit === owner;
     }
     return [
-      "hero.yanliang.yongguan-sanjun",
       "hero.lingtong.guoshi-zhifeng",
       "hero.yuanshao.haoling-qunxiong",
-    ].includes(effectId) && sharedUnit;
+    ].includes(effectId) && sharedUnit && unit !== owner;
   }
   if (type === "unit:summon") {
-    if (effectId === "hero.zhenji.luoshen") return Boolean(unit);
-    return effectId === "hero.xunyu.wangzuo-zhicai" && sharedUnit;
-  }
-  if (type === "experience:gain") {
-    if (effectId === "hero.liaohua.sujiang" || effectId === "hero.weiyan.caigao-qilie") {
-      return Boolean(unit && unit !== owner);
+    if (effectId === "hero.zhenji.luoshen") {
+      return Boolean(unit && unit !== owner && !payload.revived);
     }
+    if (effectId === "hero.yuanshu.yuxi") {
+      return unit === owner && !payload.revived;
+    }
+    return ["hero.xunyu.wangzuo-zhicai", "hero.liubei.renze"].includes(effectId) &&
+      sharedUnit &&
+      unit !== owner &&
+      !payload.revived;
+  }
+  if (type === "stratagem:use") return effectId === "hero.xunyou.qice";
+  if (type === "experience:gain") {
+    if (effectId === "hero.liaohua.sujiang") return Boolean(unit && unit !== owner);
     return false;
   }
   if (type === "unit:upgrade") {
     if (effectId === "hero.zhaoyun.longdan") return unit === owner;
-    return effectId === "hero.fazheng.yiyi-dailao" && Boolean(unit && unit !== owner);
+    return false;
   }
   if (type === "unit:death") {
-    if (["hero.pangde.xunjie", "hero.guojia.yiji-pingliao", "hero.pangtong.niepan"].includes(effectId)) {
+    if ([
+      "hero.pangde.xunjie",
+      "hero.yuejin.xiandeng-xianzhen",
+      "hero.guojia.yiji-pingliao",
+      "hero.hanxiandi.piaoyao",
+    ].includes(effectId)) {
       return unit === owner;
     }
-    if (effectId === "hero.madai.fuzhan") return payload.killer === owner;
+    if (effectId === "hero.weiyan.caigao-qilie") {
+      return Boolean(unit && unit !== owner);
+    }
+    if (effectId === "hero.yanliang.yongguan-sanjun") {
+      return Boolean(unit && unit !== owner && payload.killer === owner);
+    }
     if (effectId === "hero.huatuo.jijiu") {
       return Boolean(
         unit &&
         unit !== owner &&
         !payload.consumed &&
         !payload.revived &&
+        (owner.huatuoRevivesUsedThisRound ?? 0) < (owner.level ?? 1) &&
         getNearestShopUnit(owner, "ahead") === unit
       );
     }
-    if (effectId === "hero.caocao.jianxiong") return Boolean(unit && shareAnyBond(owner, unit));
+    if (effectId === "hero.caocao.jianxiong") {
+      return Boolean(unit && unit !== owner && shareAnyBond(owner, unit));
+    }
     return false;
-  }
-  if (type === "bond:level-change") {
-    return effectId !== "hero.yuji.guhuo" || payload.decreased;
   }
   return true;
 }
 
 function dispatchShopEvent(type, payload = {}) {
   resolveShopEquipmentEvent(type, payload);
+  resolveShopBondEvent(type);
   const candidates = [];
   let sequence = 0;
   getLineupUnits().forEach((owner) => {
@@ -1834,6 +2621,7 @@ function dispatchShopEvent(type, payload = {}) {
         skillDescription ? `：${skillDescription}` : ""
       }。`,
     });
+    queueShopSkillAnimation(candidate, type);
     resolveShopHeroSkill(candidate, { type, payload });
     recordShopEffectEvent(type, {
       sourceEffectId: candidate.effectId,
@@ -1845,8 +2633,56 @@ function dispatchShopEvent(type, payload = {}) {
   }
 }
 
+function resolveShopBondEvent(type) {
+  if (type !== "round:end") return;
+  const effectCount = getCurrentShopBondEffectCount("群");
+  if (effectCount < 2) return;
+  const amount = { 2: 1, 3: 2, 4: 4, 5: 8 }[effectCount] ?? 0;
+  const target = state.lineup
+    .map((unit, index) => ({ unit, index }))
+    .filter(({ unit }) => unit && getEffectiveUnitBonds(unit).includes("群"))
+    .sort((left, right) => right.index - left.index)[0]?.unit;
+  if (!target || amount <= 0) return;
+  applyShopUnitStatBonus(target, amount, amount, BOND_RULES.群.label);
+  const message = `${BOND_RULES.群.label} ${effectCount}人：最前方群武将${target.name}永久 +${amount}/+${amount}。`;
+  addLog(message);
+  recordShopEffectEvent("round:end", {
+    sourceEffectId: "bond.group-round-end",
+    sourceName: `${BOND_RULES.群.label} ${effectCount}人`,
+    targetId: target.id,
+    targetName: target.name,
+    message,
+  });
+}
+
 function resolveShopEquipmentEvent(type, payload) {
+  if (type === "round:end") {
+    const hasActiveBond = getBondEntries().some((entry) => entry.count >= 2);
+    if (!hasActiveBond) {
+      getLineupUnits().forEach((owner) => {
+        const equipment = getUnitEquipment(owner);
+        if (equipment?.effectId !== "equipment.dragon-square-pot") return;
+        applyShopUnitStatBonus(owner, 2, 2, equipment.name);
+        addLog(`${owner.name}的${equipment.name}触发：阵容无激活羁绊，自身永久 +2/+2。`);
+      });
+    }
+    return;
+  }
   const unit = payload.unit ?? null;
+  if (type === "unit:summon" && unit && !payload.revived) {
+    getLineupUnits().forEach((owner) => {
+      const equipment = getUnitEquipment(owner);
+      if (equipment?.effectId !== "equipment.commander-seal") return;
+      queueShopSkillAnimation(
+        { owner, effectId: equipment.effectId },
+        type,
+        equipment.name,
+      );
+      applyShopUnitStatBonus(unit, 1, 1, equipment.name);
+      addLog(`${owner.name}的${equipment.name}触发：${unit.name} +1/+1。`);
+    });
+    return;
+  }
   const equipment = getUnitEquipment(unit);
   if (
     type !== "unit:death" ||
@@ -1869,55 +2705,97 @@ function logShopHeroSkill(owner, message) {
 function resolveGeneratedStratagem(owner) {
   const tier = Math.min(6, Math.max(1, owner.level ?? 1));
   const pool = CARD_POOLS.stratagem.filter(
-    (card) => card.category === "计策" && card.tier === tier && getEffectDefinition(card.effectId),
+    (card) =>
+      card.category === "计策" &&
+      card.tier === tier &&
+      !card.rewardOnly &&
+      !card.generatedOnly &&
+      getEffectDefinition(card.effectId),
   );
-  if (pool.length === 0 || getLineupUnits().length === 0) return;
+  const targetUnit = getNearestShopUnit(owner, "ahead");
+  if (pool.length === 0 || !targetUnit) return;
   const card = pool[Math.floor(Math.random() * pool.length)];
-  const targetUnit = pickShopRandomUnits(getLineupUnits(), 1)[0];
-  let selectedFaction = null;
-  if (card.effectId === "stratagem.temporary-bond" || (
-    card.effectId === "stratagem.blood-oath" &&
-    getStratagemUseCount(card.effectId) === 0
-  )) {
-    const factions = getAvailableExtraBondFactions(targetUnit);
-    if (factions.length === 0) return;
-    selectedFaction = factions[Math.floor(Math.random() * factions.length)];
-  } else if (card.effectId === "stratagem.train-army") {
-    selectedFaction = BOND_FACTIONS[Math.floor(Math.random() * BOND_FACTIONS.length)];
+  const validation = getStratagemUseValidation(card, targetUnit);
+  if (!validation.valid) return;
+  if (validation.requiresBondChoice) {
+    state.pendingStratagemUse = {
+      generated: true,
+      ownerId: owner.id,
+      ownerName: owner.name,
+      card: { ...card },
+      cardName: card.name,
+      targetId: targetUnit.id,
+      targetName: targetUnit.name,
+      targetIndex: getShopUnitIndex(targetUnit),
+      availableFactions: validation.availableFactions,
+      choiceDescription: `${owner.name}【百计多谋】对${targetUnit.name}使用${card.name}：${validation.choiceDescription}`,
+    };
+    return;
   }
   const outcome = resolveShopEffect(card.effectId, {
     card,
     targetUnit,
     targetIndex: getShopUnitIndex(targetUnit),
-    selectedFaction,
+    selectedFaction: null,
   });
   if (outcome.applied) {
     logShopHeroSkill(owner, `对${targetUnit.name}使用了${tier}阶计策${card.name}`);
   }
 }
 
-function reviveShopUnit(deadUnit, owner, eventPayload) {
-  if (!deadUnit || eventPayload.revived || getNearestShopUnit(owner, "ahead") !== deadUnit) {
+function completeGeneratedStratagemUse(selectedFaction) {
+  const pending = state.pendingStratagemUse;
+  if (!pending?.generated || !pending.availableFactions.includes(selectedFaction)) return false;
+  const owner = getLineupUnits().find((unit) => unit.id === pending.ownerId);
+  const targetUnit = getLineupUnits().find((unit) => unit.id === pending.targetId);
+  if (!owner || !targetUnit) {
+    state.pendingStratagemUse = null;
+    render();
     return false;
   }
-  const level = owner.level ?? 1;
+  const previousBondCounts = getShopBondCountSnapshot();
+  const outcome = resolveShopEffect(pending.card.effectId, {
+    card: pending.card,
+    targetUnit,
+    targetIndex: getShopUnitIndex(targetUnit),
+    selectedFaction,
+  });
+  if (!outcome.applied) return false;
+  state.pendingStratagemUse = null;
+  dispatchShopBondCountChanges(previousBondCounts);
+  logShopHeroSkill(
+    owner,
+    `对${targetUnit.name}使用了${pending.card.tier}阶计策${pending.card.name}`,
+  );
+  render();
+  return true;
+}
+
+function reviveShopUnit(deadUnit, owner, eventPayload) {
+  const reviveLimit = owner.level ?? 1;
+  if (
+    !deadUnit ||
+    eventPayload.revived ||
+    (owner.huatuoRevivesUsedThisRound ?? 0) >= reviveLimit ||
+    getNearestShopUnit(owner, "ahead") !== deadUnit
+  ) {
+    return false;
+  }
+  const level = 2;
   deadUnit.level = level;
   deadUnit.copies = UNIT_LEVEL_COPY_THRESHOLDS[level];
   deadUnit.bonusExperience = 0;
   deadUnit.experience = 0;
-  deadUnit.baseAttack = level;
-  deadUnit.baseHealth = level;
-  deadUnit.bodyAttack = level;
-  deadUnit.bodyHealth = level;
+  deadUnit.baseAttack = 1;
+  deadUnit.baseHealth = 1;
+  deadUnit.bodyAttack = 1;
+  deadUnit.bodyHealth = 1;
   deadUnit.directModifiers = { equipment: null, status: null, bond: null };
   deadUnit.statuses = {};
-  deadUnit.faction = getSummonedUnitFaction(owner);
-  deadUnit.extraFactions = [];
-  deadUnit.tempExtraFactions = [];
-  deadUnit.usesBondDefinitionSnapshot = true;
   syncUnitStats(deadUnit);
   eventPayload.revived = true;
-  logShopHeroSkill(owner, `${deadUnit.name}以LV${level} ${level}/${level}复活`);
+  owner.huatuoRevivesUsedThisRound = (owner.huatuoRevivesUsedThisRound ?? 0) + 1;
+  logShopHeroSkill(owner, `${deadUnit.name}以LV2 3/3复活`);
   dispatchShopEvent("unit:revive", { unit: deadUnit, source: owner });
   dispatchShopEvent("unit:summon", { unit: deadUnit, source: owner, revived: true });
   return true;
@@ -1975,15 +2853,45 @@ function resolveShopHeroSkill(candidate, event) {
   }
   if (effectId === "hero.pangde.xunjie" && type === "unit:death" && eventUnit === owner) {
     const target = getNearestShopUnit(owner, "behind");
-    if (target) applyShopUnitStatBonus(target, level, level, owner.name);
+    if (target) applyShopUnitStatBonus(target, 2 * level, level, owner.name);
     return;
   }
   if (
-    effectId === "hero.madai.fuzhan" &&
+    effectId === "hero.weiyan.caigao-qilie" &&
     type === "unit:death" &&
+    eventUnit &&
+    eventUnit !== owner
+  ) {
+    applyShopUnitStatBonus(owner, level, level, owner.name);
+    return;
+  }
+  if (
+    effectId === "hero.yanliang.yongguan-sanjun" &&
+    type === "unit:death" &&
+    eventUnit !== owner &&
     payload.killer === owner
   ) {
-    grantUnitExperience(owner, level, owner.name, effectId);
+    applyShopUnitStatBonus(owner, 2 * level, 2 * level, owner.name);
+    return;
+  }
+  if (
+    effectId === "hero.hanxiandi.piaoyao" &&
+    type === "unit:death" &&
+    eventUnit === owner
+  ) {
+    const target = pickShopRandomUnits(
+      getLineupUnits().filter(
+        (unit) => unit !== owner && !getUnitEquipment(unit),
+      ),
+      1,
+    )[0];
+    if (!target) return;
+    target.directModifiers ??= {};
+    target.directModifiers.equipment = createGeneratedEquipment(
+      "equipment.imperial-edict",
+    );
+    syncUnitStats(target);
+    logShopHeroSkill(owner, `${target.name}获得诏书`);
     return;
   }
   if (
@@ -2011,8 +2919,7 @@ function resolveShopHeroSkill(candidate, event) {
       ahead &&
       behind &&
       ahead.tier <= tierLimit &&
-      behind.tier <= tierLimit &&
-      shareAnyBond(ahead, behind)
+      behind.tier <= tierLimit
     ) {
       ensureUnitBodyStats(ahead);
       ensureUnitBodyStats(behind);
@@ -2040,16 +2947,21 @@ function resolveShopHeroSkill(candidate, event) {
     }
     return;
   }
-  if (
-    effectId === "hero.weiyan.caigao-qilie" &&
-    type === "experience:gain" &&
-    eventUnit?.id !== owner.id
-  ) {
-    applyShopUnitStatBonus(owner, level, 0, owner.name);
+  if (effectId === "hero.madai.fuzhan" && type === "round:end") {
+    const target = getNearestShopUnit(owner, "ahead");
+    if (!target) return;
+    const amount = 2 * level;
+    target.health -= amount;
+    logShopHeroSkill(owner, `对${target.name}造成${amount}点伤害`);
+    if (target.health <= 0) killShopUnit(target, owner, effectId);
     return;
   }
-  if (effectId === "hero.huangzhong.laodang-yizhuang" && type === "round:end") {
-    grantUnitExperience(owner, level, owner.name, effectId);
+  if (effectId === "hero.zhugejin.hongya" && type === "round:end") {
+    const target = pickShopRandomUnits(
+      getLineupUnits().filter((unit) => unit !== owner),
+      1,
+    )[0];
+    if (target) applyShopUnitStatBonus(target, level, level, owner.name);
     return;
   }
   if (
@@ -2061,27 +2973,11 @@ function resolveShopHeroSkill(candidate, event) {
     if (target) applyShopUnitStatBonus(target, level, level, owner.name);
     return;
   }
-  if (effectId === "hero.yanliang.yongguan-sanjun" && sharedRecruit) {
-    applyShopUnitStatBonus(owner, level, level, owner.name);
-    return;
-  }
-  if (effectId === "hero.hanxiandi.piaoyao" && type === "bond:level-change") {
-    const target = pickShopRandomUnits(
-      getLineupUnits().filter((unit) => unit !== owner),
-      1,
-    )[0];
-    if (target) applyShopUnitStatBonus(target, level, level, owner.name);
-    return;
-  }
-  if (effectId === "hero.diaochan.qingcheng" && type === "round:end") {
-    const target = getNearestShopUnit(owner, "ahead");
-    if (!target) return;
-    const bonds = getBaseUnitBonds(target);
-    owner.faction = bonds[0] ?? "无";
-    owner.extraFactions = bonds.slice(1);
-    owner.tempExtraFactions = [];
-    owner.usesBondDefinitionSnapshot = true;
-    applyShopUnitStatBonus(owner, 0, level, owner.name);
+  if (effectId === "hero.xunyou.qice" && type === "stratagem:use") {
+    const ahead = getNearestShopUnit(owner, "ahead");
+    const behind = getNearestShopUnit(owner, "behind");
+    if (ahead) applyShopUnitStatBonus(ahead, level, level, owner.name);
+    if (behind) applyShopUnitStatBonus(behind, level, level, owner.name);
     return;
   }
   if (effectId === "hero.lusu.lianhe" && type === "round:start") {
@@ -2092,40 +2988,16 @@ function resolveShopHeroSkill(candidate, event) {
     }
     return;
   }
-  if (
-    effectId === "hero.yuji.guhuo" &&
-    type === "bond:level-change" &&
-    payload.decreased
-  ) {
-    const target = getNearestShopUnit(owner, "ahead");
-    if (target) applyShopUnitStatBonus(target, level, level, owner.name);
-    return;
-  }
   if (effectId === "hero.zhaoyun.longdan" && type === "unit:upgrade" && eventUnit === owner) {
-    owner.statuses = {
-      unparalleled: { sourceEffectId: effectId, sourceName: owner.name },
-    };
+    applyPositiveStatus(owner, "unparalleled", {
+      sourceEffectId: effectId,
+      sourceName: owner.name,
+    });
     applyShopUnitStatBonus(owner, 2 * level, 2 * level, owner.name);
     return;
   }
-  if (
-    effectId === "hero.fazheng.yiyi-dailao" &&
-    type === "unit:upgrade" &&
-    eventUnit &&
-    eventUnit !== owner
-  ) {
-    grantUnitExperience(eventUnit, level, owner.name, effectId);
-    eventUnit.statuses = {
-      rest: { amount: 2 * level, sourceEffectId: effectId },
-    };
-    return;
-  }
   if (effectId === "hero.lingtong.guoshi-zhifeng" && sharedRecruit) {
-    applyShopUnitStatBonus(eventUnit, 2 * level, 2 * level, owner.name);
-    return;
-  }
-  if (effectId === "hero.zhanghe.qiaobian" && type === "bond:level-change") {
-    applyShopUnitStatBonus(owner, 2 * level, level, owner.name);
+    applyShopUnitStatBonus(eventUnit, level, 2 * level, owner.name);
     return;
   }
   if (
@@ -2133,7 +3005,7 @@ function resolveShopHeroSkill(candidate, event) {
     type === "card:purchase" &&
     eventUnit === owner
   ) {
-    const options = getLineupUnits().flatMap((unit) =>
+    const options = getLineupUnits().filter((unit) => unit !== owner).flatMap((unit) =>
       getAvailableExtraBondFactions(unit).map((faction) => ({
         unitId: unit.id,
         unitName: unit.name,
@@ -2144,7 +3016,8 @@ function resolveShopHeroSkill(candidate, event) {
       state.pendingHeroBondChoice = {
         ownerId: owner.id,
         ownerName: owner.name,
-        statBonus: level,
+        kind: "sima-hui",
+        cancelable: false,
         options,
       };
     }
@@ -2152,8 +3025,9 @@ function resolveShopHeroSkill(candidate, event) {
   }
   if (
     effectId === "hero.yuanshu.yuxi" &&
-    type === "unit:recruit" &&
-    eventUnit === owner
+    type === "unit:summon" &&
+    eventUnit === owner &&
+    !payload.revived
   ) {
     const equipment = getUnitEquipment(owner);
     if (!equipment) {
@@ -2170,6 +3044,17 @@ function resolveShopHeroSkill(candidate, event) {
     return;
   }
   if (
+    effectId === "hero.liubei.renze" &&
+    type === "unit:summon" &&
+    eventUnit &&
+    eventUnit !== owner &&
+    !payload.revived &&
+    shareAnyBond(owner, eventUnit)
+  ) {
+    grantUnitExperience(eventUnit, level, owner.name, effectId);
+    return;
+  }
+  if (
     effectId === "hero.guojia.yiji-pingliao" &&
     type === "unit:death" &&
     eventUnit === owner
@@ -2181,24 +3066,13 @@ function resolveShopHeroSkill(candidate, event) {
       );
     return;
   }
-  if (
-    effectId === "hero.pangtong.niepan" &&
-    type === "unit:death" &&
-    eventUnit === owner
-  ) {
-    pickShopRandomUnits(
-      getLineupUnits().filter((unit) => unit !== owner),
-      2,
-    ).forEach((unit) => grantUnitExperience(unit, level, owner.name, effectId));
-    return;
-  }
   if (effectId === "hero.dongzhuo.baonue" && type === "round:end") {
     const targets = getLineupUnits().filter(
       (unit) => unit !== owner && !shareAnyBond(owner, unit),
     );
     const target = pickShopRandomUnits(targets, 1)[0];
     if (target && killShopUnit(target, owner, effectId)) {
-      applyShopUnitStatBonus(owner, 3 * level, 3 * level, owner.name);
+      applyShopUnitStatBonus(owner, 2 * level, 2 * level, owner.name);
     }
     return;
   }
@@ -2214,6 +3088,7 @@ function resolveShopHeroSkill(candidate, event) {
     effectId === "hero.caocao.jianxiong" &&
     type === "unit:death" &&
     eventUnit &&
+    eventUnit !== owner &&
     shareAnyBond(owner, eventUnit)
   ) {
     const target = pickShopRandomUnits(
@@ -2227,17 +3102,10 @@ function resolveShopHeroSkill(candidate, event) {
     effectId === "hero.xunyu.wangzuo-zhicai" &&
     type === "unit:summon" &&
     eventUnit &&
+    eventUnit !== owner &&
     shareAnyBond(owner, eventUnit)
   ) {
     applyShopUnitStatBonus(eventUnit, 4 * level, 4 * level, owner.name);
-    return;
-  }
-  if (effectId === "hero.liubei.renze" && type === "round:end") {
-    const target = getNearestShopUnit(owner, "ahead", (unit) => shareAnyBond(owner, unit));
-    if (target) {
-      reduceShopUnitExperience(target, 1);
-      applyShopUnitStatBonus(target, 5 * level, 5 * level, owner.name);
-    }
     return;
   }
   if (effectId === "hero.sunquan.quanheng" && type === "round:end") {
@@ -2248,7 +3116,7 @@ function resolveShopHeroSkill(candidate, event) {
     return;
   }
   if (effectId === "hero.yuanshao.haoling-qunxiong" && sharedRecruit) {
-    getLineupUnits().forEach((unit) =>
+    getLineupUnits().filter((unit) => unit !== owner).forEach((unit) =>
       applyShopUnitStatBonus(unit, level, 2 * level, owner.name),
     );
   }
@@ -2268,11 +3136,24 @@ function pickShopRandomUnits(units, count) {
 }
 
 function getHighestActiveBondFactions() {
-  const active = getBondEntries().filter((entry) => entry.level > 0);
+  const active = getBondEntries().filter((entry) => entry.count >= 2);
   if (active.length === 0) return [];
-  const highestLevel = Math.max(...active.map((entry) => entry.level));
+  const highestCount = Math.max(...active.map((entry) => entry.count));
   return active
-    .filter((entry) => entry.level === highestLevel)
+    .filter((entry) => entry.count === highestCount)
+    .map((entry) => entry.faction);
+}
+
+function getHighestBondFactions({ excludeUnlocked = false } = {}) {
+  const entries = getBondEntries().filter(
+    (entry) =>
+      entry.count > 0 &&
+      (!excludeUnlocked || !state.unlockedFivePersonBonds.includes(entry.faction)),
+  );
+  if (entries.length === 0) return [];
+  const highestCount = Math.max(...entries.map((entry) => entry.count));
+  return entries
+    .filter((entry) => entry.count === highestCount)
     .map((entry) => entry.faction);
 }
 
@@ -2419,7 +3300,7 @@ function resolveShopEffect(effectId, context) {
       ).forEach((unit) => affectedUnitIds.add(unit.id));
       if (targets.length > 0) {
         messages.push(
-          `从最高等级“${selectedFaction}”羁绊中选中${targets
+          `从人数最多的已激活“${selectedFaction}”羁绊中选中${targets
             .map((unit) => unit.name)
             .join("、")}，分别永久 +${operation.attack ?? 0}/+${operation.health ?? 0}`,
         );
@@ -2427,9 +3308,30 @@ function resolveShopEffect(effectId, context) {
       return;
     }
 
+    if (operation.type === "buff-frontmost-highest-bond") {
+      selectedFaction ??= pickHighestActiveBondFaction();
+      const candidates = selectedFaction ? getLineupUnitsInBond(selectedFaction) : [];
+      const count = Math.max(0, operation.count ?? 1);
+      const targets = count > 0 ? candidates.slice(-count) : [];
+      applyShopUnitBonuses(
+        targets,
+        operation.attack ?? 0,
+        operation.health ?? 0,
+        context.card.name,
+      ).forEach((unit) => affectedUnitIds.add(unit.id));
+      if (targets.length > 0) {
+        messages.push(
+          `人数最多的已激活“${selectedFaction}”羁绊中最前方的${targets
+            .map((unit) => unit.name)
+            .join("、")}分别永久 +${operation.attack ?? 0}/+${operation.health ?? 0}`,
+        );
+      }
+      return;
+    }
+
     if (operation.type === "buff-inactive-bonds") {
       const inactiveFactions = getBondEntries()
-        .filter((entry) => entry.level === 0)
+        .filter((entry) => entry.count < 2)
         .map((entry) => entry.faction);
       const inactiveSet = new Set(inactiveFactions);
       const targets = getLineupUnits().filter((unit) =>
@@ -2474,33 +3376,6 @@ function resolveShopEffect(effectId, context) {
       return;
     }
 
-    if (operation.type === "first-use-extra-bond-then-stats" && context.targetUnit) {
-      if (priorUseCount === 0 && selectedFaction) {
-        if (addExtraBond(context.targetUnit, selectedFaction)) {
-          getLineupUnits()
-            .filter((unit) => unit.name === context.targetUnit.name)
-            .forEach((unit) => affectedUnitIds.add(unit.id));
-          messages.push(
-            `${context.targetUnit.name}的全部同名卡牌本局永久获得“${selectedFaction}”羁绊`,
-          );
-        }
-      } else if (priorUseCount > 0) {
-        applyShopUnitStatBonus(
-          context.targetUnit,
-          operation.attack ?? 0,
-          operation.health ?? 0,
-          context.card.name,
-        );
-        affectedUnitIds.add(context.targetUnit.id);
-        messages.push(
-          `${context.targetUnit.name}永久获得 +${operation.attack ?? 0}/+${
-            operation.health ?? 0
-          }`,
-        );
-      }
-      return;
-    }
-
     if (operation.type === "buff-all-highest-bond") {
       selectedFaction ??= pickHighestActiveBondFaction();
       const targets = selectedFaction ? getLineupUnitsInBond(selectedFaction) : [];
@@ -2512,7 +3387,7 @@ function resolveShopEffect(effectId, context) {
       ).forEach((unit) => affectedUnitIds.add(unit.id));
       if (targets.length > 0) {
         messages.push(
-          `最高等级“${selectedFaction}”羁绊下的${targets
+          `人数最多的已激活“${selectedFaction}”羁绊下的${targets
             .map((unit) => unit.name)
             .join("、")}分别永久 +${operation.attack ?? 0}/+${operation.health ?? 0}`,
         );
@@ -2540,6 +3415,32 @@ function resolveShopEffect(effectId, context) {
             : "";
         messages.push(`${context.targetUnit.name}${experienceMessage}${overflowMessage}`);
       }
+      return;
+    }
+
+    if (operation.type === "gain-gold") {
+      const before = state.gold;
+      state.gold = Math.min(GOLD_CAP, state.gold + Math.max(0, operation.amount ?? 0));
+      messages.push(`获得 ${state.gold - before} 金币，当前 ${state.gold} 金币`);
+      return;
+    }
+
+    if (operation.type === "generate-shop-cards") {
+      const names = Array.isArray(operation.names) ? operation.names : [];
+      const added = addFreeShopItemsByName(names, context.card.name);
+      messages.push(
+        `生成 ${added.length} 张免费商店卡${
+          added.length ? `：${added.map((card) => card.name).join("、")}` : ""
+        }`,
+      );
+      return;
+    }
+
+    if (operation.type === "unlock-five-person-bond" && selectedFaction) {
+      if (!state.unlockedFivePersonBonds.includes(selectedFaction)) {
+        state.unlockedFivePersonBonds.push(selectedFaction);
+      }
+      messages.push(`“${selectedFaction}”羁绊的5人效果资格在本局永久解锁`);
       return;
     }
 
@@ -2571,6 +3472,15 @@ function resolveShopEffect(effectId, context) {
     useCount: applied ? priorUseCount + 1 : priorUseCount,
     applied,
   });
+  if (applied) {
+    dispatchShopEvent("stratagem:use", {
+      card: context.card,
+      unit: context.targetUnit ?? null,
+      selectedFaction,
+      affectedUnitIds: [...affectedUnitIds],
+      affectedShopCardIds: [...affectedShopCardIds],
+    });
+  }
   return {
     applied,
     messages,
@@ -2580,16 +3490,16 @@ function resolveShopEffect(effectId, context) {
   };
 }
 
-function getCurrentShopBondLevel(faction) {
-  return getBondEntries().find((entry) => entry.faction === faction)?.level ?? 0;
+function getCurrentShopBondEffectCount(faction) {
+  return getBondEntries().find((entry) => entry.faction === faction)?.effectCount ?? 0;
 }
 
 function resolveShopUpgradeBondEffects(unit, previousLevel, currentLevel) {
-  const shuLevel = getCurrentShopBondLevel("蜀");
-  if (shuLevel <= 0 || !getEffectiveUnitBonds(unit).includes("蜀")) return false;
+  const shuEffectCount = getCurrentShopBondEffectCount("蜀");
+  if (shuEffectCount <= 0 || !getEffectiveUnitBonds(unit).includes("蜀")) return false;
 
-  const statGain = shuLevel >= 4 ? 2 : shuLevel >= 3 ? 1 : shuLevel;
-  const affectsArmy = shuLevel >= 3;
+  const statGain = shuEffectCount >= 5 ? 2 : shuEffectCount >= 4 ? 1 : shuEffectCount - 1;
+  const affectsArmy = shuEffectCount >= 4;
   let queuedAnimation = false;
   for (let level = previousLevel + 1; level <= currentLevel; level += 1) {
     const targets = affectsArmy ? getLineupUnits() : [unit];
@@ -2599,21 +3509,21 @@ function resolveShopUpgradeBondEffects(unit, previousLevel, currentLevel) {
           target,
           statGain,
           statGain,
-          `${BOND_RULES.蜀.label} LV${shuLevel}`,
+          `${BOND_RULES.蜀.label} ${shuEffectCount}人`,
         ) || queuedAnimation;
     });
     const targetLabel = affectsArmy ? "全军" : unit.name;
     addLog(
-      `${BOND_RULES.蜀.label} LV${shuLevel}：${unit.name} 升到 ${level} 级，${targetLabel}永久 +${statGain}/+${statGain}。`,
+      `${BOND_RULES.蜀.label} ${shuEffectCount}人：${unit.name} 升到 ${level} 级，${targetLabel}永久 +${statGain}/+${statGain}。`,
     );
     recordShopEffectEvent("unit:upgrade", {
       sourceEffectId: "bond.shu-upgrade",
-      sourceName: `${BOND_RULES.蜀.label} LV${shuLevel}`,
+      sourceName: `${BOND_RULES.蜀.label} ${shuEffectCount}人`,
       targetId: unit.id,
       targetName: unit.name,
       unitLevel: level,
       affectedUnitIds: targets.map((target) => target.id),
-      message: `${BOND_RULES.蜀.label} LV${shuLevel}：${unit.name}升级，${
+      message: `${BOND_RULES.蜀.label} ${shuEffectCount}人：${unit.name}升级，${
         affectsArmy ? "全军" : unit.name
       }获得 +${statGain}/+${statGain}。`,
     });
@@ -2730,16 +3640,12 @@ function selectUpgradeReward(candidateIndex) {
   clearAllBondSelectionHints();
   const card = createCardFromBase({ ...base, cost: HERO_COST }, "hero");
   card.isReward = true;
-  const emptyIndex = state.shop.findIndex((slot) => slot === null);
-  if (emptyIndex >= 0) {
-    state.shop[emptyIndex] = card;
-  } else {
-    state.shop.push(card);
-  }
+  addCardsToSharedShop([card], "升级奖励");
   state.pendingRewards.shift();
   addLog(
     `${reward.unitName} 升到 ${reward.level} 级：选择 ${card.name} 作为升级奖励，购买费用 ${HERO_COST} 金币。`,
   );
+  playAudioCue("rewardClaim");
   render();
 }
 
@@ -2749,6 +3655,7 @@ function skipUpgradeReward() {
   clearAllBondSelectionHints();
   state.pendingRewards.shift();
   addLog(`${reward.unitName} 升到 ${reward.level} 级：跳过本次升级奖励。`);
+  playAudioCue("uiCancel");
   render();
 }
 
@@ -2773,20 +3680,20 @@ function buildShop({ guaranteeFaction = null } = {}) {
 
   const heroes = [...lockedHeroes, ...generatedHeroes];
   const items = [...generatedItems, ...lockedItems];
-  const standardHeroes = heroes.slice(0, rule.heroSlots);
-  const standardItems = items.slice(-rule.itemSlots);
-  const overflowHeroes = heroes.slice(rule.heroSlots);
-  const overflowItems = items.slice(0, Math.max(0, items.length - rule.itemSlots));
-
-  state.shop = [
-    ...standardHeroes,
-    ...standardItems,
-    ...overflowHeroes,
-    ...overflowItems,
-  ];
+  state.shop = Array.from({ length: SHOP_POSITION_COUNT }, () => null);
+  heroes.slice(0, SHOP_POSITION_COUNT).forEach((card, index) => {
+    state.shop[index] = card;
+  });
+  const itemCount = Math.min(items.length, SHOP_POSITION_COUNT - heroes.length);
+  if (itemCount > 0) {
+    items.slice(-itemCount).forEach((card, index) => {
+      state.shop[SHOP_POSITION_COUNT - itemCount + index] = card;
+    });
+  }
 }
 
 function refreshShop({ free = false, guaranteeFaction = null } = {}) {
+  if (!free && isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   if (!free && state.gold < REFRESH_COST) {
     notify("金币不足，无法刷新。");
     return;
@@ -2797,11 +3704,13 @@ function refreshShop({ free = false, guaranteeFaction = null } = {}) {
   buildShop({ guaranteeFaction });
 
   addLog(free ? "商店已生成本回合内容。" : "消耗 1 金币刷新商店。");
+  if (!free) playAudioCue("shopRefresh");
   render();
 }
 
-function buyHeroToLineup(shopIndex, lineupIndex) {
+function buyHeroToLineup(shopIndex, lineupIndex, intent = null) {
   if (state.phase !== "shop") return;
+  if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   const card = state.shop[shopIndex];
   if (!card || card.type !== "hero") return;
   if (state.gold < card.cost) {
@@ -2809,21 +3718,31 @@ function buyHeroToLineup(shopIndex, lineupIndex) {
     return;
   }
   const targetUnit = state.lineup[lineupIndex];
-  if (targetUnit && targetUnit.name !== card.name) {
+  const insertionDirection = intent?.mode === "insert" ? intent.direction : 0;
+  const insertionGap =
+    intent?.targetIndex === lineupIndex &&
+    targetUnit &&
+    (insertionDirection === -1 || insertionDirection === 1)
+      ? findLineupInsertionGap(lineupIndex, null, insertionDirection)
+      : null;
+  const shouldInsert =
+    insertionGap !== null && insertionGap === intent?.emptyIndex;
+  if (targetUnit && targetUnit.name !== card.name && !shouldInsert) {
     notify("目标阵容槽已有其他武将。");
     return;
   }
-  if (targetUnit && !canMergeCardIntoUnit(card, targetUnit)) {
+  if (targetUnit && !shouldInsert && !canMergeCardIntoUnit(card, targetUnit)) {
     notify(`${targetUnit.name} 已达到 3 级，不能继续叠加。`);
     return;
   }
 
-  const previousBondLevels = getShopBondLevelSnapshot();
+  const previousBondCounts = getShopBondCountSnapshot();
   state.gold -= card.cost;
   state.shop[shopIndex] = null;
   let unit = targetUnit;
   let mergeResult = null;
-  if (unit) {
+  const isNewUnit = !targetUnit || shouldInsert;
+  if (!isNewUnit) {
     const result = mergeCardIntoUnit(card, unit);
     mergeResult = result;
     addLog(
@@ -2849,12 +3768,26 @@ function buyHeroToLineup(shopIndex, lineupIndex) {
     }
   } else {
     unit = createUnitFromCard(card);
-    state.lineup[lineupIndex] = unit;
-    addLog(`拖拽购买 ${card.name} 到 ${lineupIndex + 1} 号阵容槽（1级0经验）。`);
+    if (shouldInsert) {
+      shiftLineupForInsertion(
+        unit,
+        lineupIndex,
+        insertionDirection,
+        insertionGap,
+      );
+      addLog(
+        `拖拽购买 ${card.name} 到 ${lineupIndex + 1} 号阵容槽，向${
+          insertionDirection < 0 ? "左" : "右"
+        }挤动至 ${insertionGap + 1} 号空位（1级0经验）。`,
+      );
+    } else {
+      state.lineup[lineupIndex] = unit;
+      addLog(`拖拽购买 ${card.name} 到 ${lineupIndex + 1} 号阵容槽（1级0经验）。`);
+    }
   }
-  dispatchShopEvent("card:purchase", { card, unit, isNewUnit: !targetUnit });
-  dispatchShopEvent("unit:recruit", { card, unit, isNewUnit: !targetUnit });
-  if (!targetUnit) {
+  dispatchShopEvent("card:purchase", { card, unit, isNewUnit });
+  dispatchShopEvent("unit:recruit", { card, unit, isNewUnit });
+  if (isNewUnit) {
     dispatchShopEvent("unit:summon", { card, unit, source: "purchase" });
   } else {
     dispatchShopEvent("experience:gain", {
@@ -2873,12 +3806,18 @@ function buyHeroToLineup(shopIndex, lineupIndex) {
       });
     }
   }
-  dispatchShopBondLevelChanges(previousBondLevels);
+  dispatchShopBondCountChanges(previousBondCounts);
+  if (isNewUnit) {
+    playAudioCue("heroRecruit");
+  } else if (!mergeResult?.leveledUp) {
+    playAudioCue("cardMove");
+  }
   render();
 }
 
 function buyEquipmentToLineup(shopIndex, lineupIndex) {
   if (state.phase !== "shop") return;
+  if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   const card = state.shop[shopIndex];
   const unit = state.lineup[lineupIndex];
   if (!card || card.type !== "stratagem" || card.category !== "装备") return;
@@ -2905,6 +3844,7 @@ function buyEquipmentToLineup(shopIndex, lineupIndex) {
       ? `购买装备 ${card.name}，由 ${unit.name} 佩戴；真实效果已接入。`
       : `购买装备 ${card.name}，由 ${unit.name} 佩戴；当前只展示描述，不执行真实效果。`,
   );
+  playAudioCue("equipmentEquip");
   render();
 }
 
@@ -2929,6 +3869,32 @@ function getStratagemUseValidation(card, targetUnit) {
       : { valid: false, reason: `${targetUnit.name}已经拥有两个羁绊，无法再添加。` };
   }
 
+  if (card.effectId === "reward.alliance-scroll") {
+    const factions = getAvailableExtraBondFactions(targetUnit);
+    return factions.length > 0
+      ? {
+          valid: true,
+          requiresBondChoice: true,
+          availableFactions: factions,
+          choiceDescription: `为${targetUnit.name}选择一个本局永久额外羁绊。`,
+        }
+      : { valid: false, reason: `${targetUnit.name}已经拥有两个羁绊，无法再添加。` };
+  }
+
+  if (card.effectId === "reward.united-bond") {
+    const factions = getHighestBondFactions({ excludeUnlocked: true });
+    if (factions.length === 0) {
+      return { valid: false, reason: "当前没有可解锁5人效果的羁绊。" };
+    }
+    return {
+      valid: true,
+      requiresBondChoice: factions.length > 1,
+      availableFactions: factions,
+      defaultFaction: factions.length === 1 ? factions[0] : null,
+      choiceDescription: "人数最多的羁绊并列，请选择其中1个解锁5人效果。",
+    };
+  }
+
   if (
     card.effectId === "stratagem.recommend-talent" ||
     card.effectId === "stratagem.advance-together" ||
@@ -2945,7 +3911,7 @@ function getStratagemUseValidation(card, targetUnit) {
   if (card.effectId === "stratagem.hidden-potential") {
     const inactiveFactions = new Set(
       getBondEntries()
-        .filter((entry) => entry.level === 0)
+        .filter((entry) => entry.count < 2)
         .map((entry) => entry.faction),
     );
     const hasTarget = getLineupUnits().some((unit) =>
@@ -2966,21 +3932,6 @@ function getStratagemUseValidation(card, targetUnit) {
     };
   }
 
-  if (
-    card.effectId === "stratagem.blood-oath" &&
-    getStratagemUseCount(card.effectId) === 0
-  ) {
-    const factions = getAvailableExtraBondFactions(targetUnit);
-    return factions.length > 0
-      ? {
-          valid: true,
-          requiresBondChoice: true,
-          availableFactions: factions,
-          choiceDescription: `首次使用歃血盟书：为${targetUnit.name}选择一个永久额外羁绊。`,
-        }
-      : { valid: false, reason: `${targetUnit.name}已经拥有两个羁绊，无法再添加。` };
-  }
-
   return { valid: true };
 }
 
@@ -2998,41 +3949,45 @@ function completeStratagemUse(shopIndex, lineupIndex, selectedFaction = null) {
     notify(validation.reason);
     return false;
   }
+  const resolvedFaction = selectedFaction ?? validation.defaultFaction ?? null;
   if (
     validation.requiresBondChoice &&
-    !validation.availableFactions.includes(selectedFaction)
+    !validation.availableFactions.includes(resolvedFaction)
   ) {
     notify("请选择一个有效羁绊。");
     return false;
   }
 
-  const previousBondLevels = getShopBondLevelSnapshot();
+  const previousBondCounts = getShopBondCountSnapshot();
+  state.shop[shopIndex] = null;
   const outcome = resolveShopEffect(card.effectId, {
     card,
     targetUnit,
     targetIndex: lineupIndex,
-    selectedFaction,
+    selectedFaction: resolvedFaction,
   });
   if (!outcome.applied) {
+    state.shop[shopIndex] = card;
     notify(`${card.name}当前没有可结算的目标。`);
     return false;
   }
 
   state.gold -= card.cost;
-  state.shop[shopIndex] = null;
   state.pendingStratagemUse = null;
-  dispatchShopBondLevelChanges(previousBondLevels);
+  dispatchShopBondCountChanges(previousBondCounts);
   const targetLabel =
     card.targetMode === "unit"
       ? `，目标为 ${targetUnit.name}`
       : `，由 ${lineupIndex + 1} 号阵容位触发`;
   addLog(`使用计策 ${card.name}${targetLabel}：${outcome.messages.join("；")}。`);
+  playAudioCue("stratagemUse");
   render();
   return true;
 }
 
 function useStratagemOnLineup(shopIndex, lineupIndex) {
   if (state.phase !== "shop") return;
+  if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   if (state.pendingStratagemUse) return;
   const card = state.shop[shopIndex];
   const targetUnit = state.lineup[lineupIndex];
@@ -3059,17 +4014,21 @@ function useStratagemOnLineup(shopIndex, lineupIndex) {
     render();
     return;
   }
-  completeStratagemUse(shopIndex, lineupIndex);
+  completeStratagemUse(shopIndex, lineupIndex, validation.defaultFaction ?? null);
 }
 
 function selectStratagemBondChoice(faction) {
   const pending = state.pendingStratagemUse;
   if (!pending || !pending.availableFactions.includes(faction)) return;
+  if (pending.generated) {
+    completeGeneratedStratagemUse(faction);
+    return;
+  }
   completeStratagemUse(pending.shopIndex, pending.lineupIndex, faction);
 }
 
 function cancelStratagemChoice() {
-  if (!state.pendingStratagemUse) return;
+  if (!state.pendingStratagemUse || state.pendingStratagemUse.generated) return;
   state.pendingStratagemUse = null;
   render();
 }
@@ -3081,22 +4040,20 @@ function selectHeroBondChoice(optionIndex) {
     ? getLineupUnits().find((candidate) => candidate.id === option.unitId)
     : null;
   if (!pending || !option || !unit) return;
-  const previousBondLevels = getShopBondLevelSnapshot();
+  const previousBondCounts = getShopBondCountSnapshot();
   if (!addExtraBond(unit, option.faction)) {
     notify("该羁绊选择已经失效，请重新选择。");
     return;
   }
   state.pendingHeroBondChoice = null;
-  const statBonus = Math.max(1, Number(pending.statBonus) || 1);
-  applyShopUnitStatBonus(unit, statBonus, statBonus, pending.ownerName);
-  dispatchShopBondLevelChanges(previousBondLevels);
-  addLog(
-    `${pending.ownerName}【广识】：为${unit.name}永久添加“${option.faction}”羁绊，并使其 +${statBonus}/+${statBonus}。`,
-  );
+  dispatchShopBondCountChanges(previousBondCounts);
+  addLog(`${pending.ownerName}【广识】：为${unit.name}永久添加“${option.faction}”羁绊。`);
+  playAudioCue("bondGain");
   render();
 }
 
 function moveOrSwapEquipment(sourceIndex, targetIndex) {
+  if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   if (sourceIndex === targetIndex) return;
   const sourceUnit = state.lineup[sourceIndex];
   const targetUnit = state.lineup[targetIndex];
@@ -3120,6 +4077,7 @@ function moveOrSwapEquipment(sourceIndex, targetIndex) {
       ? `${sourceUnit.name} 与 ${targetUnit.name} 交换装备：${sourceEquipment.name} / ${targetEquipment.name}。`
       : `${sourceUnit.name} 将 ${sourceEquipment.name} 交给 ${targetUnit.name}。`,
   );
+  playAudioCue(targetEquipment ? "equipmentSwap" : "equipmentEquip");
   render();
 }
 
@@ -3161,7 +4119,14 @@ function markSellZoneTarget(clientX, clientY) {
 
 function clearDragPreview() {
   if (dragPreviewElement && dragPreviewOrigin) {
-    const { parent, nextSibling, className, styleAttribute } = dragPreviewOrigin;
+    const {
+      parent,
+      nextSibling,
+      className,
+      styleAttribute,
+      originSlot,
+      equipmentPlaceholder,
+    } = dragPreviewOrigin;
     if (nextSibling?.parentNode === parent) {
       parent.insertBefore(dragPreviewElement, nextSibling);
     } else {
@@ -3173,6 +4138,8 @@ function clearDragPreview() {
     } else {
       dragPreviewElement.setAttribute("style", styleAttribute);
     }
+    originSlot?.classList.remove("drag-origin-empty");
+    equipmentPlaceholder?.remove();
   }
   dragPreviewElement = null;
   dragPreviewOrigin = null;
@@ -3185,11 +4152,26 @@ function startDragPreview(sourceElement, clientX, clientY) {
   const rect = sourceElement.getBoundingClientRect();
   const baseWidth = sourceElement.offsetWidth || rect.width || 1;
   const isEquipment = sourceElement.classList.contains("hero-equipment-slot");
+  const originSlot = isEquipment
+    ? null
+    : sourceElement.closest(".lineup-slot, .shop-slot-shell");
+  const equipmentPlaceholder = isEquipment
+    ? document.createElement("div")
+    : null;
+  if (equipmentPlaceholder) {
+    equipmentPlaceholder.className =
+      "hero-equipment-slot empty drag-origin-equipment-placeholder";
+    equipmentPlaceholder.setAttribute("aria-hidden", "true");
+    sourceElement.parentNode.insertBefore(equipmentPlaceholder, sourceElement);
+  }
+  originSlot?.classList.add("drag-origin-empty");
   dragPreviewOrigin = {
     parent: sourceElement.parentNode,
     nextSibling: sourceElement.nextSibling,
     className: sourceElement.className,
     styleAttribute: sourceElement.getAttribute("style"),
+    originSlot,
+    equipmentPlaceholder,
   };
   sourceElement.classList.add(
     "drag-source-follow",
@@ -3231,11 +4213,22 @@ function markLineupDropTarget(clientX, clientY) {
     target.classList.toggle("drop-blocked", !canUse);
     return;
   }
-  const canPlace = unit === null;
-  const canMerge = canMergeCardIntoUnit(card, unit);
-  target.classList.toggle("drop-target", canPlace);
-  target.classList.toggle("drop-merge", canMerge);
-  target.classList.toggle("drop-blocked", !canPlace && !canMerge);
+  const intent = getShopHeroDragIntent(
+    clientX,
+    clientY,
+    pointerDraggedShopIndex,
+  );
+  if (!intent) return;
+  if (intent.mode === "merge") {
+    intent.target.classList.add("drop-merge");
+    return;
+  }
+  if (intent.mode === "blocked") {
+    intent.target.classList.add("drop-blocked");
+    return;
+  }
+  intent.target.classList.add("drop-target");
+  markLineupInsertionPreview(intent);
 }
 
 function markLineupEquipmentTarget(clientX, clientY, sourceIndex) {
@@ -3282,6 +4275,55 @@ function findLineupInsertionGap(targetIndex, sourceIndex, direction) {
     }
   }
   return null;
+}
+
+function getShopHeroDragIntent(
+  clientX,
+  clientY,
+  shopIndex,
+  directionHint = lineupDragDirection,
+) {
+  const target = document.elementFromPoint(clientX, clientY)?.closest(".lineup-slot");
+  if (!target) return null;
+  const targetIndex = Number.parseInt(target.dataset.lineupIndex, 10);
+  const card = state.shop[shopIndex];
+  if (!Number.isInteger(targetIndex) || card?.type !== "hero") return null;
+  const targetUnit = state.lineup[targetIndex];
+
+  if (!targetUnit) {
+    return { mode: "move", target, targetIndex };
+  }
+
+  let direction = directionHint;
+  if (direction === 0) {
+    const rect = target.getBoundingClientRect();
+    const horizontalRatio =
+      rect.width > 0 ? (clientX - rect.left) / rect.width : 0.5;
+    direction =
+      horizontalRatio <= LINEUP_INSERT_EDGE_RATIO
+        ? -1
+        : horizontalRatio >= 1 - LINEUP_INSERT_EDGE_RATIO
+          ? 1
+          : 0;
+  }
+
+  if (direction !== 0) {
+    const emptyIndex = findLineupInsertionGap(targetIndex, null, direction);
+    if (emptyIndex !== null) {
+      return {
+        mode: "insert",
+        target,
+        targetIndex,
+        direction,
+        emptyIndex,
+      };
+    }
+  }
+
+  if (targetUnit.name === card.name && canMergeCardIntoUnit(card, targetUnit)) {
+    return { mode: "merge", target, targetIndex };
+  }
+  return { mode: "blocked", target, targetIndex };
 }
 
 function getLineupDragIntent(
@@ -3358,6 +4400,10 @@ function markLineupReorderTarget(clientX, clientY, sourceIndex) {
   }
 
   intent.target.classList.add("drop-target");
+  markLineupInsertionPreview(intent);
+}
+
+function markLineupInsertionPreview(intent) {
   if (intent.mode !== "insert") return;
 
   const directionName = intent.direction < 0 ? "left" : "right";
@@ -3371,6 +4417,17 @@ function markLineupReorderTarget(clientX, clientY, sourceIndex) {
     slots[shiftedIndex]?.classList.add(`drop-shift-${directionName}`);
   }
   slots[intent.emptyIndex]?.classList.add("drop-insert-gap");
+}
+
+function shiftLineupForInsertion(unit, targetIndex, direction, emptyIndex) {
+  for (
+    let shiftedIndex = emptyIndex;
+    shiftedIndex !== targetIndex;
+    shiftedIndex -= direction
+  ) {
+    state.lineup[shiftedIndex] = state.lineup[shiftedIndex - direction];
+  }
+  state.lineup[targetIndex] = unit;
 }
 
 function insertLineupUnit(sourceIndex, targetIndex, direction, emptyIndex) {
@@ -3387,24 +4444,19 @@ function insertLineupUnit(sourceIndex, targetIndex, direction, emptyIndex) {
   }
 
   state.lineup[sourceIndex] = null;
-  for (
-    let shiftedIndex = emptyIndex;
-    shiftedIndex !== targetIndex;
-    shiftedIndex -= direction
-  ) {
-    state.lineup[shiftedIndex] = state.lineup[shiftedIndex - direction];
-  }
-  state.lineup[targetIndex] = sourceUnit;
+  shiftLineupForInsertion(sourceUnit, targetIndex, direction, emptyIndex);
   addLog(
     `${sourceUnit.name} 插入 ${targetIndex + 1} 号阵容位，向${
       direction < 0 ? "左" : "右"
     }挤动至 ${emptyIndex + 1} 号空位。`,
   );
+  playAudioCue("cardMove");
   render();
   return true;
 }
 
 function moveOrMergeLineupUnit(sourceIndex, targetIndex, intent = null) {
+  if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   if (sourceIndex === targetIndex) return;
   const sourceUnit = state.lineup[sourceIndex];
   const targetUnit = state.lineup[targetIndex];
@@ -3427,7 +4479,7 @@ function moveOrMergeLineupUnit(sourceIndex, targetIndex, intent = null) {
       notify(`${targetUnit.name} 合并后会超过 3 级上限。`);
       return;
     }
-    const previousBondLevels = getShopBondLevelSnapshot();
+    const previousBondCounts = getShopBondCountSnapshot();
     const gainedProgress = getUnitProgressValue(sourceUnit);
     const result = mergeUnitIntoTarget(sourceUnit, targetUnit);
     state.lineup[sourceIndex] = null;
@@ -3469,7 +4521,8 @@ function moveOrMergeLineupUnit(sourceIndex, targetIndex, intent = null) {
         sourceEffectId: "system.unit-merge",
       });
     }
-    dispatchShopBondLevelChanges(previousBondLevels);
+    dispatchShopBondCountChanges(previousBondCounts);
+    if (!result.leveledUp) playAudioCue("cardMove");
     render();
     return;
   }
@@ -3481,31 +4534,36 @@ function moveOrMergeLineupUnit(sourceIndex, targetIndex, intent = null) {
       ? `交换 ${sourceIndex + 1} 号与 ${targetIndex + 1} 号阵容位。`
       : `${sourceUnit.name} 移动到 ${targetIndex + 1} 号阵容位。`,
   );
+  playAudioCue("cardMove");
   render();
 }
 
 function sellUnit(index) {
   if (state.phase !== "shop") return;
+  if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   const unit = state.lineup[index];
   if (!unit) return;
-  const previousBondLevels = getShopBondLevelSnapshot();
+  const previousBondCounts = getShopBondCountSnapshot();
   dispatchShopEvent("unit:sell", { unit, index });
   const salePrice = unit.level;
   state.gold = Math.min(GOLD_CAP, state.gold + salePrice);
   state.lineup[index] = null;
-  dispatchShopBondLevelChanges(previousBondLevels);
+  dispatchShopBondCountChanges(previousBondCounts);
   addLog(`出售 ${unit.name}，获得 ${salePrice} 金币。`);
+  playAudioCue("heroSell");
   render();
 }
 
 function sellEquipment(index) {
   if (state.phase !== "shop") return;
+  if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   const unit = state.lineup[index];
   const equipment = getUnitEquipment(unit);
   if (!unit || !equipment) return;
   unit.directModifiers.equipment = null;
   syncUnitStats(unit);
   addLog(`出售 ${unit.name} 佩戴的 ${equipment.name}，不获得金币。`);
+  playAudioCue("equipmentSell");
   render();
 }
 
@@ -3533,11 +4591,12 @@ function cloneBattleUnit(unit, { side = "enemy", index = 0 } = {}) {
     tier: unit.tier,
     side,
     lineupIndex: index,
+    skill: unit.skill ?? "",
     skillEffectIds: [
       ...(unit.skillEffectIds ?? (unit.effectId ? [unit.effectId] : [])),
     ],
     equipment: cloneDirectModifier(getUnitEquipment(unit)),
-    statuses: cloneDirectModifier(unit.statuses ?? {}),
+    statuses: normalizeUnitStatuses(unit.statuses ?? {}),
     level: unit.level ?? 1,
     experience: unit.experience ?? 0,
     copies: getUnitCopies(unit),
@@ -3547,6 +4606,7 @@ function cloneBattleUnit(unit, { side = "enemy", index = 0 } = {}) {
     skillDisabledUntilExchange: null,
     consumedSnapshot: null,
     lastDamageSource: null,
+    huatuoRevivesUsedThisRound: unit.huatuoRevivesUsedThisRound ?? 0,
   };
 }
 
@@ -3640,7 +4700,7 @@ function createReplayEnemyBattleUnit(unitSnapshot, index) {
     copies: unitSnapshot.copies ?? 1,
     bonusExperience: unitSnapshot.bonusExperience ?? 0,
     skillEffectIds: [
-      unitSnapshot.skillEffectId ?? definition.effectId,
+      definition.effectId ?? unitSnapshot.skillEffectId,
     ].filter(Boolean),
     directModifiers: {
       equipment: getReplayEquipment(unitSnapshot.equipment),
@@ -3694,10 +4754,22 @@ function createEnemyBattleSetup() {
     .reverse()
     .map(createReplayEnemyBattleUnit);
   const lockedBonds = Object.fromEntries(
-    BOND_FACTIONS.map((faction) => [
-      faction,
-      replayRound.bonds?.find((entry) => entry.faction === faction)?.level ?? 0,
-    ]),
+    BOND_FACTIONS.map((faction) => {
+      const entry = replayRound.bonds?.find((bond) => bond.faction === faction);
+      const recordedCount = Number(entry?.count);
+      if (Number.isFinite(recordedCount)) {
+        return [
+          faction,
+          getBondEffectCount(
+            recordedCount,
+            faction,
+            replayRound.unlockedFivePersonBonds ?? [],
+          ),
+        ];
+      }
+      const legacyEffectCount = { 1: 2, 2: 3, 3: 4, 4: 4 }[entry?.level] ?? 0;
+      return [faction, legacyEffectCount];
+    }),
   );
   return {
     team,
@@ -3716,8 +4788,10 @@ function createEnemyBattleSetup() {
   };
 }
 
-function getLockedPlayerBondLevels() {
-  return Object.fromEntries(getBondEntries().map((entry) => [entry.faction, entry.level]));
+function getLockedPlayerBondEffectCounts() {
+  return Object.fromEntries(
+    getBondEntries().map((entry) => [entry.faction, entry.effectCount]),
+  );
 }
 
 function createBattleRuntime(player, enemy, { seed, lockedBonds }) {
@@ -3913,7 +4987,9 @@ function recordBattlePresentationStep(
     deathIds = [],
     actorIds = [],
     cues = [],
+    movements = [],
     simultaneous = false,
+    animationSkip = false,
     resolvedAttack = null,
     durationMs = null,
   } = {},
@@ -3943,7 +5019,17 @@ function recordBattlePresentationStep(
     deathIds: [...new Set(deathIds.filter(Boolean))],
     actorIds: [...new Set(actorIds.filter(Boolean))],
     cues: cues.filter((cue) => cue?.text && cue?.unitId),
+    movements: movements
+      .filter(
+        (movement) =>
+          movement?.unitId &&
+          ["player", "enemy"].includes(movement.side) &&
+          Number.isInteger(movement.fromSlot) &&
+          Number.isInteger(movement.toSlot),
+      )
+      .map((movement) => ({ ...movement })),
     simultaneous,
+    animationSkip,
     resolvedAttack:
       resolvedAttack ??
       currentCandidate?.resolvedAttack ??
@@ -3991,6 +5077,112 @@ function getBattleUnitBonds(unit) {
     ...(unit.extraFactions ?? []),
     ...(unit.tempExtraFactions ?? []),
   ]);
+}
+
+function getNegativeStatusId(unit) {
+  const statusId = getUnitStatusId(unit);
+  return NEGATIVE_STATUS_IDS.includes(statusId) ? statusId : null;
+}
+
+function getNegativeStatus(unit) {
+  const statusId = getNegativeStatusId(unit);
+  return statusId ? { statusId, data: unit.statuses[statusId] } : null;
+}
+
+function hasNegativeStatus(unit, statusId = null) {
+  const currentStatusId = getNegativeStatusId(unit);
+  return statusId ? currentStatusId === statusId : Boolean(currentStatusId);
+}
+
+function getUnitStatusId(unit) {
+  const statusIds = Object.entries(unit?.statuses ?? {})
+    .filter(([statusId, status]) => STATUS_PRESENTATION_ORDER.includes(statusId) && Boolean(status))
+    .map(([statusId]) => statusId);
+  return statusIds.reduce(
+    (activeStatusId, statusId) =>
+      activeStatusId === "unparalleled" && NEGATIVE_STATUS_IDS.includes(statusId)
+        ? activeStatusId
+        : statusId,
+    null,
+  );
+}
+
+function normalizeUnitStatuses(statuses = {}) {
+  const statusId = getUnitStatusId({ statuses });
+  return statusId ? { [statusId]: cloneDirectModifier(statuses[statusId]) } : {};
+}
+
+function replaceUnitStatus(unit, statusId, statusData) {
+  unit.statuses = statusId ? { [statusId]: statusData } : {};
+}
+
+function replaceNegativeStatus(unit, statusId, statusData) {
+  replaceUnitStatus(unit, statusId, statusData);
+}
+
+function applyPositiveStatus(unit, statusId, statusData) {
+  if (!POSITIVE_STATUS_IDS.includes(statusId)) return false;
+  replaceUnitStatus(unit, statusId, statusData);
+  return true;
+}
+
+function isUnitSkillDisabled(unit, exchange) {
+  return Boolean(unit?.skillDisabled) ||
+    (Number.isInteger(unit?.skillDisabledUntilExchange) &&
+      unit.skillDisabledUntilExchange === exchange);
+}
+
+function clearExpiredTemporaryStatuses(runtime) {
+  Object.values(runtime.teams)
+    .flat()
+    .forEach((unit) => {
+      if (
+        unit.skillDisabled &&
+        Number.isInteger(unit.skillDisabledUntilExchange) &&
+        unit.skillDisabledUntilExchange !== runtime.currentExchange
+      ) {
+        unit.skillDisabled = false;
+        unit.skillDisabledUntilExchange = null;
+      }
+    });
+}
+
+function applySkillDisable(runtime, target, options) {
+  if (!target || target.health <= 0) return false;
+  const { ownerSide, sourceEffectId, sourceName, untilExchange } = options;
+  if (target.skillDisabled && target.skillDisabledUntilExchange === untilExchange) {
+    return false;
+  }
+  target.skillDisabled = true;
+  target.skillDisabledUntilExchange = untilExchange;
+  recordBattlePresentationLog(
+    runtime,
+    "effect",
+    `${sourceName}：${target.side === "player" ? "我方" : "敌方"} ${target.name}的武将技能本轮无法触发。`,
+    {
+      targetUnitId: target.id,
+      targetName: target.name,
+      targetSide: target.side,
+      effectId: "skill-disabled",
+      effectName: STATUS_LABELS["skill-disabled"],
+      ownerSide,
+      sourceEffectId,
+      sourceName,
+    },
+    {
+      kind: "effect",
+      title: `${target.name}的技能本轮禁用`,
+      effectName: sourceName,
+      sourceIds:
+        runtime.currentCandidate?.effectId === sourceEffectId
+          ? [runtime.currentCandidate?.owner?.id].filter(Boolean)
+          : [],
+      targetIds: [target.id],
+      cues: [{ unitId: target.id, text: "技能禁用", tone: "status" }],
+      durationMs: 1450,
+    },
+  );
+  return true;
 }
 
 function pickBattleRandomUnits(runtime, units, count) {
@@ -4092,9 +5284,29 @@ function applyBattleUnitStatBonus(runtime, unit, attack, health, sourceName = ""
 }
 
 function getSummonedUnitFaction(summonerOrFaction) {
-  const faction =
-    typeof summonerOrFaction === "string" ? summonerOrFaction : summonerOrFaction?.faction;
-  return BOND_FACTIONS.includes(faction) ? faction : "无";
+  return getSummonedUnitBondSnapshot(summonerOrFaction).faction;
+}
+
+function getSummonedUnitBondSnapshot(summonerOrFaction) {
+  const bonds = Array.isArray(summonerOrFaction)
+    ? normalizeBondTags(summonerOrFaction)
+    : typeof summonerOrFaction === "string"
+      ? normalizeBondTags([summonerOrFaction])
+      : getBattleUnitBonds(summonerOrFaction);
+  const preferredFaction =
+    !Array.isArray(summonerOrFaction) &&
+    typeof summonerOrFaction !== "string" &&
+    BOND_FACTIONS.includes(summonerOrFaction?.faction) &&
+    bonds.includes(summonerOrFaction.faction)
+      ? summonerOrFaction.faction
+      : bonds[0];
+  const faction = BOND_FACTIONS.includes(preferredFaction)
+    ? preferredFaction
+    : "无";
+  return {
+    faction,
+    extraFactions: bonds.filter((bond) => bond !== faction),
+  };
 }
 
 function createHeavyCavalry(runtime, side) {
@@ -4113,6 +5325,7 @@ function createHeavyCavalry(runtime, side) {
     tier: 0,
     side,
     lineupIndex: runtime.teams[side].length,
+    skill: DERIVED_UNIT_DEFINITION_BY_NAME.重骑兵.skill,
     skillEffectIds: ["summon.heavy-cavalry-growth"],
     equipment: null,
     statuses: {},
@@ -4164,13 +5377,14 @@ function summonHeavyCavalry(runtime, side, count, sourceEffectId) {
 function createCavalry(
   runtime,
   side,
-  attack = 1,
+  attack = 2,
   health = 1,
   faction = "无",
   level = 1,
 ) {
   const summonId = runtime.nextSummonId;
   runtime.nextSummonId += 1;
+  const bondSnapshot = getSummonedUnitBondSnapshot(faction);
   return {
     id: `${side}-cavalry-${summonId}`,
     sourceId: null,
@@ -4178,12 +5392,13 @@ function createCavalry(
     attack,
     health,
     maxHealth: health,
-    faction: getSummonedUnitFaction(faction),
-    extraFactions: [],
+    faction: bondSnapshot.faction,
+    extraFactions: bondSnapshot.extraFactions,
     tempExtraFactions: [],
     tier: 0,
     side,
     lineupIndex: runtime.teams[side].length,
+    skill: DERIVED_UNIT_DEFINITION_BY_NAME.骑兵.skill,
     skillEffectIds: [],
     equipment: null,
     statuses: {},
@@ -4201,7 +5416,7 @@ function summonCavalry(
   side,
   count,
   {
-    attack = 1,
+    attack = 2,
     health = 1,
     sourceEffectId = null,
     sourceName = "",
@@ -4262,6 +5477,7 @@ function summonCavalry(
     dispatchBattleEvent(runtime, "unit:summon", {
       unit: cavalry,
       side,
+      source: summoner,
       sourceEffectId,
     });
   }
@@ -4281,7 +5497,7 @@ function addBattleUnitToTeamTail(runtime, side, unit) {
 }
 
 function hasBattleSummonSlot(runtime, side) {
-  return runtime.teams[side].length < LINEUP_SLOT_COUNT;
+  return runtime.teams[side].filter((unit) => unit.health > 0).length < LINEUP_SLOT_COUNT;
 }
 
 function recordBattleSummonFailure(runtime, side, sourceName, sourceEffectId = null) {
@@ -4343,9 +5559,9 @@ function insertBattleUnitInFrontOfTarget(runtime, target, unit, deathPosition = 
 function resolveWeiBondDeath(runtime, candidate, event) {
   const unit = event.payload.unit;
   const side = candidate.ownerSide;
-  const level = runtime.lockedBonds[side]?.魏 ?? 0;
+  const effectCount = runtime.lockedBonds[side]?.魏 ?? 0;
   if (
-    level <= 0 ||
+    effectCount <= 0 ||
     !unit ||
     unit.side !== side ||
     !getBattleUnitBonds(unit).includes("魏")
@@ -4356,14 +5572,14 @@ function resolveWeiBondDeath(runtime, candidate, event) {
   const counter = runtime.bondCounters[side];
   counter.魏阵亡 += 1;
   const summonProgress = ((counter.魏阵亡 - 1) % 4) + 1;
-  const summonName = level >= 3 ? "重骑兵" : "骑兵";
+  const summonName = effectCount >= 4 ? "重骑兵" : "骑兵";
   recordBattlePresentationLog(
     runtime,
     "bond",
-    `${BOND_RULES.魏.label} LV${level}：${summonName}召唤进度 ${summonProgress}/4（本场累计 ${counter.魏阵亡} 名魏羁绊武将阵亡）。`,
+    `${BOND_RULES.魏.label} ${effectCount}人：${summonName}召唤进度 ${summonProgress}/4（本场累计 ${counter.魏阵亡} 名魏羁绊单位阵亡）。`,
     {
       faction: "魏",
-      level,
+      effectCount,
       ownerSide: side,
       deathCount: counter.魏阵亡,
       summonProgress,
@@ -4374,19 +5590,19 @@ function resolveWeiBondDeath(runtime, candidate, event) {
       kind: "counter",
       title: `${summonName}召唤进度 ${summonProgress}/4`,
       effectId: candidate.effectId,
-      effectName: `${BOND_RULES.魏.label} LV${level}`,
+      effectName: `${BOND_RULES.魏.label} ${effectCount}人`,
       durationMs: 1250,
     },
   );
   if (counter.魏阵亡 % 4 === 0) {
-    const summonCount = level % 2 === 0 ? 2 : 1;
+    const summonCount = effectCount === 3 || effectCount === 5 ? 2 : 1;
     recordBattleLog(
       runtime,
       "bond",
       `${BOND_RULES.魏.label}累计 ${counter.魏阵亡} 名魏羁绊武将阵亡，在己方最前方召唤 ${summonCount} 名${summonName}。`,
-      { faction: "魏", level, deathCount: counter.魏阵亡, summonCount, summonName },
+      { faction: "魏", effectCount, deathCount: counter.魏阵亡, summonCount, summonName },
     );
-    if (level >= 3) {
+    if (effectCount >= 4) {
       summonHeavyCavalry(runtime, side, summonCount, candidate.effectId);
     } else {
       summonCavalry(runtime, side, summonCount, {
@@ -4404,17 +5620,17 @@ function resolveWeiBondDeath(runtime, candidate, event) {
 function resolveShuBattleUpgrade(runtime, candidate, event) {
   const unit = event.payload.unit;
   const side = candidate.ownerSide;
-  const level = runtime.lockedBonds[side]?.蜀 ?? 0;
+  const effectCount = runtime.lockedBonds[side]?.蜀 ?? 0;
   if (
-    level <= 0 ||
+    effectCount <= 0 ||
     !unit ||
     unit.side !== side ||
     !getBattleUnitBonds(unit).includes("蜀")
   ) {
     return;
   }
-  const statGain = level >= 4 ? 2 : level >= 3 ? 1 : level;
-  const targets = level >= 3
+  const statGain = effectCount >= 5 ? 2 : effectCount >= 4 ? 1 : effectCount - 1;
+  const targets = effectCount >= 4
     ? runtime.teams[side].filter((target) => target.health > 0)
     : [unit];
   targets.forEach((target) =>
@@ -4423,25 +5639,24 @@ function resolveShuBattleUpgrade(runtime, candidate, event) {
       target,
       statGain,
       statGain,
-      `${BOND_RULES.蜀.label} LV${level}`,
+      `${BOND_RULES.蜀.label} ${effectCount}人`,
     ),
   );
   recordBattleLog(
     runtime,
     "bond",
-    `${BOND_RULES.蜀.label} LV${level}：${unit.name}升级，${
-      level >= 3 ? "全军" : unit.name
+    `${BOND_RULES.蜀.label} ${effectCount}人：${unit.name}升级，${
+      effectCount >= 4 ? "全军" : unit.name
     }获得 +${statGain}/+${statGain}。`,
-    { faction: "蜀", level, unitId: unit.id, affectedUnitIds: targets.map((target) => target.id) },
+    { faction: "蜀", effectCount, unitId: unit.id, affectedUnitIds: targets.map((target) => target.id) },
   );
 }
 
-function getWuOpeningTargets(runtime, side, level) {
+function getWuOpeningTargets(runtime, side, effectCount) {
   const opposingSide = side === "player" ? "enemy" : "player";
   const enemies = getBattleUnitsFromFront(runtime, opposingSide);
-  if (level >= 4) return enemies;
-  if (level === 3) return enemies.slice(-4);
-  if (level === 2) return enemies.slice(-3);
+  if (effectCount >= 4) return enemies;
+  if (effectCount === 3) return enemies.slice(-3);
   return pickBattleRandomUnits(runtime, enemies, 2);
 }
 
@@ -4449,9 +5664,18 @@ function applyNegativeStatus(
   runtime,
   target,
   statusId,
-  { ownerSide, summonFaction = null, sourceEffectId, sourceName },
+  options,
 ) {
   if (!target || target.health <= 0) return false;
+  const {
+    ownerSide,
+    summonFaction = null,
+    summonBonds = null,
+    sourceUnit = runtime.currentCandidate?.owner ?? null,
+    sourceEffectId,
+    sourceName,
+    ...statusMetadata
+  } = options;
   target.statuses ??= {};
   if (target.statuses.unparalleled) {
     recordBattlePresentationLog(
@@ -4476,24 +5700,154 @@ function applyNegativeStatus(
     );
     return false;
   }
-  const existingBurn = target.statuses.burn ?? null;
+  if (target.equipment?.effectId === "equipment.imperial-edict") {
+    const clearedStatusId = getUnitStatusId(target);
+    replaceUnitStatus(target, null, null);
+    target.equipment = null;
+    recordBattlePresentationLog(
+      runtime,
+      "equipment",
+      `${target.name}的诏书清空状态槽并阻止${STATUS_LABELS[statusId] ?? statusId}，诏书消失。`,
+      {
+        targetUnitId: target.id,
+        targetName: target.name,
+        targetSide: target.side,
+        statusId,
+        clearedStatusId,
+        sourceEffectId: "equipment.imperial-edict",
+        equipmentRemoved: true,
+      },
+      {
+        kind: "equipment",
+        title: `${target.name}的诏书阻止负面状态`,
+        effectId: "equipment.imperial-edict",
+        effectName: "诏书",
+        targetIds: [target.id],
+        cues: [{ unitId: target.id, text: "诏书消失", tone: "equipment" }],
+        durationMs: 1350,
+      },
+    );
+    return true;
+  }
+  if (target.statuses?.rest) {
+    replaceUnitStatus(target, null, null);
+    recordBattlePresentationLog(
+      runtime,
+      "status",
+      `${target.name}的休整清除自身并阻止${STATUS_LABELS[statusId] ?? statusId}。`,
+      {
+        targetUnitId: target.id,
+        targetName: target.name,
+        targetSide: target.side,
+        statusId,
+        sourceEffectId: "status.rest-intercept",
+      },
+      {
+        kind: "status",
+        title: `${target.name}以休整化解负面状态`,
+        effectId: "status.rest-intercept",
+        effectName: "休整",
+        targetIds: [target.id],
+        cues: [{ unitId: target.id, text: "休整清除", tone: "status" }],
+        durationMs: 1350,
+      },
+    );
+    return true;
+  }
+  const existingNegativeStatus = getNegativeStatus(target);
+  const existingBurn = existingNegativeStatus?.statusId === "burn"
+    ? existingNegativeStatus.data
+    : null;
   const appliedStatus = {
+    ...statusMetadata,
     ownerSide,
     summonFaction,
+    summonBonds:
+      summonBonds ??
+      (sourceUnit ? getBattleUnitBonds(sourceUnit) : null),
+    sourceUnitId: sourceUnit?.id ?? null,
     sourceEffectId,
     sourceName,
   };
-  let preserveExistingBurn = false;
+  if (statusId === "intimidated") appliedStatus.spent = false;
+
+  if (
+    existingNegativeStatus?.statusId === "intimidated" &&
+    statusId === "intimidated"
+  ) {
+    recordBattleLog(
+      runtime,
+      "status",
+      `${target.name}已有震慑，重复施加不会刷新其下一次普通攻击归零标记。`,
+      { targetUnitId: target.id, statusId, ignoredRefresh: true },
+    );
+    return false;
+  }
+
+  const recordApplication = (
+    appliedTarget,
+    appliedStatusId,
+    statusData = appliedStatus,
+  ) => {
+    const applicationOwnerSide = statusData?.ownerSide ?? ownerSide;
+    const applicationSourceEffectId = statusData?.sourceEffectId ?? sourceEffectId;
+    const applicationSourceName = statusData?.sourceName ?? sourceName;
+    recordBattlePresentationLog(
+      runtime,
+      "status",
+      `${applicationSourceName}：${appliedTarget.side === "player" ? "我方" : "敌方"} ${
+        appliedTarget.name
+      }获得${STATUS_LABELS[appliedStatusId] ?? appliedStatusId}。`,
+      {
+        targetUnitId: appliedTarget.id,
+        targetName: appliedTarget.name,
+        targetSide: appliedTarget.side,
+        statusId: appliedStatusId,
+        statusName: STATUS_LABELS[appliedStatusId] ?? appliedStatusId,
+        ownerSide: applicationOwnerSide,
+        sourceEffectId: applicationSourceEffectId,
+        sourceName: applicationSourceName,
+        sourceSide: applicationOwnerSide,
+      },
+      {
+        kind: "status",
+        title: `${appliedTarget.name}获得${STATUS_LABELS[appliedStatusId] ?? appliedStatusId}`,
+        effectName: applicationSourceName,
+        sourceIds:
+          runtime.currentCandidate?.effectId === applicationSourceEffectId
+            ? [runtime.currentCandidate?.owner?.id].filter(Boolean)
+            : [],
+        targetIds: [appliedTarget.id],
+        cues: [
+          {
+            unitId: appliedTarget.id,
+            text: STATUS_LABELS[appliedStatusId] ?? appliedStatusId,
+            tone: "status",
+          },
+        ],
+        durationMs: 1450,
+      },
+    );
+    resolveImmediateBattleEvent(runtime, "status:apply", {
+      target: appliedTarget,
+      statusId: appliedStatusId,
+      ownerSide: applicationOwnerSide,
+      sourceEffectId: applicationSourceEffectId,
+      sourceName: applicationSourceName,
+    });
+  };
 
   if (existingBurn) {
     const burnOwnerSide = existingBurn.ownerSide;
-    const wuLevel = runtime.lockedBonds[burnOwnerSide]?.吴 ?? 0;
-    const igniteDamage = wuLevel >= 3 ? 7 : 5;
-    const virtualSource = {
+    const wuEffectCount = runtime.lockedBonds[burnOwnerSide]?.吴 ?? 0;
+    const igniteDamage = 6;
+    replaceNegativeStatus(target, statusId, appliedStatus);
+    recordApplication(target, statusId, appliedStatus);
+    const virtualSource = getBattleStatusDamageSource(runtime, existingBurn, {
       id: `${burnOwnerSide ?? "neutral"}-burn-status`,
       name: "引燃",
       side: burnOwnerSide,
-    };
+    });
     const damage = dealBattleDamage(runtime, {
       source: virtualSource,
       target,
@@ -4502,83 +5856,78 @@ function applyNegativeStatus(
       sourceEffectId: "status.burn-ignite",
       extraPayload: { statusId: "ignite" },
     });
-    preserveExistingBurn = wuLevel >= 4;
+    const currentNegativeStatus = getNegativeStatus(target);
+    const clearedCurrentBurn = currentNegativeStatus?.statusId === "burn";
+    if (clearedCurrentBurn) replaceNegativeStatus(target, null, null);
+    const restoreOriginalBurn =
+      wuEffectCount >= 5 && clearedCurrentBurn && target.health > 0;
     recordBattleLog(
       runtime,
       "status",
       `${target.name}被引燃，受到 ${damage?.finalAmount ?? 0} 点真实伤害${
-        preserveExistingBurn ? "，原灼烧保留" : "，原灼烧清除"
+        restoreOriginalBurn
+          ? "，东吴业火 5 人重新施加原灼烧"
+          : clearedCurrentBurn
+            ? "，现有灼烧清除"
+            : currentNegativeStatus
+              ? `，当前${STATUS_LABELS[currentNegativeStatus.statusId] ?? currentNegativeStatus.statusId}保留`
+              : ""
       }。`,
-      { targetUnitId: target.id, damage, wuLevel },
+      {
+        targetUnitId: target.id,
+        damage,
+        wuEffectCount,
+        clearedCurrentBurn,
+        retainedStatusId: clearedCurrentBurn ? null : currentNegativeStatus?.statusId ?? null,
+        restoredOriginalBurn: restoreOriginalBurn,
+      },
     );
     if (target.health <= 0) return true;
+    if (restoreOriginalBurn) {
+      replaceNegativeStatus(target, "burn", existingBurn);
+      recordApplication(target, "burn", existingBurn);
+    }
+    return true;
   }
 
-  if (preserveExistingBurn) {
-    target.statuses = { burn: existingBurn };
-  } else {
-    target.statuses = { [statusId]: appliedStatus };
+  if (existingNegativeStatus?.statusId === "chain" && statusId !== "chain") {
+    const chainedUnits = Object.values(runtime.teams)
+      .flat()
+      .filter((unit) => unit.health > 0 && hasNegativeStatus(unit, "chain"));
+    const replacements = chainedUnits.map((unit) => ({
+      unit,
+      statusData: { ...appliedStatus },
+    }));
+    replacements.forEach(({ unit, statusData }) => {
+      replaceNegativeStatus(unit, statusId, statusData);
+    });
+    replacements.forEach(({ unit }) => recordApplication(unit, statusId));
+    return replacements.length > 0;
   }
-  recordBattlePresentationLog(
-    runtime,
-    "status",
-    `${sourceName}：${target.side === "player" ? "我方" : "敌方"} ${
-      target.name
-    }获得${STATUS_LABELS[statusId] ?? statusId}。`,
-    {
-      targetUnitId: target.id,
-      targetName: target.name,
-      targetSide: target.side,
-      statusId,
-      statusName: STATUS_LABELS[statusId] ?? statusId,
-      ownerSide,
-      sourceEffectId,
-      sourceName,
-      sourceSide: ownerSide,
-    },
-    {
-      kind: "status",
-      title: `${target.name}获得${STATUS_LABELS[statusId] ?? statusId}`,
-      effectName: sourceName,
-      sourceIds: [runtime.currentCandidate?.owner?.id],
-      targetIds: [target.id],
-      cues: [
-        {
-          unitId: target.id,
-          text: STATUS_LABELS[statusId] ?? statusId,
-          tone: "status",
-        },
-      ],
-      durationMs: 1450,
-    },
-  );
-  resolveImmediateBattleEvent(runtime, "status:apply", {
-    target,
-    statusId,
-    ownerSide,
-    sourceEffectId,
-    sourceName,
-  });
+
+  if (!existingBurn && existingNegativeStatus?.statusId === statusId) return false;
+  replaceNegativeStatus(target, statusId, appliedStatus);
+  recordApplication(target, statusId);
   return true;
 }
 
 function resolveWuOpeningBurn(runtime, candidate) {
   const side = candidate.ownerSide;
-  const level = runtime.lockedBonds[side]?.吴 ?? 0;
-  if (level <= 0) return;
-  const targets = getWuOpeningTargets(runtime, side, level);
+  const effectCount = runtime.lockedBonds[side]?.吴 ?? 0;
+  if (effectCount <= 0) return;
+  const targets = getWuOpeningTargets(runtime, side, effectCount);
   targets.forEach((target) =>
     applyNegativeStatus(runtime, target, "burn", {
       ownerSide: side,
       sourceEffectId: candidate.effectId,
-      sourceName: `${BOND_RULES.吴.label} LV${level}`,
+      sourceName: `${BOND_RULES.吴.label} ${effectCount}人`,
     }),
   );
   recordBattleLog(
     runtime,
     "bond",
-    `${BOND_RULES.吴.label} LV${level}：战斗开始时使 ${targets.length} 名敌军获得灼烧。`,
-    { faction: "吴", level, targetUnitIds: targets.map((target) => target.id) },
+    `${BOND_RULES.吴.label} ${effectCount}人：战斗开始时使 ${targets.length} 名敌军获得灼烧。`,
+    { faction: "吴", effectCount, targetUnitIds: targets.map((target) => target.id) },
   );
 }
 
@@ -4590,11 +5939,11 @@ function resolveBurnTick(runtime, event) {
 
   const resolvedDamages = burnedUnits.map((target) => {
     const burn = target.statuses.burn;
-    const virtualSource = {
+    const virtualSource = getBattleStatusDamageSource(runtime, burn, {
       id: `${burn.ownerSide ?? "neutral"}-burn-status`,
       name: burn.sourceName || STATUS_LABELS.burn,
       side: burn.ownerSide,
-    };
+    });
     return resolveBattleDamage(runtime, {
       source: virtualSource,
       target,
@@ -4624,6 +5973,145 @@ function resolveBurnTick(runtime, event) {
   );
 }
 
+function getBattleDeathNearestAheadOwnerIds(runtime, unit) {
+  return runtime.teams[unit.side]
+    .filter((owner) => owner !== unit && owner.health > 0)
+    .filter((owner) => getNearestBattlePositionUnit(runtime, owner, "ahead") === unit)
+    .map((owner) => owner.id);
+}
+
+function resolveBattleDeathBatch(
+  runtime,
+  candidates,
+  exchange,
+  { recordDeathPresentation = true } = {},
+) {
+  const pendingDeaths = candidates
+    .map((candidate) => ({
+      unit: candidate?.unit ?? candidate,
+      deathPosition:
+        candidate?.deathPosition ?? captureBattleDeathPosition(runtime, candidate?.unit ?? candidate),
+      killer: candidate?.killer ?? candidate?.unit?.lastDamageSource ?? null,
+      sourceEffectId:
+        candidate?.sourceEffectId ?? candidate?.unit?.lastDamageEffectId ?? null,
+      consumed: Boolean(candidate?.consumed),
+    }))
+    .filter(
+      ({ unit }) =>
+        unit &&
+        unit.health <= 0 &&
+        !runtime.resolvedDeathIds.has(unit.id) &&
+        !runtime.deferredDeathIds.has(unit.id),
+    );
+  if (pendingDeaths.length === 0) return 0;
+
+  const deathEntries = [];
+  const preparedDeathEvents = [];
+  pendingDeaths.forEach(({ unit, deathPosition, killer, sourceEffectId, consumed }) => {
+    runtime.resolvedDeathIds.add(unit.id);
+    unit.deathPosition = deathPosition;
+    const nearestAheadOwnerIds = getBattleDeathNearestAheadOwnerIds(runtime, unit);
+    const entry = recordBattleLog(
+      runtime,
+      "death",
+      `${unit.side === "player" ? "我方" : "敌方"} ${unit.name}${
+        consumed ? "被吞噬并视为" : ""
+      }阵亡。`,
+      {
+        unitId: unit.id,
+        unitName: unit.name,
+        unitSide: unit.side,
+        exchange,
+        consumed,
+        killerUnitId: killer?.id ?? null,
+        sourceEffectId,
+      },
+    );
+    deathEntries.push(entry);
+    preparedDeathEvents.push(
+      prepareBattleEvent(runtime, "unit:death", {
+        unit,
+        killer,
+        sourceEffectId,
+        consumed,
+        exchange,
+        deathPosition,
+        nearestAheadOwnerIds,
+      }),
+    );
+  });
+
+  if (recordDeathPresentation) {
+    const playerDeathCount = pendingDeaths.filter(
+      ({ unit }) => unit.side === "player",
+    ).length;
+    const enemyDeathCount = pendingDeaths.length - playerDeathCount;
+    const title =
+      playerDeathCount > 0 && enemyDeathCount > 0
+        ? "双方武将同时阵亡"
+        : pendingDeaths.length > 1
+          ? `${playerDeathCount > 0 ? "我方" : "敌方"}多名武将同时阵亡`
+          : `${pendingDeaths[0].unit.name}阵亡`;
+    recordBattlePresentationStep(runtime, {
+      kind: "death",
+      title,
+      description: "阵亡卡牌同时化为烟雾并退出战场",
+      entries: deathEntries,
+      exchange,
+      effectId:
+        pendingDeaths.length === 1 ? pendingDeaths[0].sourceEffectId : null,
+      sourceIds: pendingDeaths.map(({ killer }) => killer?.id),
+      targetIds: pendingDeaths.map(({ unit }) => unit.id),
+      deathIds: pendingDeaths.map(({ unit }) => unit.id),
+      cues: pendingDeaths.map(({ unit, consumed }) => ({
+        unitId: unit.id,
+        text: consumed ? "被吞噬" : "阵亡",
+        tone: "death",
+      })),
+      simultaneous: pendingDeaths.length > 1,
+      durationMs: 1500,
+    });
+  }
+
+  const removedIds = new Set(pendingDeaths.map(({ unit }) => unit.id));
+  ["player", "enemy"].forEach((side) => {
+    const team = runtime.teams[side];
+    const survivors = team.filter((unit) => !removedIds.has(unit.id));
+    team.splice(0, team.length, ...survivors);
+  });
+  const leaveEntries = pendingDeaths.map(({ unit }) =>
+    recordBattleLog(
+      runtime,
+      "leave",
+      `${unit.side === "player" ? "我方" : "敌方"} ${unit.name}离开战场，队列前移。`,
+      {
+        unitId: unit.id,
+        unitName: unit.name,
+        unitSide: unit.side,
+        exchange,
+      },
+    ),
+  );
+  const beforeAdvanceSnapshot = runtime.presentationSnapshot;
+  const afterAdvanceSnapshot = getBattlePresentationSnapshot(runtime);
+  const movements = getBattleAdvanceMovements(beforeAdvanceSnapshot, afterAdvanceSnapshot);
+  recordBattlePresentationStep(runtime, {
+    kind: "advance",
+    title: "存活武将向阵容前方补位",
+    description: "阵容补位完成后再继续结算后续效果",
+    entries: leaveEntries,
+    exchange,
+    movements,
+    animationSkip: movements.length === 0,
+    durationMs: movements.length > 0 ? 700 : 0,
+  });
+
+  preparedDeathEvents.forEach((event) =>
+    resolvePreparedBattleEventImmediately(runtime, event),
+  );
+  return pendingDeaths.length;
+}
+
 function resolveBattleUnitDeath(
   runtime,
   unit,
@@ -4635,79 +6123,18 @@ function resolveBattleUnitDeath(
     consumed = false,
   } = {},
 ) {
-  if (!unit || unit.health > 0 || runtime.resolvedDeathIds.has(unit.id)) {
-    return false;
-  }
-  runtime.resolvedDeathIds.add(unit.id);
-  unit.deathPosition = deathPosition;
-  recordBattlePresentationLog(
-    runtime,
-    "death",
-    `${unit.side === "player" ? "我方" : "敌方"} ${unit.name}${
-      consumed ? "被吞噬并视为" : ""
-    }阵亡。`,
-    {
-      unitId: unit.id,
-      unitName: unit.name,
-      unitSide: unit.side,
-      exchange,
-      consumed,
-      killerUnitId: killer?.id ?? null,
-      sourceEffectId,
-    },
-    {
-      kind: consumed ? "consume" : "death",
-      title: consumed ? `${unit.name}被吞噬` : `${unit.name}阵亡`,
-      effectId: sourceEffectId,
-      sourceIds: [killer?.id],
-      targetIds: [unit.id],
-      deathIds: [unit.id],
-      cues: [
-        {
-          unitId: unit.id,
-          text: consumed ? "被吞噬" : "阵亡",
-          tone: "death",
-        },
-      ],
-      durationMs: 1550,
-    },
-  );
-  resolveImmediateBattleEvent(runtime, "unit:death", {
-    unit,
-    killer,
-    sourceEffectId,
-    consumed,
-    exchange,
-    deathPosition,
-  });
-  const team = runtime.teams[unit.side];
-  const index = team.indexOf(unit);
-  if (index >= 0) {
-    team.splice(index, 1);
-    recordBattlePresentationLog(
+  return (
+    resolveBattleDeathBatch(
       runtime,
-      "leave",
-      `${unit.side === "player" ? "我方" : "敌方"} ${unit.name}离开战场，队列前移。`,
-      {
-        unitId: unit.id,
-        unitName: unit.name,
-        unitSide: unit.side,
-        exchange,
-      },
-      {
-        kind: "leave",
-        title: `${unit.name}离场`,
-        targetIds: [unit.id],
-        durationMs: 850,
-      },
-    );
-  }
-  return true;
+      [{ unit, deathPosition, killer, sourceEffectId, consumed }],
+      exchange,
+      { recordDeathPresentation: !consumed },
+    ) > 0
+  );
 }
 
 function resolveAllBattleDeaths(runtime, exchange) {
-  let resolvedCount = 0;
-  const deathPositions = new Map();
+  const pendingDeaths = [];
   ["player", "enemy"].forEach((side) => {
     runtime.teams[side].forEach((unit) => {
       if (
@@ -4717,26 +6144,13 @@ function resolveAllBattleDeaths(runtime, exchange) {
       ) {
         return;
       }
-      deathPositions.set(unit.id, captureBattleDeathPosition(runtime, unit));
+      pendingDeaths.push({
+        unit,
+        deathPosition: captureBattleDeathPosition(runtime, unit),
+      });
     });
   });
-  ["player", "enemy"].forEach((side) => {
-    const team = runtime.teams[side];
-    [...team].forEach((unit) => {
-      if (
-        unit.health > 0 ||
-        runtime.resolvedDeathIds.has(unit.id) ||
-        runtime.deferredDeathIds.has(unit.id)
-      ) {
-        return;
-      }
-      const deathPosition = deathPositions.get(unit.id) ?? captureBattleDeathPosition(runtime, unit);
-      if (resolveBattleUnitDeath(runtime, unit, exchange, { deathPosition })) {
-        resolvedCount += 1;
-      }
-    });
-  });
-  return resolvedCount;
+  return resolveBattleDeathBatch(runtime, pendingDeaths, exchange);
 }
 
 function createBattleEvent(runtime, type, payload = {}, parentEvent = null) {
@@ -4753,20 +6167,51 @@ function createBattleEvent(runtime, type, payload = {}, parentEvent = null) {
   };
 }
 
-function dispatchBattleEvent(runtime, type, payload = {}, parentEvent = runtime.currentEvent) {
+function prepareBattleEvent(
+  runtime,
+  type,
+  payload = {},
+  parentEvent = runtime.currentEvent,
+  { lockHeroAvailability = false } = {},
+) {
   const event = createBattleEvent(runtime, type, payload, parentEvent);
+  const candidates = collectBattleEffectCandidates(runtime, event);
+  event.lockedCandidates = lockHeroAvailability
+    ? candidates.filter((candidate) => {
+        if (candidate.definition.sourceType !== "hero") return true;
+        const owner = candidate.owner;
+        const ownerParticipated = event.payload.attackers?.includes(owner);
+        const ownerWasAvailable = ownerParticipated || isBattleUnitActive(runtime, owner);
+        if (
+          !owner ||
+          !ownerWasAvailable ||
+          isUnitSkillDisabled(owner, runtime.currentExchange)
+        ) {
+          return false;
+        }
+        candidate.ownerAvailabilityLocked = true;
+        return true;
+      })
+    : candidates;
+  return event;
+}
+
+function dispatchPreparedBattleEvent(runtime, event) {
+  if (!event) return null;
   runtime.queue.push(event);
   processBattleEventQueue(runtime);
   return event;
 }
 
-function resolveImmediateBattleEvent(
-  runtime,
-  type,
-  payload = {},
-  parentEvent = runtime.currentEvent,
-) {
-  const event = createBattleEvent(runtime, type, payload, parentEvent);
+function dispatchBattleEvent(runtime, type, payload = {}, parentEvent = runtime.currentEvent) {
+  return dispatchPreparedBattleEvent(
+    runtime,
+    createBattleEvent(runtime, type, payload, parentEvent),
+  );
+}
+
+function resolvePreparedBattleEventImmediately(runtime, event) {
+  if (!event) return null;
   const stepCount = (runtime.chainSteps.get(event.chainId) ?? 0) + 1;
   runtime.chainSteps.set(event.chainId, stepCount);
   if (stepCount > MAX_EFFECT_CHAIN_STEPS) {
@@ -4793,6 +6238,18 @@ function resolveImmediateBattleEvent(
   resolveBattleEvent(runtime, event);
   runtime.currentEvent = previousEvent;
   return event;
+}
+
+function resolveImmediateBattleEvent(
+  runtime,
+  type,
+  payload = {},
+  parentEvent = runtime.currentEvent,
+) {
+  return resolvePreparedBattleEventImmediately(
+    runtime,
+    createBattleEvent(runtime, type, payload, parentEvent),
+  );
 }
 
 function processBattleEventQueue(runtime) {
@@ -4850,11 +6307,7 @@ function collectBattleEffectCandidates(runtime, event) {
         definition.sourceType === "hero" &&
         Boolean(owner) &&
         isBattleUnitActive(runtime, owner) &&
-        !owner.skillDisabled &&
-        !(
-          Number.isInteger(owner.skillDisabledUntilExchange) &&
-          owner.skillDisabledUntilExchange === runtime.currentExchange
-        ),
+        !isUnitSkillDisabled(owner, runtime.currentExchange),
       resolved: false,
     });
     sequence += 1;
@@ -4882,15 +6335,15 @@ function collectBattleEffectCandidates(runtime, event) {
     });
   });
 
-  Object.entries(runtime.lockedBonds).forEach(([side, levels]) => {
+  Object.entries(runtime.lockedBonds).forEach(([side, effectCounts]) => {
     BOND_FACTIONS.forEach((faction) => {
-      const level = levels?.[faction] ?? 0;
-      if (level <= 0) return;
+      const effectCount = effectCounts?.[faction] ?? 0;
+      if (effectCount <= 0) return;
       (BOND_RULES[faction].effectIds ?? []).forEach((effectId) => {
         addCandidate({
           effectId,
           ownerSide: side,
-          sourceName: `${BOND_RULES[faction].label} LV${level}`,
+          sourceName: `${BOND_RULES[faction].label} ${effectCount}人`,
         });
       });
     });
@@ -4900,7 +6353,7 @@ function collectBattleEffectCandidates(runtime, event) {
 }
 
 function isBattleHeroSkillApplicable(runtime, candidate, event) {
-  if (candidate.definition.sourceType !== "hero" || !candidate.effectId.startsWith("hero.")) {
+  if (candidate.definition.sourceType !== "hero") {
     return true;
   }
   const { owner, effectId } = candidate;
@@ -4911,73 +6364,104 @@ function isBattleHeroSkillApplicable(runtime, candidate, event) {
   const sharedUnit = sameSideUnit && shareBattleBond(owner, unit);
 
   if (event.type === "unit:death") {
-    if (["hero.pangde.xunjie", "hero.guojia.yiji-pingliao", "hero.pangtong.niepan"].includes(effectId)) {
+    if ([
+      "hero.pangde.xunjie",
+      "hero.mayunlu.xiliang-lienv",
+      "hero.yuejin.xiandeng-xianzhen",
+      "hero.zhanghe.qiaobian",
+      "hero.gongsunzan.baima-yicong",
+      "hero.guojia.yiji-pingliao",
+      "hero.hanxiandi.piaoyao",
+      "hero.yuji.guhuo",
+      "summon.fangshi-death",
+    ].includes(effectId)) {
       return unit === owner;
     }
-    if (effectId === "hero.madai.fuzhan") return unit?.lastDamageSource === owner;
+    if (effectId === "hero.weiyan.caigao-qilie") {
+      return Boolean(sameSideUnit && unit !== owner);
+    }
+    if (effectId === "hero.yanliang.yongguan-sanjun") {
+      return Boolean(unit && unit !== owner && event.payload.killer === owner);
+    }
     if (effectId === "hero.dianwei.guzhi-elai") return unit === owner && Boolean(owner.consumedSnapshot);
     if (effectId === "hero.huatuo.jijiu") {
+      const wasNearestAhead = Array.isArray(event.payload.nearestAheadOwnerIds)
+        ? event.payload.nearestAheadOwnerIds.includes(owner.id)
+        : getNearestBattlePositionUnit(runtime, owner, "ahead") === unit;
       return Boolean(
         sameSideUnit &&
         unit !== owner &&
         !event.payload.consumed &&
-        getNearestBattlePositionUnit(runtime, owner, "ahead") === unit &&
-        !event.payload.revived
+        wasNearestAhead &&
+        !event.payload.revived &&
+        (owner.huatuoRevivesUsedThisRound ?? 0) < (owner.level ?? 1)
       );
     }
-    if (effectId === "hero.caocao.jianxiong") return Boolean(sharedUnit);
+    if (effectId === "hero.caocao.jianxiong") return Boolean(sharedUnit && unit !== owner);
     return false;
   }
   if (event.type === "unit:summon") {
-    if (effectId === "hero.zhenji.luoshen") return sameSideUnit;
-    return ["hero.xunyou.qice", "hero.xunyu.wangzuo-zhicai"].includes(effectId) &&
-      Boolean(sharedUnit);
+    if (effectId === "hero.zhenji.luoshen") {
+      return sameSideUnit && unit !== owner && !event.payload.revived;
+    }
+    if (effectId === "hero.yuanshu.yuxi") {
+      return unit === owner && !event.payload.revived;
+    }
+    return ["hero.xunyu.wangzuo-zhicai", "hero.liubei.renze"].includes(effectId) &&
+      Boolean(sharedUnit && unit !== owner && !event.payload.revived);
   }
   if (event.type === "experience:gain") {
-    if (["hero.liaohua.sujiang", "hero.weiyan.caigao-qilie"].includes(effectId)) {
-      return sameSideUnit && unit !== owner;
-    }
-    return effectId === "hero.machao.hanqiang-pozhen" && unit === owner;
+    return effectId === "hero.liaohua.sujiang" && sameSideUnit && unit !== owner;
   }
   if (event.type === "unit:upgrade") {
-    if (effectId === "hero.zhaoyun.longdan") return unit === owner;
-    return effectId === "hero.fazheng.yiyi-dailao" && sameSideUnit && unit !== owner;
+    return effectId === "hero.zhaoyun.longdan" && unit === owner;
   }
-  if (event.type === "status:apply") {
-    return effectId === "hero.zhugejin.hongya" &&
-      event.payload.target?.side === getOpposingSide(owner.side);
-  }
+  if (event.type === "status:apply") return false;
   if (event.type === "damage:before") {
     if (effectId === "hero.zhoutai.roushen-tiebi") {
       return damage?.target === owner &&
-        damage.type === "attack" &&
+        ["attack", "skill"].includes(damage.type) &&
         runtime.currentAttackers?.includes(owner);
     }
-    return effectId === "hero.zhouyu.fengzhu-huoshi" &&
-      damage?.target?.side === getOpposingSide(owner.side) &&
-      ["status.burn-tick", "status.burn-ignite"].includes(damage.sourceEffectId);
+    if (effectId === "hero.zhouyu.fengzhu-huoshi") {
+      const enemySide = getOpposingSide(owner.side);
+      return (
+        (damage?.target?.side === enemySide &&
+          (["status.burn-tick", "status.burn-ignite"].includes(damage.sourceEffectId) ||
+            (damage.target.statuses?.["broken-morale"] &&
+              ["attack", "skill"].includes(damage.type)))) ||
+        (damage?.source?.side === enemySide &&
+          damage.source.statuses?.fear &&
+          damage.type === "attack")
+      );
+    }
+    return false;
   }
   if (event.type === "damage:after") {
     if (["hero.huanggai.kurouji", "hero.xiahoudun.gangyong"].includes(effectId)) {
       return damage?.target === owner && damage.finalAmount > 0;
     }
-    if (effectId === "hero.wenchou.hanyong") {
-      return event.phase === "battle:start" &&
-        damage?.source?.side === owner.side &&
-        damage.finalAmount > 0;
-    }
     return false;
   }
   if (event.type === "attack:before") {
+    if (effectId === "hero.machao.pozhen") {
+      return ownerAttacked && !owner.machaoFirstAttackUsed;
+    }
     return ownerAttacked;
   }
   if (event.type === "attack:after") {
-    if (effectId === "hero.xiaoqiao.huaron-yuemao") {
+    if ([
+      "hero.xiaoqiao.huaron-yuemao",
+      "hero.wenchou.yongguan-sanjun",
+      "hero.xuhuang.changqu-zhiru",
+    ].includes(effectId)) {
       const target = getNearestBattleUnit(runtime, owner, "ahead");
       return Boolean(target && event.payload.attackers?.includes(target));
     }
     if (effectId === "hero.zhugeliang.yunchou") {
-      return event.payload.attackers?.some((attacker) => attacker.side === owner.side);
+      return event.payload.attackers?.some(
+        (attacker) => attacker.side === owner.side && attacker !== owner,
+      );
     }
     return ownerAttacked;
   }
@@ -5008,12 +6492,12 @@ function isEffectCandidateValid(runtime, candidate, event) {
   const isOwnersDeathEvent =
     event.type === "unit:death" && event.payload.unit === candidate.owner;
   const isLockedBattleStartHeroSkill = Boolean(candidate.battleStartLocked);
+  const isOwnerAvailabilityLocked = Boolean(candidate.ownerAvailabilityLocked);
   if (
     candidate.definition.sourceType === "hero" &&
     !isLockedBattleStartHeroSkill &&
-    (candidate.owner?.skillDisabled ||
-      (Number.isInteger(candidate.owner?.skillDisabledUntilExchange) &&
-        candidate.owner.skillDisabledUntilExchange === runtime.currentExchange))
+    !isOwnerAvailabilityLocked &&
+    isUnitSkillDisabled(candidate.owner, runtime.currentExchange)
   ) {
     return false;
   }
@@ -5045,6 +6529,39 @@ function isEffectCandidateValid(runtime, candidate, event) {
     return false;
   }
   if (
+    candidate.effectId === "equipment.commander-seal" &&
+    event.type === "unit:summon" &&
+    (event.payload.unit?.side !== candidate.owner?.side || event.payload.revived)
+  ) {
+    return false;
+  }
+  if (
+    candidate.effectId === "equipment.white-jade-turtle" &&
+    event.type === "status:apply" &&
+    event.payload.target !== candidate.owner
+  ) {
+    return false;
+  }
+  if (
+    candidate.effectId === "equipment.yanmo-sail" &&
+    event.type === "unit:death" &&
+    (event.payload.unit !== candidate.owner || event.payload.revived)
+  ) {
+    return false;
+  }
+  if (candidate.effectId === "equipment.fangtian-halberd") {
+    const owner = candidate.owner;
+    const isOwnersAttackExchange = runtime.currentAttackers?.includes(owner);
+    if (
+      event.type !== "damage:before" ||
+      damage?.type !== "attack" ||
+      !isOwnersAttackExchange ||
+      (damage?.source !== owner && damage?.target !== owner)
+    ) {
+      return false;
+    }
+  }
+  if (
     candidate.effectId === "equipment.blood-armor" &&
     event.type === "damage:after" &&
     (damage?.target !== candidate.owner || damage.finalAmount <= 0)
@@ -5057,6 +6574,7 @@ function isEffectCandidateValid(runtime, candidate, event) {
     !isOwnersDamageAfterEvent &&
     !isOwnersAttackAfterEvent &&
     !isLockedBattleStartHeroSkill &&
+    !isOwnerAvailabilityLocked &&
     !isBattleUnitActive(runtime, candidate.owner)
   ) {
     return false;
@@ -5117,12 +6635,36 @@ function getEquipmentRuntimeState(owner, defaultCharges = null) {
   return owner.equipment.runtime;
 }
 
+function consumeEquipmentRuntimeCharge(owner, defaultCharges = 0) {
+  const equipmentState = getEquipmentRuntimeState(owner, defaultCharges);
+  if (!equipmentState || equipmentState.remainingCharges <= 0) return null;
+  equipmentState.remainingCharges = Math.max(
+    0,
+    equipmentState.remainingCharges - 1,
+  );
+  const remainingCharges = equipmentState.remainingCharges;
+  const exhausted = remainingCharges === 0;
+  if (exhausted) owner.equipment = null;
+  return { remainingCharges, exhausted };
+}
+
 function getOpposingSide(side) {
   return side === "player" ? "enemy" : "player";
 }
 
 function getLivingBattleUnits(runtime, side) {
   return runtime.teams[side].filter((unit) => unit.health > 0);
+}
+
+function getBattleUnitById(runtime, unitId) {
+  if (!unitId) return null;
+  return Object.values(runtime.teams)
+    .flat()
+    .find((unit) => unit.id === unitId) ?? null;
+}
+
+function getBattleStatusDamageSource(runtime, status, fallback) {
+  return getBattleUnitById(runtime, status?.sourceUnitId) ?? fallback;
 }
 
 function getBattleUnitsFromFront(runtime, side) {
@@ -5269,6 +6811,8 @@ function commitResolvedBattleDamage(
         unitId: target.id,
         text: damage.finalAmount > 0 ? `-${damage.finalAmount}` : "伤害抵挡",
         tone: "damage",
+        damageAmount: damage.finalAmount,
+        damageType: damage.type,
       },
     ],
     entries: [entry],
@@ -5542,8 +7086,18 @@ function cloneBattleIdentityForSummon(
   health,
   level = 1,
   summonerOrFaction = source.faction,
+  { preserveSourceBonds = false } = {},
 ) {
   const summonId = runtime.nextSummonId++;
+  const inheritedBonds = preserveSourceBonds
+    ? {
+        faction: source.faction,
+        extraFactions: [
+          ...(source.extraFactions ?? []),
+          ...(source.tempExtraFactions ?? []),
+        ],
+      }
+    : getSummonedUnitBondSnapshot(summonerOrFaction);
   return {
     id: `${side}-${source.name}-skill-summon-${summonId}`,
     sourceId: source.sourceId ?? null,
@@ -5551,14 +7105,235 @@ function cloneBattleIdentityForSummon(
     attack,
     health,
     maxHealth: health,
-    faction: getSummonedUnitFaction(summonerOrFaction),
-    extraFactions: [],
+    faction: inheritedBonds.faction,
+    extraFactions: normalizeBondTags(inheritedBonds.extraFactions),
     tempExtraFactions: [],
     usesBondDefinitionSnapshot: true,
     tier: source.tier,
     side,
     lineupIndex: 0,
+    skill: source.skill ?? "",
     skillEffectIds: [...(source.skillEffectIds ?? [])],
+    equipment: null,
+    statuses: {},
+    level,
+    experience: 0,
+    copies: UNIT_LEVEL_COPY_THRESHOLDS[level] ?? 1,
+    bonusExperience: 0,
+    isSummon: true,
+    skillDisabled: false,
+    skillDisabledUntilExchange: null,
+    consumedSnapshot: null,
+    lastDamageSource: null,
+    huatuoRevivesUsedThisRound: source.huatuoRevivesUsedThisRound ?? 0,
+  };
+}
+
+function createFormalHeroSummon(runtime, owner, heroDefinition) {
+  const level = Math.max(1, Math.min(MAX_UNIT_LEVEL, owner.level ?? 1));
+  const summonId = runtime.nextSummonId++;
+  const attack = Math.max(1, Number(heroDefinition.attack) * level);
+  const health = Math.max(1, Number(heroDefinition.health) * level);
+  const inheritedBonds = getSummonedUnitBondSnapshot(owner);
+  return {
+    id: `${owner.side}-${heroDefinition.name}-formal-summon-${summonId}`,
+    sourceId: null,
+    name: heroDefinition.name,
+    attack,
+    health,
+    maxHealth: health,
+    faction: inheritedBonds.faction,
+    extraFactions: inheritedBonds.extraFactions,
+    tempExtraFactions: [],
+    usesBondDefinitionSnapshot: true,
+    tier: heroDefinition.tier,
+    side: owner.side,
+    lineupIndex: 0,
+    skill: heroDefinition.skill ?? "",
+    skillEffectIds: [heroDefinition.effectId].filter(Boolean),
+    equipment: null,
+    statuses: {},
+    level,
+    experience: 0,
+    copies: UNIT_LEVEL_COPY_THRESHOLDS[level] ?? 1,
+    bonusExperience: 0,
+    isSummon: true,
+    skillDisabled: false,
+    skillDisabledUntilExchange: null,
+    consumedSnapshot: null,
+    lastDamageSource: null,
+  };
+}
+
+function createBattleGeneratedEquipment(runtime, effectId) {
+  const definition = CARD_POOLS.stratagem.find(
+    (item) => item.effectId === effectId,
+  );
+  if (!definition) return null;
+  const equipment = createEquipmentFromCard({
+    ...definition,
+    id: `battle-generated-equipment-${runtime.nextSummonId}`,
+  });
+  runtime.nextSummonId += 1;
+  return equipment;
+}
+
+function createFangshiSummon(runtime, owner) {
+  const level = Math.max(1, Math.min(MAX_UNIT_LEVEL, owner.level ?? 1));
+  const summonId = runtime.nextSummonId++;
+  const inheritedBonds = getSummonedUnitBondSnapshot(owner);
+  return {
+    id: `${owner.side}-fangshi-${summonId}`,
+    sourceId: null,
+    name: "方士",
+    attack: level,
+    health: level,
+    maxHealth: level,
+    faction: inheritedBonds.faction,
+    extraFactions: inheritedBonds.extraFactions,
+    tempExtraFactions: [],
+    usesBondDefinitionSnapshot: true,
+    tier: 0,
+    side: owner.side,
+    lineupIndex: 0,
+    skillEffectIds: ["summon.fangshi-death"],
+    skill: DERIVED_UNIT_DEFINITION_BY_NAME.方士.skill,
+    equipment: null,
+    statuses: {},
+    level,
+    experience: 0,
+    copies: UNIT_LEVEL_COPY_THRESHOLDS[level] ?? 1,
+    bonusExperience: 0,
+    isSummon: true,
+    skillDisabled: false,
+    skillDisabledUntilExchange: null,
+    consumedSnapshot: null,
+    lastDamageSource: null,
+  };
+}
+
+function summonUnitAtDeadOwnerPosition(runtime, owner, summon, effectId) {
+  if (
+    !hasBattleSummonSlot(runtime, owner.side) ||
+    !insertBattleUnitAtDeathPosition(
+      runtime,
+      owner.side,
+      summon,
+      owner.deathPosition,
+    )
+  ) {
+    recordBattleSummonFailure(runtime, owner.side, owner.name, effectId);
+    return false;
+  }
+  recordBattlePresentationLog(
+    runtime,
+    "summon",
+    `${owner.name}：在原位置召唤${summon.name} LV${summon.level} ${summon.attack}/${summon.health}。`,
+    {
+      ownerId: owner.id,
+      ownerName: owner.name,
+      ownerSide: owner.side,
+      unitId: summon.id,
+      unitName: summon.name,
+      unitSide: summon.side,
+      sourceEffectId: effectId,
+    },
+    {
+      kind: "summon",
+      title: `${owner.name}在原位置召唤${summon.name}`,
+      effectId,
+      effectName: owner.name,
+      sourceIds: [owner.id],
+      targetIds: [summon.id],
+      cues: [{ unitId: summon.id, text: "召唤", tone: "buff" }],
+      durationMs: 1550,
+    },
+  );
+  dispatchBattleEvent(runtime, "unit:summon", {
+    unit: summon,
+    side: owner.side,
+    source: owner,
+    sourceEffectId: effectId,
+  });
+  return true;
+}
+
+function summonUnitInFrontOfDeadOwner(runtime, owner, summon, effectId, sourceName) {
+  if (!hasBattleSummonSlot(runtime, owner.side)) {
+    recordBattleSummonFailure(runtime, owner.side, sourceName, effectId);
+    return false;
+  }
+  if (!insertBattleUnitInFrontOfTarget(runtime, owner, summon, owner.deathPosition)) {
+    recordBattleSummonFailure(runtime, owner.side, sourceName, effectId);
+    return false;
+  }
+  recordBattlePresentationLog(
+    runtime,
+    "summon",
+    `${sourceName}：召唤${summon.name} LV${summon.level} ${summon.attack}/${summon.health}。`,
+    {
+      ownerId: owner.id,
+      ownerName: owner.name,
+      ownerSide: owner.side,
+      unitId: summon.id,
+      unitName: summon.name,
+      unitSide: summon.side,
+      sourceEffectId: effectId,
+    },
+    {
+      kind: "summon",
+      title: `${summon.name}加入战场`,
+      effectId,
+      effectName: sourceName,
+      sourceIds: [owner.id],
+      targetIds: [summon.id],
+      cues: [{ unitId: summon.id, text: "召唤", tone: "buff" }],
+      durationMs: 1550,
+    },
+  );
+  dispatchBattleEvent(runtime, "unit:summon", {
+    unit: summon,
+    side: owner.side,
+    source: owner,
+    sourceEffectId: effectId,
+  });
+  return true;
+}
+
+function summonZhangHeHero(runtime, owner, effectId) {
+  const ownerBonds = new Set(getBattleUnitBonds(owner));
+  const pool = CARD_POOLS.hero.filter(
+    (hero) =>
+      hero.name !== "张郃" &&
+      BOND_FACTIONS.includes(hero.faction) &&
+      ownerBonds.has(hero.faction),
+  );
+  if (pool.length === 0) return false;
+  const heroDefinition = pool[Math.floor(runtime.random() * pool.length)];
+  const summon = createFormalHeroSummon(runtime, owner, heroDefinition);
+  return summonUnitInFrontOfDeadOwner(runtime, owner, summon, effectId, owner.name);
+}
+
+function createWhiteHorseSummon(runtime, owner) {
+  const level = Math.max(1, Math.min(MAX_UNIT_LEVEL, owner.level ?? 1));
+  const summonId = runtime.nextSummonId++;
+  const inheritedBonds = getSummonedUnitBondSnapshot(owner);
+  return {
+    id: `${owner.side}-white-horse-${summonId}`,
+    sourceId: null,
+    name: "白马义从",
+    attack: 4 * level,
+    health: 4 * level,
+    maxHealth: 4 * level,
+    faction: inheritedBonds.faction,
+    extraFactions: inheritedBonds.extraFactions,
+    tempExtraFactions: [],
+    usesBondDefinitionSnapshot: true,
+    tier: 0,
+    side: owner.side,
+    lineupIndex: 0,
+    skillEffectIds: ["summon.white-horse-attack"],
+    skill: "[白马突袭] 攻击前，对生命值最低的敌军造成（4）点伤害",
     equipment: null,
     statuses: {},
     level,
@@ -5648,12 +7423,42 @@ function resolveRestRecovery(runtime, event) {
 
 function resolveIntimidatedDamage(runtime, event) {
   const damage = event.payload.damage;
-  if (!damage?.source?.statuses?.intimidated || damage.type === "true") return;
+  const status = damage?.source?.statuses?.intimidated;
+  if (!status || status.spent || damage.type !== "attack") return;
   const before = damage.amount;
-  damage.amount = Math.floor(damage.amount * 0.5);
+  damage.amount = 0;
+  status.spent = true;
   damage.modifiers.push({
     effectId: "status.intimidated-damage",
     sourceName: "震慑",
+    amount: damage.amount - before,
+  });
+}
+
+function resolveBrokenMoraleDamage(runtime, event) {
+  const damage = event.payload.damage;
+  if (
+    !damage?.target?.statuses?.["broken-morale"] ||
+    !["attack", "skill"].includes(damage.type)
+  ) {
+    return;
+  }
+  damage.amount += 5;
+  damage.modifiers.push({
+    effectId: "status.broken-morale-damage",
+    sourceName: "破胆",
+    amount: 5,
+  });
+}
+
+function resolveFearDamage(runtime, event) {
+  const damage = event.payload.damage;
+  if (!damage?.source?.statuses?.fear || damage.type !== "attack") return;
+  const before = damage.amount;
+  damage.amount = Math.max(0, damage.amount - 3);
+  damage.modifiers.push({
+    effectId: "status.fear-damage",
+    sourceName: "畏惧",
     amount: damage.amount - before,
   });
 }
@@ -5703,7 +7508,7 @@ function resolveCounterplotRevive(runtime, event) {
     3,
     3,
     1,
-    status.summonFaction,
+    status.summonBonds ?? status.summonFaction,
   );
   addBattleUnitToTeamFront(runtime, side, summon);
   recordBattlePresentationLog(
@@ -5744,6 +7549,47 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     eventUnit.side === owner.side &&
     shareBattleBond(owner, eventUnit);
 
+  if (effectId === "summon.white-horse-attack" && event.type === "attack:before" && ownerAttacked) {
+    const enemies = getLivingBattleUnits(runtime, enemySide);
+    const lowestHealth = Math.min(...enemies.map((unit) => unit.health), Infinity);
+    const target = pickBattleRandomUnits(
+      runtime,
+      enemies.filter((unit) => unit.health === lowestHealth),
+      1,
+    )[0];
+    if (target) {
+      dealBattleDamage(runtime, {
+        source: owner,
+        target,
+        amount: 4 * level,
+        type: "skill",
+        sourceEffectId: effectId,
+      });
+    }
+    return;
+  }
+  if (
+    effectId === "summon.fangshi-death" &&
+    event.type === "unit:death" &&
+    eventUnit === owner
+  ) {
+    const target = pickBattleRandomUnits(
+      runtime,
+      getLivingBattleUnits(runtime, owner.side).filter((unit) => unit !== owner),
+      1,
+    )[0];
+    if (target) {
+      applyBattleUnitStatBonus(
+        runtime,
+        target,
+        3 * level,
+        3 * level,
+        owner.name,
+      );
+    }
+    return;
+  }
+
   if (
     effectId === "hero.zhenji.luoshen" &&
     event.type === "unit:summon" &&
@@ -5754,15 +7600,7 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
   }
   if (effectId === "hero.pangde.xunjie" && event.type === "unit:death" && eventUnit === owner) {
     const target = getNearestBattleUnit(runtime, owner, "behind");
-    if (target) applyBattleUnitStatBonus(runtime, target, level, level, owner.name);
-    return;
-  }
-  if (
-    effectId === "hero.madai.fuzhan" &&
-    event.type === "unit:death" &&
-    eventUnit?.lastDamageSource === owner
-  ) {
-    grantBattleExperience(runtime, owner, level, owner, effectId);
+    if (target) applyBattleUnitStatBonus(runtime, target, 2 * level, level, owner.name);
     return;
   }
   if (
@@ -5774,49 +7612,50 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     applyBattleUnitStatBonus(runtime, eventUnit, 0, level, owner.name);
     return;
   }
-  if (effectId === "hero.mayunlu.xiliang-lienv" && event.type === "battle:start") {
-    grantBattleExperience(runtime, owner, level, owner, effectId);
+  if (effectId === "hero.mayunlu.xiliang-lienv" && event.type === "unit:death" && eventUnit === owner) {
+    const summon = createCavalry(runtime, owner.side, 2 * level, level, owner, level);
+    summonUnitInFrontOfDeadOwner(runtime, owner, summon, effectId, owner.name);
     return;
   }
   if (
-    effectId === "hero.zhugejin.hongya" &&
-    event.type === "status:apply" &&
-    event.payload.target?.side === enemySide
+    effectId === "hero.yuji.guhuo" &&
+    event.type === "unit:death" &&
+    eventUnit === owner
   ) {
-    const target = pickBattleRandomUnits(
-      runtime,
-      getLivingBattleUnits(runtime, owner.side).filter((unit) => unit !== owner),
-      1,
-    )[0];
-    if (target) applyBattleUnitStatBonus(runtime, target, level, level, owner.name);
+    const summon = createFangshiSummon(runtime, owner);
+    summonUnitAtDeadOwnerPosition(runtime, owner, summon, effectId);
     return;
   }
-  if (effectId === "hero.handang.yonglie" && event.type === "attack:after" && ownerAttacked) {
-    const target = pickBattleRandomUnits(runtime, getLivingBattleUnits(runtime, enemySide), 1)[0];
+  if (effectId === "hero.handang.zuoyou-kaigong" && event.type === "attack:before" && ownerAttacked) {
+    const target = pickBattleRandomUnits(
+      runtime,
+      getLivingBattleUnits(runtime, enemySide).filter((unit) => hasNegativeStatus(unit)),
+      1,
+    )[0];
     if (!target) return;
-    dealBattleDamage(runtime, { source: owner, target, amount: level, sourceEffectId: effectId });
-    if (target.health > 0) {
-      applyNegativeStatus(runtime, target, "burn", {
-        ownerSide: owner.side,
-        sourceEffectId: effectId,
-        sourceName: owner.name,
-      });
-    }
+    dealBattleDamage(runtime, {
+      source: owner,
+      target,
+      amount: 3 * level,
+      type: "skill",
+      sourceEffectId: effectId,
+    });
     return;
   }
   if (effectId === "hero.huaxiong.xiaoyong" && event.type === "battle:start") {
     getBattleUnitsFromFront(runtime, enemySide)
       .slice(0, level)
       .forEach((target) =>
-        dealBattleDamage(runtime, { source: owner, target, amount: 2, sourceEffectId: effectId }),
+        dealBattleDamage(runtime, { source: owner, target, amount: 1, sourceEffectId: effectId }),
       );
     return;
   }
   if (effectId === "hero.xiahouyuan.qianli-benxi" && event.type === "attack:after" && ownerAttacked) {
+    const ratio = 0.33 * level;
     summonCavalry(runtime, owner.side, 1, {
-      attack: 2 * level,
-      health: level,
-      level,
+      attack: Math.max(1, Math.floor(owner.attack * ratio)),
+      health: Math.max(1, Math.floor(owner.health * ratio)),
+      level: 1,
       sourceEffectId: effectId,
       sourceName: owner.name,
       summoner: owner,
@@ -5825,8 +7664,36 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     });
     return;
   }
-  if (effectId === "hero.weiyan.caigao-qilie" && event.type === "experience:gain" && eventUnit !== owner) {
-    applyBattleUnitStatBonus(runtime, owner, level, 0, owner.name);
+  if (effectId === "hero.diaochan.qingcheng" && event.type === "attack:after" && ownerAttacked) {
+    pickBattleRandomUnits(runtime, getLivingBattleUnits(runtime, enemySide), level).forEach(
+      (target) =>
+        applyNegativeStatus(runtime, target, "counterplot", {
+          ownerSide: owner.side,
+          summonFaction: owner.faction,
+          sourceEffectId: effectId,
+          sourceName: owner.name,
+        }),
+    );
+    return;
+  }
+  if (effectId === "hero.huangzhong.laodang-yizhuang" && event.type === "attack:after" && ownerAttacked) {
+    grantBattleExperience(runtime, owner, level, owner, effectId);
+    return;
+  }
+  if (
+    effectId === "hero.weiyan.caigao-qilie" &&
+    event.type === "unit:death" &&
+    eventUnit?.side === owner.side &&
+    eventUnit !== owner
+  ) {
+    applyBattleUnitStatBonus(runtime, owner, level, level, owner.name);
+    return;
+  }
+  if (effectId === "hero.wenchou.yongguan-sanjun" && event.type === "attack:after") {
+    const target = getNearestBattleUnit(runtime, owner, "ahead");
+    if (target && event.payload.attackers?.includes(target)) {
+      applyBattleUnitStatBonus(runtime, owner, level, level, owner.name);
+    }
     return;
   }
   if (effectId === "hero.xiaoqiao.huaron-yuemao" && event.type === "attack:after") {
@@ -5858,36 +7725,41 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     event.payload.damage?.target === owner &&
     event.payload.damage.finalAmount > 0
   ) {
-    const targets = getLivingBattleUnits(runtime, owner.side).filter(
-      (unit) => unit !== owner && shareBattleBond(owner, unit),
-    );
-    pickBattleRandomUnits(runtime, targets, level).forEach((target) =>
-      applyBattleUnitStatBonus(runtime, target, 2, 2, owner.name),
-    );
+    const target = getNearestBattleUnit(runtime, owner, "behind");
+    if (target) applyBattleUnitStatBonus(runtime, target, 2 * level, 2 * level, owner.name);
     return;
   }
-  if (effectId === "hero.yuejin.xiandeng-xianzhen" && event.type === "attack:before" && ownerAttacked) {
-    summonScaledCavalryInFront(runtime, owner, 2, effectId);
+  if (effectId === "hero.yuejin.xiandeng-xianzhen" && event.type === "unit:death" && eventUnit === owner) {
+    const target = getBattleUnitsFromFront(runtime, owner.side)[0] ?? null;
+    if (target) applyBattleUnitStatBonus(runtime, target, 4 * level, 4 * level, owner.name);
     return;
   }
-  if (effectId === "hero.xuhuang.changqu-zhiru" && event.type === "battle:start") {
-    for (let hit = 0; hit < 2; hit += 1) {
+  if (effectId === "hero.xuhuang.changqu-zhiru" && event.type === "attack:after") {
+    const ahead = getNearestBattleUnit(runtime, owner, "ahead");
+    if (ahead && event.payload.attackers?.includes(ahead)) {
       const target = getBattleUnitsFromFront(runtime, enemySide).at(-1);
-      if (!target) break;
-      dealBattleDamage(runtime, {
-        source: owner,
-        target,
-        amount: 3 * level,
-        sourceEffectId: effectId,
-      });
+      if (target) {
+        dealBattleDamage(runtime, {
+          source: owner,
+          target,
+          amount: 3 * level,
+          type: "skill",
+          sourceEffectId: effectId,
+        });
+      }
     }
     return;
   }
-  if (effectId === "hero.zhangfei.yanren-paoxiao" && event.type === "attack:before" && ownerAttacked) {
-    const target = getBattleFrontUnit(runtime.teams[enemySide], enemySide);
-    if (target) {
-      applyBattleUnitStatBonus(runtime, target, -3 * level, 0, owner.name);
-    }
+  if (effectId === "hero.zhangfei.yanren-paoxiao" && event.type === "battle:start") {
+    getBattleUnitsFromFront(runtime, enemySide)
+      .slice(0, level)
+      .forEach((target) =>
+        applyNegativeStatus(runtime, target, "broken-morale", {
+          ownerSide: owner.side,
+          sourceEffectId: effectId,
+          sourceName: owner.name,
+        }),
+      );
     return;
   }
   if (effectId === "hero.xushu.jiancai" && event.type === "battle:start") {
@@ -5924,7 +7796,7 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     event.type === "damage:before" &&
     event.payload.damage?.target === owner &&
     runtime.currentAttackers?.includes(owner) &&
-    event.payload.damage.type === "attack"
+    ["attack", "skill"].includes(event.payload.damage.type)
   ) {
     const damage = event.payload.damage;
     const before = damage.amount;
@@ -5937,21 +7809,55 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     return;
   }
   if (
-    effectId === "hero.wenchou.hanyong" &&
-    event.type === "damage:after" &&
-    event.phase === "battle:start" &&
-    event.payload.damage?.source?.side === owner.side &&
-    event.payload.damage.finalAmount > 0
+    effectId === "hero.yanliang.yongguan-sanjun" &&
+    event.type === "unit:death" &&
+    eventUnit !== owner &&
+    event.payload.killer === owner
   ) {
-    applyBattleUnitStatBonus(runtime, owner, level, level, owner.name);
+    applyBattleUnitStatBonus(runtime, owner, 2 * level, 2 * level, owner.name);
     return;
   }
   if (
-    effectId === "hero.xunyou.qice" &&
-    event.type === "unit:summon" &&
-    sharedEventUnit
+    effectId === "hero.hanxiandi.piaoyao" &&
+    event.type === "unit:death" &&
+    eventUnit === owner
   ) {
-    grantBattleExperience(runtime, eventUnit, 2 * level, owner, effectId);
+    const target = pickBattleRandomUnits(
+      runtime,
+      getLivingBattleUnits(runtime, owner.side).filter(
+        (unit) => unit !== owner && !unit.equipment,
+      ),
+      1,
+    )[0];
+    if (!target) return;
+    target.equipment = createBattleGeneratedEquipment(
+      runtime,
+      "equipment.imperial-edict",
+    );
+    recordBattlePresentationLog(
+      runtime,
+      "equipment",
+      `${owner.name}使${target.name}获得诏书。`,
+      {
+        ownerId: owner.id,
+        ownerName: owner.name,
+        ownerSide: owner.side,
+        targetUnitId: target.id,
+        targetName: target.name,
+        targetSide: target.side,
+        sourceEffectId: effectId,
+      },
+      {
+        kind: "equipment",
+        title: `${target.name}获得诏书`,
+        effectId,
+        effectName: owner.name,
+        sourceIds: [owner.id],
+        targetIds: [target.id],
+        cues: [{ unitId: target.id, text: "诏书", tone: "equipment" }],
+        durationMs: 1450,
+      },
+    );
     return;
   }
   if (effectId === "hero.dianwei.guzhi-elai") {
@@ -6017,13 +7923,11 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     return;
   }
   if (effectId === "hero.zhaoyun.longdan" && event.type === "unit:upgrade" && eventUnit === owner) {
-    owner.statuses = {
-      unparalleled: {
-        targetCount: 1,
-        sourceEffectId: effectId,
-        sourceName: owner.name,
-      },
-    };
+    applyPositiveStatus(owner, "unparalleled", {
+      targetCount: 1,
+      sourceEffectId: effectId,
+      sourceName: owner.name,
+    });
     recordBattlePresentationLog(
       runtime,
       "status",
@@ -6055,45 +7959,47 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
   }
   if (
     effectId === "hero.fazheng.yiyi-dailao" &&
-    event.type === "unit:upgrade" &&
-    eventUnit?.side === owner.side &&
-    eventUnit !== owner
+    event.type === "battle:start"
   ) {
-    grantBattleExperience(runtime, eventUnit, level, owner, effectId);
-    eventUnit.statuses = {
-      rest: { amount: 2 * level, sourceEffectId: effectId },
-    };
+    const target = getNearestBattleUnit(runtime, owner, "behind");
+    if (!target) return;
+    grantBattleExperience(runtime, target, level, owner, effectId);
+    applyPositiveStatus(target, "rest", {
+      amount: 2 * level,
+      sourceEffectId: effectId,
+      sourceName: owner.name,
+    });
     recordBattlePresentationLog(
       runtime,
       "status",
-      `${owner.name}使${eventUnit.name}获得休整。`,
+      `${owner.name}使${target.name}获得休整。`,
       {
         ownerId: owner.id,
         ownerName: owner.name,
         ownerSide: owner.side,
-        targetUnitId: eventUnit.id,
-        targetName: eventUnit.name,
-        targetSide: eventUnit.side,
+        targetUnitId: target.id,
+        targetName: target.name,
+        targetSide: target.side,
         statusId: "rest",
         statusName: STATUS_LABELS.rest,
         sourceEffectId: effectId,
       },
       {
         kind: "status",
-        title: `${eventUnit.name}获得休整`,
+        title: `${target.name}获得休整`,
         effectId,
         effectName: owner.name,
         sourceIds: [owner.id],
-        targetIds: [eventUnit.id],
-        cues: [{ unitId: eventUnit.id, text: "休整", tone: "status" }],
+        targetIds: [target.id],
+        cues: [{ unitId: target.id, text: "休整", tone: "status" }],
         durationMs: 1450,
       },
     );
     return;
   }
   if (effectId === "hero.sunce.jiangdong-bawang" && event.type === "battle:start") {
-    const count = getLivingBattleUnits(runtime, owner.side).filter((unit) =>
-      shareBattleBond(owner, unit),
+    const count = getLivingBattleUnits(runtime, owner.side).filter(
+      (unit) => unit !== owner && shareBattleBond(owner, unit),
     ).length;
     applyBattleUnitStatBonus(runtime, owner, count * level, count * 2 * level, owner.name);
     return;
@@ -6102,82 +8008,22 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     getBattleUnitsFromFront(runtime, enemySide)
       .slice(0, level)
       .forEach((unit) => {
-        unit.skillDisabledUntilExchange = runtime.currentExchange;
-        recordBattlePresentationLog(
-          runtime,
-          "status",
-          `${owner.name}使${unit.name}本次交锋武将技能失效。`,
-          {
-            ownerId: owner.id,
-            ownerName: owner.name,
-            ownerSide: owner.side,
-            targetUnitId: unit.id,
-            targetName: unit.name,
-            targetSide: unit.side,
-            statusId: "skill-disabled",
-            statusName: "技能禁用",
-            sourceEffectId: effectId,
-          },
-          {
-            kind: "status",
-            title: `${unit.name}本轮技能被禁用`,
-            effectId,
-            effectName: owner.name,
-            sourceIds: [owner.id],
-            targetIds: [unit.id],
-            cues: [{ unitId: unit.id, text: "技能禁用", tone: "debuff" }],
-            durationMs: 1350,
-          },
-        );
+        applySkillDisable(runtime, unit, {
+          ownerSide: owner.side,
+          sourceEffectId: effectId,
+          sourceName: owner.name,
+          untilExchange: runtime.currentExchange,
+        });
       });
     return;
   }
-  if (effectId === "hero.gongsunzan.baima-yicong" && event.type === "battle:start") {
-    getBattleUnitsFromFront(runtime, enemySide)
-      .slice(0, level)
-      .forEach((target) => {
-        const removedEquipment = target.equipment;
-        target.equipment = null;
-        if (removedEquipment) {
-          recordBattlePresentationLog(
-            runtime,
-            "equipment",
-            `${owner.name}移除${target.name}的${removedEquipment.name}。`,
-            {
-              ownerId: owner.id,
-              ownerName: owner.name,
-              ownerSide: owner.side,
-              targetUnitId: target.id,
-              targetName: target.name,
-              targetSide: target.side,
-              equipmentName: removedEquipment.name,
-              sourceEffectId: effectId,
-            },
-            {
-              kind: "equipment",
-              title: `${target.name}失去${removedEquipment.name}`,
-              effectId,
-              effectName: owner.name,
-              sourceIds: [owner.id],
-              targetIds: [target.id],
-              cues: [
-                {
-                  unitId: target.id,
-                  text: `卸除${removedEquipment.name}`,
-                  tone: "debuff",
-                },
-              ],
-              durationMs: 1450,
-            },
-          );
-        }
-        dealBattleDamage(runtime, {
-          source: owner,
-          target,
-          amount: 3,
-          sourceEffectId: effectId,
-        });
-      });
+  if (effectId === "hero.gongsunzan.baima-yicong" && event.type === "unit:death" && eventUnit === owner) {
+    const summon = createWhiteHorseSummon(runtime, owner);
+    summonUnitInFrontOfDeadOwner(runtime, owner, summon, effectId, owner.name);
+    return;
+  }
+  if (effectId === "hero.zhanghe.qiaobian" && event.type === "unit:death" && eventUnit === owner) {
+    summonZhangHeHero(runtime, owner, effectId);
     return;
   }
   if (effectId === "hero.jiaxu.fanjian" && event.type === "battle:start") {
@@ -6201,15 +8047,16 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     return;
   }
   if (effectId === "hero.zhangliao.weizhen-xiaoyao" && event.type === "battle:start") {
-    getBattleUnitsFromFront(runtime, enemySide)
-      .slice(0, level)
+    getLivingBattleUnits(runtime, enemySide)
       .forEach((target) => {
         const healthBefore = target.health;
-        target.health *= 0.6;
+        const retainedRatio = 1 - 0.2 * level;
+        target.health = Math.floor(target.health * retainedRatio);
+        const reductionPercent = 20 * level;
         recordBattlePresentationLog(
           runtime,
           "health",
-          `${owner.name}使${target.name}当前生命降低 40%（${healthBefore} → ${target.health}）。`,
+          `${owner.name}使${target.name}当前生命降低 ${reductionPercent}%（${healthBefore} → ${target.health}）。`,
           {
             ownerId: owner.id,
             ownerName: owner.name,
@@ -6224,7 +8071,7 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
           },
           {
             kind: "health",
-            title: `${target.name}当前生命降低 40%`,
+            title: `${target.name}当前生命降低 ${reductionPercent}%`,
             effectId,
             effectName: owner.name,
             sourceIds: [owner.id],
@@ -6243,60 +8090,82 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     resolveAllBattleDeaths(runtime, runtime.currentExchange);
     return;
   }
-  if (effectId === "hero.machao.hanqiang-pozhen" && event.type === "experience:gain" && eventUnit === owner) {
-    applyBattleUnitStatBonus(runtime, owner, level, level, owner.name);
-    const target = pickBattleRandomUnits(runtime, getLivingBattleUnits(runtime, enemySide), 1)[0];
-    if (target) {
-      dealBattleDamage(runtime, {
-        source: owner,
-        target,
-        amount: Math.max(1, Math.floor(owner.attack * 0.5)),
-        sourceEffectId: effectId,
-      });
+  if (effectId === "hero.machao.pozhen" && event.type === "attack:before" && ownerAttacked) {
+    if (!owner.machaoFirstAttackUsed) {
+      owner.machaoFirstAttackUsed = true;
+      owner.nextBasicAttackDamageMultiplier = 1 + level;
     }
     return;
   }
-  if (effectId === "hero.pangtong.niepan" && event.type === "unit:death" && eventUnit === owner) {
-    pickBattleRandomUnits(
-      runtime,
-      getLivingBattleUnits(runtime, owner.side).filter((unit) => unit !== owner),
-      2,
-    ).forEach((unit) => grantBattleExperience(runtime, unit, level, owner, effectId));
+  if (effectId === "hero.pangtong.tiesuo-lianhuan" && event.type === "battle:start") {
+    pickBattleRandomUnits(runtime, getLivingBattleUnits(runtime, enemySide), 2 * level).forEach(
+      (target) =>
+        applyNegativeStatus(runtime, target, "chain", {
+          ownerSide: owner.side,
+          sourceEffectId: effectId,
+          sourceName: owner.name,
+        }),
+    );
     return;
   }
   if (effectId === "hero.luxun.huoshao-lianying" && event.type === "attack:after" && ownerAttacked) {
-    const target = pickBattleRandomUnits(runtime, getLivingBattleUnits(runtime, enemySide), 1)[0];
-    if (!target) return;
-    for (let count = 0; count < 3 * level && target.health > 0; count += 1) {
-      applyNegativeStatus(runtime, target, "burn", {
-        ownerSide: owner.side,
-        sourceEffectId: effectId,
-        sourceName: owner.name,
-      });
-      resolveAllBattleDeaths(runtime, runtime.currentExchange);
-    }
-    return;
-  }
-  if (effectId === "hero.ganning.baiqi-jieying" && event.type === "battle:start") {
-    const targets = getBattleUnitsFromFront(runtime, enemySide).slice(-2);
-    targets.forEach((target) =>
-      applyNegativeStatus(runtime, target, "burn", {
-        ownerSide: owner.side,
-        sourceEffectId: effectId,
-        sourceName: owner.name,
-      }),
-    );
-    for (let trigger = 0; trigger < level; trigger += 1) {
-      targets.filter((target) => target.health > 0).forEach((target) => {
+    getLivingBattleUnits(runtime, enemySide)
+      .filter((target) => hasNegativeStatus(target, "burn"))
+      .forEach((target) => {
         dealBattleDamage(runtime, {
           source: owner,
           target,
-          amount: 1,
-          type: "true",
-          sourceEffectId: "status.burn-tick",
-          extraPayload: { statusId: "burn", forcedBy: effectId },
+          amount: Math.max(1, Math.floor(owner.attack * 0.2 * level)),
+          type: "skill",
+          sourceEffectId: effectId,
         });
       });
+    return;
+  }
+  if (effectId === "hero.ganning.baiqi-jieying" && event.type === "battle:start") {
+    for (let application = 0; application < 2 * level; application += 1) {
+      const target = getBattleUnitsFromFront(runtime, enemySide).at(-1);
+      if (!target) break;
+      applyNegativeStatus(runtime, target, "burn", {
+        ownerSide: owner.side,
+        sourceEffectId: effectId,
+        sourceName: owner.name,
+      });
+    }
+    return;
+  }
+  if (
+    effectId === "hero.yuanshu.yuxi" &&
+    event.type === "unit:summon" &&
+    eventUnit === owner &&
+    !event.payload.revived
+  ) {
+    if (!owner.equipment) {
+      owner.equipment = createBattleGeneratedEquipment(
+        runtime,
+        "equipment.imperial-jade-seal",
+      );
+      recordBattlePresentationLog(
+        runtime,
+        "equipment",
+        `${owner.name}被召唤并佩戴传国玉玺。`,
+        {
+          ownerId: owner.id,
+          ownerName: owner.name,
+          ownerSide: owner.side,
+          sourceEffectId: effectId,
+        },
+        {
+          kind: "equipment",
+          title: `${owner.name}佩戴传国玉玺`,
+          effectId,
+          effectName: owner.name,
+          sourceIds: [owner.id],
+          targetIds: [owner.id],
+          cues: [{ unitId: owner.id, text: "传国玉玺", tone: "equipment" }],
+          durationMs: 1450,
+        },
+      );
     }
     return;
   }
@@ -6306,17 +8175,21 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     eventUnit?.side === owner.side &&
     eventUnit !== owner &&
     !event.payload.consumed &&
-    getNearestBattlePositionUnit(runtime, owner, "ahead") === eventUnit &&
-    !event.payload.revived
+    (Array.isArray(event.payload.nearestAheadOwnerIds)
+      ? event.payload.nearestAheadOwnerIds.includes(owner.id)
+      : getNearestBattlePositionUnit(runtime, owner, "ahead") === eventUnit) &&
+    !event.payload.revived &&
+    (owner.huatuoRevivesUsedThisRound ?? 0) < level
   ) {
     const revived = cloneBattleIdentityForSummon(
       runtime,
       eventUnit,
       owner.side,
-      level,
-      level,
-      level,
-      owner,
+      3,
+      3,
+      2,
+      eventUnit,
+      { preserveSourceBonds: true },
     );
     if (
       !insertBattleUnitInFrontOfTarget(
@@ -6330,6 +8203,7 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
       return;
     }
     event.payload.revived = true;
+    owner.huatuoRevivesUsedThisRound = (owner.huatuoRevivesUsedThisRound ?? 0) + 1;
     recordBattlePresentationLog(
       runtime,
       "summon",
@@ -6361,6 +8235,7 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
       side: owner.side,
       source: owner,
       sourceEffectId: effectId,
+      revived: true,
     });
     return;
   }
@@ -6368,6 +8243,7 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     effectId === "hero.caocao.jianxiong" &&
     event.type === "unit:death" &&
     eventUnit?.side === owner.side &&
+    eventUnit !== owner &&
     shareBattleBond(owner, eventUnit)
   ) {
     const target = pickBattleRandomUnits(
@@ -6395,20 +8271,35 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     }
     return;
   }
-  if (effectId === "hero.xunyu.wangzuo-zhicai" && event.type === "unit:summon" && sharedEventUnit) {
+  if (effectId === "hero.xunyu.wangzuo-zhicai" && event.type === "unit:summon" && sharedEventUnit && eventUnit !== owner) {
     applyBattleUnitStatBonus(runtime, eventUnit, 4 * level, 4 * level, owner.name);
+    return;
+  }
+  if (
+    effectId === "hero.liubei.renze" &&
+    event.type === "unit:summon" &&
+    sharedEventUnit &&
+    eventUnit !== owner &&
+    !event.payload.revived
+  ) {
+    grantBattleExperience(runtime, eventUnit, level, owner, effectId);
     return;
   }
   if (effectId === "hero.zhugeliang.yunchou" && event.type === "attack:after") {
     const friendlyAttacked = event.payload.attackers?.some(
-      (attacker) => attacker.side === owner.side,
+      (attacker) => attacker.side === owner.side && attacker !== owner,
     );
     if (!friendlyAttacked) return;
-    pickBattleRandomUnits(
-      runtime,
-      getLivingBattleUnits(runtime, owner.side).filter((unit) => unit !== owner),
-      level,
-    ).forEach((unit) => grantBattleExperience(runtime, unit, 1, owner, effectId));
+    const target = pickBattleRandomUnits(runtime, getLivingBattleUnits(runtime, enemySide), 1)[0];
+    if (target) {
+      dealBattleDamage(runtime, {
+        source: owner,
+        target,
+        amount: 4 * level,
+        type: "skill",
+        sourceEffectId: effectId,
+      });
+    }
     return;
   }
   if (effectId === "hero.guanyu.weizhen-huaxia" && event.type === "attack:after" && ownerAttacked) {
@@ -6425,19 +8316,34 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
   }
   if (
     effectId === "hero.zhouyu.fengzhu-huoshi" &&
-    event.type === "damage:before" &&
-    event.payload.damage?.target?.side === enemySide &&
-    ["status.burn-tick", "status.burn-ignite"].includes(
-      event.payload.damage.sourceEffectId,
-    )
+    event.type === "damage:before"
   ) {
     const damage = event.payload.damage;
-    const increase = damage.originalAmount * level;
-    damage.amount += increase;
+    let amount = 0;
+    if (
+      damage.target?.side === enemySide &&
+      ["status.burn-tick", "status.burn-ignite"].includes(damage.sourceEffectId)
+    ) {
+      amount = damage.originalAmount * level;
+    } else if (
+      damage.target?.side === enemySide &&
+      damage.target.statuses?.["broken-morale"] &&
+      ["attack", "skill"].includes(damage.type)
+    ) {
+      amount = 5 * level;
+    } else if (
+      damage.source?.side === enemySide &&
+      damage.source.statuses?.fear &&
+      damage.type === "attack"
+    ) {
+      amount = -Math.min(damage.amount, 3 * level);
+    }
+    if (amount === 0) return;
+    damage.amount += amount;
     damage.modifiers.push({
       effectId,
       sourceName: owner.name,
-      amount: increase,
+      amount,
     });
     return;
   }
@@ -6455,13 +8361,11 @@ function resolveBattleHeroSkill(runtime, candidate, event) {
     return;
   }
   if (effectId === "hero.lvbu.tianxia-wushuang" && event.type === "attack:before" && ownerAttacked) {
-    owner.statuses = {
-      unparalleled: {
-        targetCount: level,
-        sourceEffectId: effectId,
-        sourceName: owner.name,
-      },
-    };
+    applyPositiveStatus(owner, "unparalleled", {
+      targetCount: level,
+      sourceEffectId: effectId,
+      sourceName: owner.name,
+    });
     recordBattlePresentationLog(
       runtime,
       "status",
@@ -6501,6 +8405,14 @@ function applyBattleOperation(runtime, candidate, event, operation) {
     resolveRestRecovery(runtime, event);
     return;
   }
+  if (operation.type === "resolve-broken-morale-damage") {
+    resolveBrokenMoraleDamage(runtime, event);
+    return;
+  }
+  if (operation.type === "resolve-fear-damage") {
+    resolveFearDamage(runtime, event);
+    return;
+  }
   if (operation.type === "resolve-intimidated-damage") {
     resolveIntimidatedDamage(runtime, event);
     return;
@@ -6517,7 +8429,7 @@ function applyBattleOperation(runtime, candidate, event, operation) {
     recordBattlePresentationLog(
       runtime,
       "equipment",
-      `${candidate.owner.name}的${candidate.sourceName}生效：相同触发条件下，其武将技能优先结算。`,
+      `${candidate.owner.name}的${candidate.sourceName}生效：相同触发条件下，其武将技能优先结算；东吴业火仍先行结算。`,
       {
         ownerId: candidate.owner.id,
         ownerName: candidate.owner.name,
@@ -6568,6 +8480,219 @@ function applyBattleOperation(runtime, candidate, event, operation) {
       sourceEffectId: candidate.effectId,
       sourceName: candidate.sourceName,
     });
+    return;
+  }
+
+  if (operation.type === "buff-allied-summon" && candidate.owner) {
+    const summonedUnit = event.payload.unit ?? null;
+    if (!summonedUnit || summonedUnit.health <= 0) return;
+    const entry = recordBattleLog(
+      runtime,
+      "equipment",
+      `${candidate.owner.name}的${candidate.sourceName}触发（${getEventDisplayName(event.type)}）。`,
+      {
+        effectId: candidate.effectId,
+        ownerId: candidate.owner.id,
+        unitId: summonedUnit.id,
+      },
+    );
+    recordBattlePresentationStep(runtime, {
+      kind: "equipment",
+      title: `${candidate.owner.name} · ${candidate.sourceName}`,
+      entries: [entry],
+      eventType: event.type,
+      effectId: candidate.effectId,
+      effectName: candidate.sourceName,
+      sourceIds: [candidate.owner.id],
+      targetIds: [summonedUnit.id],
+      cues: [
+        {
+          unitId: candidate.owner.id,
+          text: `【${candidate.sourceName}】`,
+          tone: "skill",
+        },
+      ],
+      durationMs: 1250,
+    });
+    applyBattleUnitStatBonus(
+      runtime,
+      summonedUnit,
+      operation.attack ?? 0,
+      operation.health ?? 0,
+      candidate.sourceName,
+    );
+    return;
+  }
+
+  if (operation.type === "tiger-tally-opening" && candidate.owner) {
+    applyBattleUnitStatBonus(
+      runtime,
+      candidate.owner,
+      operation.attack ?? 0,
+      operation.health ?? 0,
+      candidate.sourceName,
+    );
+    grantBattleExperience(
+      runtime,
+      candidate.owner,
+      operation.experience ?? 0,
+      candidate.owner,
+      candidate.effectId,
+    );
+    recordBattlePresentationLog(
+      runtime,
+      "equipment",
+      `${candidate.owner.name}的${candidate.sourceName}使其 +${operation.attack ?? 0}/+${operation.health ?? 0}并获得${operation.experience ?? 0}经验。`,
+      { effectId: candidate.effectId, ownerId: candidate.owner.id },
+      {
+        kind: "equipment",
+        title: `${candidate.sourceName}战斗开始`,
+        effectId: candidate.effectId,
+        effectName: candidate.sourceName,
+        sourceIds: [candidate.owner.id],
+        targetIds: [candidate.owner.id],
+        cues: [{ unitId: candidate.owner.id, text: `+${operation.attack ?? 0}/+${operation.health ?? 0} · 经验+${operation.experience ?? 0}`, tone: "buff" }],
+        durationMs: 1450,
+      },
+    );
+    return;
+  }
+
+  if (operation.type === "cleanse-negative-and-grow" && candidate.owner) {
+    const statusId = getNegativeStatusId(candidate.owner);
+    if (!statusId) return;
+    replaceNegativeStatus(candidate.owner, null, null);
+    applyBattleUnitStatBonus(
+      runtime,
+      candidate.owner,
+      operation.attack ?? 0,
+      operation.health ?? 0,
+      candidate.sourceName,
+    );
+    recordBattlePresentationLog(
+      runtime,
+      "equipment",
+      `${candidate.owner.name}的${candidate.sourceName}清除${STATUS_LABELS[statusId] ?? statusId}并使其 +${operation.attack ?? 0}/+${operation.health ?? 0}。`,
+      { effectId: candidate.effectId, ownerId: candidate.owner.id, statusId },
+      {
+        kind: "equipment",
+        title: `${candidate.sourceName}清除负面状态`,
+        effectId: candidate.effectId,
+        effectName: candidate.sourceName,
+        sourceIds: [candidate.owner.id],
+        targetIds: [candidate.owner.id],
+        cues: [{ unitId: candidate.owner.id, text: `清除${STATUS_LABELS[statusId] ?? statusId} · +2/+2`, tone: "buff" }],
+        durationMs: 1450,
+      },
+    );
+    return;
+  }
+
+  if (operation.type === "revive-without-equipment" && candidate.owner) {
+    const owner = candidate.owner;
+    const revived = cloneBattleIdentityForSummon(
+      runtime,
+      owner,
+      owner.side,
+      operation.attack ?? 5,
+      operation.health ?? 5,
+      owner.level ?? 1,
+      owner,
+      { preserveSourceBonds: true },
+    );
+    if (
+      !insertBattleUnitInFrontOfTarget(
+        runtime,
+        owner,
+        revived,
+        event.payload.deathPosition ?? owner.deathPosition,
+      )
+    ) {
+      recordBattleSummonFailure(runtime, owner.side, candidate.sourceName, candidate.effectId);
+      return;
+    }
+    event.payload.revived = true;
+    recordBattlePresentationLog(
+      runtime,
+      "summon",
+      `${owner.name}的${candidate.sourceName}使其以 LV${revived.level} 5/5复活；复活后无装备和状态。`,
+      { effectId: candidate.effectId, ownerId: owner.id, unitId: revived.id, revived: true },
+      {
+        kind: "summon",
+        title: `${owner.name}被${candidate.sourceName}复活`,
+        effectId: candidate.effectId,
+        effectName: candidate.sourceName,
+        sourceIds: [owner.id],
+        targetIds: [revived.id],
+        cues: [{ unitId: revived.id, text: "5/5复活", tone: "buff" }],
+        durationMs: 1650,
+      },
+    );
+    dispatchBattleEvent(runtime, "unit:revive", { unit: revived, source: owner });
+    dispatchBattleEvent(runtime, "unit:summon", {
+      unit: revived,
+      side: owner.side,
+      source: owner,
+      sourceEffectId: candidate.effectId,
+      revived: true,
+    });
+    return;
+  }
+
+  if (operation.type === "fangtian-attack-modifier" && damage && candidate.owner) {
+    const amount = Math.floor(Math.max(0, candidate.owner.attack) * (operation.ratio ?? 0));
+    if (amount <= 0) return;
+    const modifier = damage.source === candidate.owner ? amount : -Math.min(amount, damage.amount);
+    damage.amount = Math.max(0, damage.amount + modifier);
+    damage.modifiers.push({
+      effectId: candidate.effectId,
+      sourceName: candidate.sourceName,
+      amount: modifier,
+    });
+    recordBattlePresentationLog(
+      runtime,
+      "equipment",
+      `${candidate.owner.name}的${candidate.sourceName}使本次攻击伤害${modifier > 0 ? ` +${modifier}` : ` -${Math.abs(modifier)}`}。`,
+      { effectId: candidate.effectId, ownerId: candidate.owner.id, damageChange: modifier },
+      {
+        kind: "equipment",
+        title: `${candidate.sourceName}修正同时攻击伤害`,
+        effectId: candidate.effectId,
+        effectName: candidate.sourceName,
+        sourceIds: [candidate.owner.id],
+        targetIds: [damage.target?.id],
+        cues: [{ unitId: modifier > 0 ? damage.target?.id : candidate.owner.id, text: `伤害${modifier > 0 ? "+" : ""}${modifier}`, tone: "equipment" }],
+        durationMs: 1250,
+      },
+    );
+    return;
+  }
+
+  if (operation.type === "add-attack-ratio-damage" && damage && candidate.owner) {
+    const amount = Math.floor(Math.max(0, candidate.owner.attack) * (operation.ratio ?? 0));
+    if (amount <= 0) return;
+    damage.amount += amount;
+    damage.modifiers.push({
+      effectId: candidate.effectId,
+      sourceName: candidate.sourceName,
+      amount,
+    });
+    recordBattlePresentationLog(
+      runtime,
+      "equipment",
+      `${candidate.owner.name}的${candidate.sourceName}使本次技能伤害 +${amount}。`,
+      { effectId: candidate.effectId, ownerId: candidate.owner.id, damageChange: amount },
+      {
+        kind: "equipment",
+        title: `${candidate.sourceName}附加技能伤害`,
+        effectId: candidate.effectId,
+        effectName: candidate.sourceName,
+        sourceIds: [candidate.owner.id],
+        targetIds: [damage.target?.id],
+        cues: [{ unitId: damage.target?.id, text: `技能伤害 +${amount}`, tone: "equipment" }],
+        durationMs: 1250,
+      },
+    );
     return;
   }
 
@@ -6650,7 +8775,14 @@ function applyBattleOperation(runtime, candidate, event, operation) {
     const blocked = Math.min(operation.amount ?? 0, damage.amount);
     if (blocked <= 0) return;
     damage.amount -= blocked;
-    equipmentState.remainingCharges -= 1;
+    const chargeUse = consumeEquipmentRuntimeCharge(
+      candidate.owner,
+      operation.charges ?? 0,
+    );
+    if (!chargeUse) return;
+    const chargeLabel = chargeUse.exhausted
+      ? "次数耗尽，装备已移除"
+      : `剩余 ${chargeUse.remainingCharges} 次`;
     damage.modifiers.push({
       effectId: candidate.effectId,
       sourceName: candidate.sourceName,
@@ -6659,16 +8791,15 @@ function applyBattleOperation(runtime, candidate, event, operation) {
     recordBattlePresentationLog(
       runtime,
       "equipment",
-      `${candidate.owner.name}的${candidate.sourceName}抵挡 ${blocked} 点伤害，剩余 ${
-        equipmentState.remainingCharges
-      } 次。`,
+      `${candidate.owner.name}的${candidate.sourceName}抵挡 ${blocked} 点伤害，${chargeLabel}。`,
       {
         ownerId: candidate.owner.id,
         ownerName: candidate.owner.name,
         effectId: candidate.effectId,
         effectName: candidate.sourceName,
         blocked,
-        remainingCharges: equipmentState.remainingCharges,
+        remainingCharges: chargeUse.remainingCharges,
+        equipmentRemoved: chargeUse.exhausted,
       },
       {
         kind: "equipment",
@@ -6680,7 +8811,11 @@ function applyBattleOperation(runtime, candidate, event, operation) {
         cues: [
           {
             unitId: candidate.owner.id,
-            text: `抵挡 ${blocked} · 剩${equipmentState.remainingCharges}次`,
+            text: `抵挡 ${blocked} · ${
+              chargeUse.exhausted
+                ? "装备移除"
+                : `剩${chargeUse.remainingCharges}次`
+            }`,
             tone: "equipment",
           },
         ],
@@ -6698,7 +8833,14 @@ function applyBattleOperation(runtime, candidate, event, operation) {
     if (!equipmentState || equipmentState.remainingCharges <= 0) return;
     const increase = operation.amount ?? 0;
     damage.amount += increase;
-    equipmentState.remainingCharges -= 1;
+    const chargeUse = consumeEquipmentRuntimeCharge(
+      candidate.owner,
+      operation.charges ?? 0,
+    );
+    if (!chargeUse) return;
+    const chargeLabel = chargeUse.exhausted
+      ? "次数耗尽，装备已移除"
+      : `剩余 ${chargeUse.remainingCharges} 次`;
     damage.modifiers.push({
       effectId: candidate.effectId,
       sourceName: candidate.sourceName,
@@ -6707,16 +8849,15 @@ function applyBattleOperation(runtime, candidate, event, operation) {
     recordBattlePresentationLog(
       runtime,
       "equipment",
-      `${candidate.owner.name}的${candidate.sourceName}使本次攻击伤害 +${increase}，剩余 ${
-        equipmentState.remainingCharges
-      } 次。`,
+      `${candidate.owner.name}的${candidate.sourceName}使本次攻击伤害 +${increase}，${chargeLabel}。`,
       {
         ownerId: candidate.owner.id,
         ownerName: candidate.owner.name,
         effectId: candidate.effectId,
         effectName: candidate.sourceName,
         increase,
-        remainingCharges: equipmentState.remainingCharges,
+        remainingCharges: chargeUse.remainingCharges,
+        equipmentRemoved: chargeUse.exhausted,
       },
       {
         kind: "equipment",
@@ -6728,7 +8869,11 @@ function applyBattleOperation(runtime, candidate, event, operation) {
         cues: [
           {
             unitId: candidate.owner.id,
-            text: `伤害 +${increase} · 剩${equipmentState.remainingCharges}次`,
+            text: `伤害 +${increase} · ${
+              chargeUse.exhausted
+                ? "装备移除"
+                : `剩${chargeUse.remainingCharges}次`
+            }`,
             tone: "equipment",
           },
         ],
@@ -6759,19 +8904,24 @@ function applyBattleOperation(runtime, candidate, event, operation) {
   }
 
   if (operation.type === "modify-battle-unit-stats" && candidate.owner) {
+    const levelMultiplier = operation.scaleWithOwnerLevel
+      ? getHeroSkillLevel(candidate.owner)
+      : 1;
+    const attackGain = (operation.attack ?? 0) * levelMultiplier;
+    const healthGain = (operation.health ?? 0) * levelMultiplier;
     applyBattleUnitStatBonus(
       runtime,
       candidate.owner,
-      operation.attack ?? 0,
-      operation.health ?? 0,
+      attackGain,
+      healthGain,
       candidate.sourceName,
     );
     recordBattleLog(
       runtime,
       "effect",
-      `${candidate.owner.name}在攻击前获得 +${operation.attack ?? 0}/+${
-        operation.health ?? 0
-      }，当前 ${candidate.owner.attack}/${candidate.owner.health}。`,
+      `${candidate.owner.name}在攻击前获得 +${attackGain}/+${healthGain}，当前 ${
+        candidate.owner.attack
+      }/${candidate.owner.health}。`,
       { effectId: candidate.effectId, ownerId: candidate.owner.id },
     );
     return;
@@ -6821,16 +8971,6 @@ function applyBattleOperation(runtime, candidate, event, operation) {
     return;
   }
 
-  if (operation.type === "modify-damage-by-bond-level" && damage) {
-    const level = runtime.lockedBonds[candidate.ownerSide]?.[operation.faction] ?? 0;
-    if (level <= 0) return;
-    damage.amount += level;
-    damage.modifiers.push({
-      effectId: candidate.effectId,
-      sourceName: candidate.sourceName,
-      amount: level,
-    });
-  }
 }
 
 function resolveEffectCandidate(runtime, candidate, event) {
@@ -6938,7 +9078,7 @@ function resolveEffectCandidate(runtime, candidate, event) {
 }
 
 function resolveBattleEvent(runtime, event) {
-  const candidates = collectBattleEffectCandidates(runtime, event);
+  const candidates = event.lockedCandidates ?? collectBattleEffectCandidates(runtime, event);
   while (!runtime.abortedChains.has(event.chainId)) {
     const candidate = chooseNextEffectCandidate(runtime, candidates, event);
     if (!candidate) break;
@@ -6984,6 +9124,7 @@ function getBattleUnitSnapshot(unit) {
     usesBondDefinitionSnapshot: true,
     tier: unit.tier,
     side: unit.side,
+    skill: unit.skill ?? "",
     skillEffectIds: [...(unit.skillEffectIds ?? [])],
     equipment: cloneDirectModifier(unit.equipment),
     statuses: cloneDirectModifier(unit.statuses ?? {}),
@@ -7005,7 +9146,7 @@ function simulateBasicBattle({ preBattleEntries = [] } = {}) {
   const enemySetup = createEnemyBattleSetup();
   const enemy = enemySetup.team;
   const lockedBonds = {
-    player: getLockedPlayerBondLevels(),
+    player: getLockedPlayerBondEffectCounts(),
     enemy: enemySetup.lockedBonds,
   };
   return simulateBattleScenario({
@@ -7037,7 +9178,7 @@ function simulateBattleScenario({
   preparationEntries.push(recordBattleLog(
     runtime,
     "system",
-    `技能结算底座已启动，战斗随机种子 ${seed}；魏、蜀、吴、群羁绊等级已在战前锁定。`,
+    `技能结算底座已启动，战斗随机种子 ${seed}；魏、蜀、吴、群羁绊人数效果已在战前锁定。`,
     { seed },
   ));
   preparationEntries.push(recordBattleLog(
@@ -7066,13 +9207,13 @@ function simulateBattleScenario({
   });
 
   BOND_FACTIONS.forEach((faction) => {
-    const level = lockedBonds.player[faction] ?? 0;
-    if (level <= 0) return;
+    const effectCount = lockedBonds.player[faction] ?? 0;
+    if (effectCount <= 0) return;
     preparationEntries.push(recordBattleLog(
       runtime,
       "bond",
-      `${BOND_RULES[faction].label} LV${level} 已锁定，本场战斗不再变化。`,
-      { faction, level },
+      `${BOND_RULES[faction].label} ${effectCount}人效果已锁定，本场战斗不再变化。`,
+      { faction, effectCount },
     ));
   });
   recordBattlePresentationStep(runtime, {
@@ -7130,6 +9271,7 @@ function simulateBattleScenario({
   let exchange = 1;
   while (player.length > 0 && enemy.length > 0 && exchange <= maxExchanges) {
     runtime.currentExchange = exchange;
+    clearExpiredTemporaryStatuses(runtime);
     roundSnapshots.push({
       exchange,
       player: player.map(getBattleUnitSnapshot),
@@ -7139,10 +9281,23 @@ function simulateBattleScenario({
     const foe = getBattleFrontUnit(enemy, "enemy");
     runtime.currentAttackers = [ally, foe];
     dispatchBattleEvent(runtime, "attack:before", { attackers: [ally, foe], exchange });
+    if (!isBattleUnitActive(runtime, ally) || !isBattleUnitActive(runtime, foe)) {
+      runtime.currentAttackers = null;
+      exchange += 1;
+      continue;
+    }
     const allyHealthBefore = ally.health;
     const foeHealthBefore = foe.health;
-    const allyAttackDamage = Math.max(1, ally.attack);
-    const foeAttackDamage = Math.max(1, foe.attack);
+    const allyAttackDamage = Math.max(
+      1,
+      ally.attack * (ally.nextBasicAttackDamageMultiplier ?? 1),
+    );
+    const foeAttackDamage = Math.max(
+      1,
+      foe.attack * (foe.nextBasicAttackDamageMultiplier ?? 1),
+    );
+    delete ally.nextBasicAttackDamageMultiplier;
+    delete foe.nextBasicAttackDamageMultiplier;
 
     const damageToEnemy = resolveBattleDamage(runtime, {
       source: ally,
@@ -7208,11 +9363,15 @@ function simulateBattleScenario({
           unitId: ally.id,
           text: `-${damageToPlayer.finalAmount}`,
           tone: "damage",
+          damageAmount: damageToPlayer.finalAmount,
+          damageType: damageToPlayer.type,
         },
         {
           unitId: foe.id,
           text: `-${damageToEnemy.finalAmount}`,
           tone: "damage",
+          damageAmount: damageToEnemy.finalAmount,
+          damageType: damageToEnemy.type,
         },
       ],
       simultaneous: true,
@@ -7221,16 +9380,23 @@ function simulateBattleScenario({
 
     dispatchBattleEvent(runtime, "damage:after", { damage: damageToEnemy, exchange });
     dispatchBattleEvent(runtime, "damage:after", { damage: damageToPlayer, exchange });
-    dispatchBattleEvent(runtime, "attack:after", {
-      attackers: [ally, foe],
-      attackPairs: [
-        { source: ally, target: foe, damage: damageToEnemy },
-        { source: foe, target: ally, damage: damageToPlayer },
-      ],
-      exchange,
-    });
+    const attackAfterEvent = prepareBattleEvent(
+      runtime,
+      "attack:after",
+      {
+        attackers: [ally, foe],
+        attackPairs: [
+          { source: ally, target: foe, damage: damageToEnemy },
+          { source: foe, target: ally, damage: damageToPlayer },
+        ],
+        exchange,
+      },
+      runtime.currentEvent,
+      { lockHeroAvailability: true },
+    );
     runtime.deferredDeathIds.clear();
     resolveAllBattleDeaths(runtime, exchange);
+    dispatchPreparedBattleEvent(runtime, attackAfterEvent);
     runtime.currentAttackers = null;
     recordBattleLog(
       runtime,
@@ -7262,6 +9428,7 @@ function simulateBattleScenario({
   }
 
   runtime.currentExchange = null;
+  clearExpiredTemporaryStatuses(runtime);
   runtime.phase = "battle:end";
   const result =
     player.length > 0 && enemy.length === 0
@@ -7305,17 +9472,78 @@ function simulateBattleScenario({
   };
 }
 
+function isRoundRewardBlockingShop({ notifyPlayer = false } = {}) {
+  const blocked = Boolean(state.pendingRoundReward);
+  if (blocked && notifyPlayer) {
+    notify(`请先完成第${state.pendingRoundReward.round}回合奖励选择。`);
+  }
+  return blocked;
+}
+
+function queueRoundReward(round = state.round) {
+  if (!ROUND_REWARD_ROUNDS.includes(round) || state.pendingRoundReward) return;
+  const pool = (ROUND_REWARD_CARD_NAMES[round] ?? [])
+    .map((name) => CARD_POOLS.stratagem.find((card) => card.name === name))
+    .filter(Boolean);
+  const candidates = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
+  if (candidates.length !== 3) {
+    addLog(`第 ${round} 回合奖励卡池配置不完整。`);
+    return;
+  }
+  state.pendingRoundReward = { round, candidates };
+  state.roundRewardCollapsed = false;
+  addLog(`第 ${round} 回合初始商店已生成；必须从3张奖励卡中选择1张。`);
+}
+
+function setRoundRewardCollapsed(collapsed) {
+  if (!state.pendingRoundReward) return;
+  state.roundRewardCollapsed = collapsed;
+  render();
+  window.requestAnimationFrame(() => {
+    const focusTarget = collapsed
+      ? elements.roundRewardExpandButton
+      : elements.roundRewardOptions?.querySelector(".reward-option");
+    focusTarget?.focus();
+  });
+}
+
+function chooseRoundRewardCard(candidateIndex) {
+  const pending = state.pendingRoundReward;
+  const base = pending?.candidates?.[candidateIndex];
+  if (!pending || !base) return;
+  const card = createFreeShopItemFromBase(base);
+  state.pendingRoundReward = null;
+  state.roundRewardCollapsed = false;
+  addCardsToSharedShop([card], `第 ${pending.round} 回合奖励`);
+  addLog(`第 ${pending.round} 回合奖励选择：${card.name}。`);
+  playAudioCue("rewardClaim");
+  render();
+}
+
+function cancelCurrentChoice() {
+  if (state.pendingHeroBondChoice?.cancelable) {
+    state.pendingHeroBondChoice = null;
+    playAudioCue("uiCancel");
+    render();
+    return;
+  }
+  if (state.pendingStratagemUse) playAudioCue("uiCancel");
+  cancelStratagemChoice();
+}
+
 function endTurn() {
   if (state.phase !== "shop") return;
+  if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
   if (state.pendingHeroBondChoice) {
     notify("请先完成司马徽的额外羁绊选择。");
     return;
   }
+  playAudioCue("battleEnter");
   resolvingEndTurn = true;
   const effectEventStart = state.effectEvents.length;
-  const previousBondLevels = getShopBondLevelSnapshot();
+  const previousBondCounts = getShopBondCountSnapshot();
   dispatchShopEvent("round:end", { round: state.round });
-  dispatchShopBondLevelChanges(previousBondLevels);
+  dispatchShopBondCountChanges(previousBondCounts);
   pendingEndTurnReportEntries = state.effectEvents
     .slice(effectEventStart)
     .filter((entry) => entry.message)
@@ -7338,13 +9566,17 @@ function startNextRound() {
     render();
     return;
   }
+  playAudioCue("nextRound");
   state.round += 1;
   state.phase = "shop";
   state.gold = TURN_GOLD;
   state.battle = null;
-  const previousBondLevels = getShopBondLevelSnapshot();
+  getLineupUnits().forEach((unit) => {
+    unit.huatuoRevivesUsedThisRound = 0;
+  });
+  const previousBondCounts = getShopBondCountSnapshot();
   clearTemporaryBonds();
-  dispatchShopBondLevelChanges(previousBondLevels);
+  dispatchShopBondCountChanges(previousBondCounts);
   addLog(`第 ${state.round} 回合开始，获得 ${TURN_GOLD} 金币。`);
   if (state.round === ROUND_THREE_LIFE_RECOVERY_ROUND) {
     const previousLife = state.life;
@@ -7358,17 +9590,24 @@ function startNextRound() {
   }
   dispatchShopEvent("round:start", { round: state.round });
   refreshShop({ free: true });
+  if (ROUND_REWARD_ROUNDS.includes(state.round)) {
+    queueRoundReward();
+    render();
+  }
 }
 
 function resetDemo() {
-  closeCodex({ restoreFocus: false });
+  playAudioCue("nextRound");
+  closeCodex({ restoreFocus: false, silent: true });
   window.clearTimeout(shopPresentationTimer);
   shopPresentationTimer = 0;
+  queuedShopSkillAnimations = [];
   queuedShopBonusAnimations = [];
   queuedShopUpgradeAnimations = [];
+  shopPresentationSequence = 0;
   pendingEndTurnReportEntries = [];
   resolvingEndTurn = false;
-  previousRenderedBondLevels = null;
+  previousRenderedBondEffectCounts = null;
   queuedBondUpgradeCelebrations = [];
   clearBondUpgradeEffects();
   clearAllBondSelectionHints();
@@ -7391,7 +9630,8 @@ function addLog(message) {
 }
 
 function notify(message) {
-  elements.toast.textContent = message;
+  playAudioCue("uiError");
+  elements.toast.innerHTML = getEscapedGameTextMarkup(message);
   elements.toast.classList.add("visible");
   window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => {
@@ -7411,16 +9651,42 @@ function getUnitMetaText(unit) {
   return `${unit.tier} 阶 · ${unit.level} 级 ${unit.experience ?? 0} 经验 · ${unit.attack}/${unit.health}`;
 }
 
-function getBondLevel(count) {
-  if (count >= 5) return 4;
-  if (count >= 4) return 3;
-  if (count >= 3) return 2;
-  if (count >= 2) return 1;
+function isFivePersonBondUnlocked(faction, unlockedFactions = state?.unlockedFivePersonBonds) {
+  return Array.isArray(unlockedFactions) && unlockedFactions.includes(faction);
+}
+
+function getBondEffectCount(count, faction, unlockedFactions = state?.unlockedFivePersonBonds) {
+  if (count >= 5 && isFivePersonBondUnlocked(faction, unlockedFactions)) return 5;
+  if (count >= 4) return 4;
+  if (count >= 3) return 3;
+  if (count >= 2) return 2;
   return 0;
 }
 
-function getBondLevelText(level) {
-  return level === 4 ? "满级" : `LV${level}`;
+function getVisibleBondEffectTiers(faction, unlockedFactions = state?.unlockedFivePersonBonds) {
+  return isFivePersonBondUnlocked(faction, unlockedFactions) ? [2, 3, 4, 5] : [2, 3, 4];
+}
+
+function getBondProgressMarkup(count, faction, unlockedFactions = state?.unlockedFivePersonBonds) {
+  const currentCount = Math.max(0, Math.min(5, Math.floor(Number(count) || 0)));
+  if (currentCount < 2) return `<strong>${currentCount}</strong>/2`;
+
+  const fivePersonUnlocked = isFivePersonBondUnlocked(faction, unlockedFactions);
+  const activeTier = getBondEffectCount(currentCount, faction, unlockedFactions);
+
+  const visibleTiers = currentCount === 2
+    ? [2, 3]
+    : currentCount === 3
+      ? [2, 3, 4]
+      : !fivePersonUnlocked
+        ? [2, 3, 4]
+        : [2, 3, 4, 5];
+
+  return visibleTiers
+    .map((tier) => {
+      return tier === activeTier ? `<strong>${tier}</strong>` : String(tier);
+    })
+    .join("/");
 }
 
 function getLineupUnits() {
@@ -7641,26 +9907,25 @@ function getBondEntries() {
   return BOND_FACTIONS.map((faction) => ({
     faction,
     count: counts[faction] ?? 0,
-    level: getBondLevel(counts[faction] ?? 0),
+    effectCount: getBondEffectCount(counts[faction] ?? 0, faction),
   }));
 }
 
 function getActiveBondCount() {
-  return getBondEntries().filter((entry) => entry.level > 0).length;
+  return getBondEntries().filter((entry) => entry.count >= 2).length;
 }
 
 function getHighestActiveBondNames() {
-  const active = getBondEntries().filter((entry) => entry.level > 0);
+  const active = getBondEntries().filter((entry) => entry.count >= 2);
   if (active.length === 0) return [];
-  const highestLevel = Math.max(...active.map((entry) => entry.level));
-  return active.filter((entry) => entry.level === highestLevel).map((entry) => entry.faction);
+  const highestCount = Math.max(...active.map((entry) => entry.count));
+  return active.filter((entry) => entry.count === highestCount).map((entry) => entry.faction);
 }
 
 function getHighestBondFactionForRecruit() {
   const entries = getBondEntries();
-  const highestLevel = Math.max(...entries.map((entry) => entry.level));
-  const highestCount = Math.max(...entries.filter((entry) => entry.level === highestLevel).map((entry) => entry.count));
-  const target = entries.find((entry) => entry.level === highestLevel && entry.count === highestCount && entry.count > 0);
+  const highestCount = Math.max(...entries.map((entry) => entry.count));
+  const target = entries.find((entry) => entry.count === highestCount && entry.count > 0);
   return target?.faction ?? null;
 }
 
@@ -7742,19 +10007,7 @@ function getShopFixedSlotRects() {
 }
 
 function getShopPositionIndex(index, round) {
-  const rule = getShopRule(round);
-  const standardSlotCount = rule.heroSlots + rule.itemSlots;
-
-  if (index < rule.heroSlots) return index;
-  if (index < standardSlotCount) {
-    const itemOffset = index - rule.heroSlots;
-    return SHOP_POSITION_COUNT - rule.itemSlots + itemOffset;
-  }
-
-  const rewardOffset = index - standardSlotCount;
-  return SHOP_OVERFLOW_SLOT_INDICES[
-    Math.min(rewardOffset, SHOP_OVERFLOW_SLOT_INDICES.length - 1)
-  ];
+  return Math.max(0, Math.min(SHOP_POSITION_COUNT - 1, index));
 }
 
 function getShopSlotRects(cards, round) {
@@ -7769,8 +10022,11 @@ function createFactionTag(faction) {
   return tag;
 }
 
-function createTierStars(tier) {
-  return Array.from({ length: tier }, () => '<img src="res/HeroCard/star.png" alt="" />').join("");
+function createTierStars(tier, { purple = false } = {}) {
+  return Array.from(
+    { length: tier },
+    () => `<img${purple ? ' class="purple-star"' : ""} src="res/HeroCard/star.png" alt="" />`,
+  ).join("");
 }
 
 function createHeroFateMarkup(hero, lineupIndex = null) {
@@ -7799,7 +10055,9 @@ function createHeroCardMarkup(
   const showOwnedDetails = isLineupUnit || battleSnapshot;
   const fateMarkup = createHeroFateMarkup(hero, isLineupUnit ? lineupIndex : null);
   const portraitImage = hero.image ?? HERO_IMAGE_BY_NAME[hero.name] ?? "";
-  const heroEffectId = hero.effectId ?? hero.skillEffectIds?.[0] ?? null;
+  const derivedUnitDefinition = DERIVED_UNIT_DEFINITION_BY_NAME[hero.name] ?? null;
+  const heroEffectId =
+    hero.effectId ?? hero.skillEffectIds?.[0] ?? derivedUnitDefinition?.effectId ?? null;
   const equipment = battleSnapshot ? hero.equipment ?? null : isLineupUnit ? getUnitEquipment(hero) : null;
   const equipmentSkillDisplay = equipment
     ? resolveHeroSkillDisplay(equipment.skill, 1, hero)
@@ -7811,7 +10069,18 @@ function createHeroCardMarkup(
       : "";
   const level = hero.level ?? 1;
   const experience = hero.experience ?? 0;
-  const skillDisplay = resolveHeroSkillDisplay(hero.skill, level, hero);
+  const skillName = getHeroSkillName(heroEffectId, hero);
+  const skillDescriptionDisplay = getHeroSkillDescriptionDisplay(heroEffectId, hero);
+  const skillCaption = hero.isSummon ? "召唤物" : "武将技";
+  const derivedContentEntries = getDerivedContentEntries([
+    skillDescriptionDisplay.text,
+    equipmentSkillDisplay?.text,
+    hero.isSummon ? hero.name : "",
+  ]);
+  const derivedContentMarkup = createDerivedContentRailMarkup(
+    derivedContentEntries,
+    "hero-derived-detail-rail",
+  );
   const experienceNeeded = getExperienceNeeded(level);
   const experienceProgress =
     level >= MAX_UNIT_LEVEL ? 100 : Math.round((experience / experienceNeeded) * 100);
@@ -7852,11 +10121,7 @@ function createHeroCardMarkup(
                    ? `<span class="battle-equipment-charges">${remainingEquipmentCharges}</span>`
                    : ""
                }
-               <div class="hero-equipment-tooltip">
-                 <strong>${equipment.name}</strong>
-                 ${equipmentSkillDisplay?.html ?? escapeBattleReportHtml(equipment.skill)}
-                 ${equipmentRuntimeLabel ? `<em>${equipmentRuntimeLabel.slice(1)}</em>` : ""}
-               </div>`
+              `
             : ""
         }
       </div>
@@ -7869,16 +10134,59 @@ function createHeroCardMarkup(
     .join("");
   const statusMarkup =
     statusEntries.length > 0
-      ? `<div class="hero-card-status-effects" role="img" aria-label="状态特效：${statusNames.join("、")}">${statusEntries
+      ? `<div class="hero-card-status-effects" role="img" aria-label="状态与独立效果：${statusNames.join("、")}">${statusEntries
           .map(
             (status, index) =>
               `<span class="hero-card-status-effect status-effect-${status.id}" style="--status-offset: ${index * 3}px" aria-hidden="true"></span>`,
           )
           .join("")}</div>`
       : "";
+  const statusTooltipMarkup =
+    statusEntries.length > 0
+      ? `<div class="hero-status-tooltip card-detail-paper">
+           <div class="card-detail-heading">
+             <strong class="card-detail-ink-tag">状态 / 效果</strong>
+             <span class="card-detail-title">状态与独立效果描述</span>
+           </div>
+           <div class="hero-status-tooltip-list">
+             ${statusEntries
+               .map(
+                 (status) => `<div class="hero-status-tooltip-entry">
+                   <b>${escapeBattleReportHtml(status.label)}</b>
+                   <span>${getEscapedGameTextMarkup(status.description)}</span>
+                 </div>`,
+               )
+               .join("")}
+           </div>
+         </div>`
+      : "";
+  const detailTooltipMarkup = `
+    <div class="hero-card-detail-stack" role="tooltip">
+      <div class="hero-skill-tooltip card-detail-paper">
+        <div class="card-detail-heading">
+          <strong class="hero-skill-name-tag card-detail-ink-tag">${escapeBattleReportHtml(skillName)}</strong>
+          <span class="card-detail-caption">${skillCaption}</span>
+        </div>
+        <span class="hero-skill-description">${skillDescriptionDisplay.html}</span>
+      </div>
+      ${
+        equipment
+          ? `<div class="hero-equipment-tooltip card-detail-paper">
+               <div class="card-detail-heading">
+                 <strong class="card-detail-ink-tag">装备</strong>
+                 <span class="card-detail-title">${escapeBattleReportHtml(equipment.name)}</span>
+               </div>
+               <span class="card-detail-body">${equipmentSkillDisplay ? getStatDescriptionMarkup(equipmentSkillDisplay.html) : getEscapedStatDescriptionMarkup(equipment.skill)}</span>
+               ${equipmentRuntimeLabel ? `<em>${equipmentRuntimeLabel.slice(1)}</em>` : ""}
+             </div>`
+          : ""
+      }
+      ${statusTooltipMarkup}
+      ${derivedContentMarkup}
+    </div>`;
 
   return `
-    <div class="hero-card${battleSnapshot ? " battle-snapshot-card" : ""}${statusEntries.length > 0 ? " has-status-effect" : ""}${statusClassNames}" tabindex="0" aria-label="${hero.name}，${hero.isLocked ? "已锁定，" : ""}${showOwnedDetails ? `${progressionLabel}，` : ""}${bondLabel}，${equipment ? `装备${equipment.name}，` : ""}${statusNames.length > 0 ? `状态${statusNames.join("、")}，` : ""}${skillDisplay.text}">
+    <div class="hero-card${battleSnapshot ? " battle-snapshot-card" : ""}${statusEntries.length > 0 ? " has-status-effect" : ""}${statusClassNames}" tabindex="0" aria-label="${hero.name}，${hero.isLocked ? "已锁定，" : ""}${showOwnedDetails ? `${progressionLabel}，` : ""}${bondLabel}，${equipment ? `装备${equipment.name}，` : ""}${statusNames.length > 0 ? `状态${statusNames.join("、")}，` : ""}技能${skillName}，${getStatPairAccessibleText(skillDescriptionDisplay.text)}${derivedContentEntries.length > 0 ? `，衍生说明${derivedContentEntries.map((entry) => entry.name).join("、")}` : ""}">
       ${portraitMarkup}
       <div class="hero-nameplate">${hero.name}</div>
       ${showCost ? `<div class="hero-cost"><img src="res/HeroCard/coin_no_diamond_preview2.png" alt="" /><span>${hero.cost}</span></div>` : ""}
@@ -7897,21 +10205,15 @@ function createHeroCardMarkup(
         <img src="res/HeroCard/hp_bk.png" alt="" />
         <span>${hero.health}</span>
       </div>
-      <div class="hero-skill-tooltip"><strong>技能描述</strong>${skillDisplay.html}</div>
+      ${detailTooltipMarkup}
       ${hero.isLocked ? '<div class="shop-card-lock-overlay" aria-hidden="true"><span>锁定</span></div>' : ""}
     </div>
   `;
 }
 
-function createItemCardMarkup(item, { showDragHint = true } = {}) {
-  const dragHint =
-    item.category === "装备"
-      ? "拖到阵容武将的空装备槽购买"
-      : item.targetMode === "unit"
-        ? "拖到一名阵容武将上使用"
-        : "拖到任意阵容位使用";
+function createItemCardMarkup(item) {
   return `
-    <div class="item-card" tabindex="0" aria-label="${item.name}，${item.isLocked ? "已锁定，" : ""}${item.skill}">
+    <div class="item-card" tabindex="0" aria-label="${item.name}，${item.isLocked ? "已锁定，" : ""}${getStatPairAccessibleText(item.skill)}">
       <img class="item-icon" src="${item.image}" alt="${item.name}" />
       <div class="item-nameplate">${item.name}</div>
       <div class="item-cost">
@@ -7919,12 +10221,401 @@ function createItemCardMarkup(item, { showDragHint = true } = {}) {
         <span>${item.cost}</span>
       </div>
       <img class="item-wave" src="res/HeroCard/wave.png" alt="" />
-      <div class="item-stars">${createTierStars(item.tier ?? 1)}</div>
+      <div class="item-stars">${createTierStars(item.tier ?? 1, {
+        purple: Boolean(item.purpleStars || item.rewardOnly || item.rewardItem),
+      })}</div>
       <div class="item-type-tag">${item.category ?? "装备/计策"}</div>
-      <div class="item-skill-tooltip"><strong>${item.category ?? "装备/计策"}描述</strong>${item.skill}${showDragHint ? `<em>${dragHint}</em>` : ""}</div>
+      <div class="item-skill-tooltip card-detail-paper" role="tooltip">
+        <div class="card-detail-heading">
+          <strong class="item-skill-name-tag card-detail-ink-tag">${escapeBattleReportHtml(item.category ?? "装备/计策")}</strong>
+          <span class="card-detail-title">${escapeBattleReportHtml(item.name)}</span>
+          <span class="card-detail-meta">${item.rewardOnly || item.rewardItem ? `${item.tier ?? 1}星奖励` : `${item.tier ?? 1}阶`}</span>
+        </div>
+        <span class="item-skill-description">${getEscapedStatDescriptionMarkup(item.skill)}</span>
+      </div>
       ${item.isLocked ? '<div class="shop-card-lock-overlay" aria-hidden="true"><span>锁定</span></div>' : ""}
     </div>
   `;
+}
+
+const CARD_DETAIL_VIEWPORT_MARGIN = 8;
+const CARD_DETAIL_GAP = 10;
+let adaptiveCardDetailLayer = null;
+let adaptiveCardDetailCard = null;
+let adaptiveCardDetailAnimationFrame = 0;
+
+function clampCardDetailValue(value, minimum, maximum) {
+  return Math.min(Math.max(value, minimum), Math.max(minimum, maximum));
+}
+
+function normalizeCardDetailRect(rect) {
+  const width = Number(rect?.width) || Math.max(0, Number(rect?.right) - Number(rect?.left));
+  const height = Number(rect?.height) || Math.max(0, Number(rect?.bottom) - Number(rect?.top));
+  const left = Number(rect?.left) || 0;
+  const top = Number(rect?.top) || 0;
+  return {
+    left,
+    top,
+    width,
+    height,
+    right: Number.isFinite(rect?.right) ? Number(rect.right) : left + width,
+    bottom: Number.isFinite(rect?.bottom) ? Number(rect.bottom) : top + height,
+  };
+}
+
+function getCardDetailViewportBounds(viewport = getVisibleViewportBounds()) {
+  return {
+    left: viewport.left + CARD_DETAIL_VIEWPORT_MARGIN,
+    top: viewport.top + CARD_DETAIL_VIEWPORT_MARGIN,
+    right: viewport.left + viewport.width - CARD_DETAIL_VIEWPORT_MARGIN,
+    bottom: viewport.top + viewport.height - CARD_DETAIL_VIEWPORT_MARGIN,
+  };
+}
+
+function getCardDetailOverflow(position, size, bounds) {
+  return (
+    Math.max(0, bounds.left - position.left) +
+    Math.max(0, position.left + size.width - bounds.right) +
+    Math.max(0, bounds.top - position.top) +
+    Math.max(0, position.top + size.height - bounds.bottom)
+  );
+}
+
+function getPrioritizedHeroSkillPosition(cardRectValue, size, bounds) {
+  const cardRect = normalizeCardDetailRect(cardRectValue);
+  return {
+    placement: "above",
+    left: clampCardDetailValue(
+      cardRect.left + cardRect.width / 2 - size.width / 2,
+      bounds.left,
+      bounds.right - size.width,
+    ),
+    top: clampCardDetailValue(
+      cardRect.top - CARD_DETAIL_GAP - size.height,
+      bounds.top,
+      bounds.bottom - size.height,
+    ),
+  };
+}
+
+function getAdaptiveSingleDetailPosition(cardRectValue, size, bounds) {
+  const cardRect = normalizeCardDetailRect(cardRectValue);
+  const centeredLeft = clampCardDetailValue(
+    cardRect.left + cardRect.width / 2 - size.width / 2,
+    bounds.left,
+    bounds.right - size.width,
+  );
+  const centeredTop = clampCardDetailValue(
+    cardRect.top + cardRect.height / 2 - size.height / 2,
+    bounds.top,
+    bounds.bottom - size.height,
+  );
+  const candidates = [
+    {
+      placement: "above",
+      left: centeredLeft,
+      top: cardRect.top - CARD_DETAIL_GAP - size.height,
+    },
+    {
+      placement: "below",
+      left: centeredLeft,
+      top: cardRect.bottom + CARD_DETAIL_GAP,
+    },
+    {
+      placement: "right",
+      left: cardRect.right + CARD_DETAIL_GAP,
+      top: centeredTop,
+    },
+    {
+      placement: "left",
+      left: cardRect.left - CARD_DETAIL_GAP - size.width,
+      top: centeredTop,
+    },
+  ];
+  const best = candidates.reduce((currentBest, candidate, preference) => {
+    const score = getCardDetailOverflow(candidate, size, bounds) * 100 + preference;
+    return !currentBest || score < currentBest.score
+      ? { ...candidate, score }
+      : currentBest;
+  }, null);
+  return {
+    placement: best.placement,
+    left: clampCardDetailValue(best.left, bounds.left, bounds.right - size.width),
+    top: clampCardDetailValue(best.top, bounds.top, bounds.bottom - size.height),
+  };
+}
+
+function getCardDetailOverlapArea(firstRectValue, secondRectValue) {
+  const firstRect = normalizeCardDetailRect(firstRectValue);
+  const secondRect = normalizeCardDetailRect(secondRectValue);
+  return (
+    Math.max(0, Math.min(firstRect.right, secondRect.right) - Math.max(firstRect.left, secondRect.left)) *
+    Math.max(0, Math.min(firstRect.bottom, secondRect.bottom) - Math.max(firstRect.top, secondRect.top))
+  );
+}
+
+function getAuxiliaryCardDetailLayout(sizes, cardRectValue, primaryRectValue, bounds) {
+  if (sizes.length === 0) return { placement: "none", positions: [] };
+  const cardRect = normalizeCardDetailRect(cardRectValue);
+  const primaryRect = normalizeCardDetailRect(primaryRectValue);
+  const groupWidth = Math.max(...sizes.map((size) => size.width));
+  const groupHeight =
+    sizes.reduce((total, size) => total + size.height, 0) +
+    CARD_DETAIL_GAP * Math.max(0, sizes.length - 1);
+  const groupSize = { width: groupWidth, height: groupHeight };
+  const rawCandidates = [
+    {
+      placement: "right",
+      left: Math.max(cardRect.right, primaryRect.right) + CARD_DETAIL_GAP,
+      top: cardRect.top - CARD_DETAIL_GAP - groupHeight,
+    },
+    {
+      placement: "left",
+      left: Math.min(cardRect.left, primaryRect.left) - CARD_DETAIL_GAP - groupWidth,
+      top: cardRect.top - CARD_DETAIL_GAP - groupHeight,
+    },
+    {
+      placement: "below",
+      left: cardRect.left + cardRect.width / 2 - groupWidth / 2,
+      top: cardRect.bottom + CARD_DETAIL_GAP,
+    },
+    {
+      placement: "above",
+      left: cardRect.left + cardRect.width / 2 - groupWidth / 2,
+      top: primaryRect.top - CARD_DETAIL_GAP - groupHeight,
+    },
+  ];
+  const candidates = rawCandidates.map((candidate, preference) => {
+    const left = clampCardDetailValue(candidate.left, bounds.left, bounds.right - groupWidth);
+    const top = clampCardDetailValue(candidate.top, bounds.top, bounds.bottom - groupHeight);
+    const groupRect = { left, top, width: groupWidth, height: groupHeight };
+    const collision =
+      getCardDetailOverlapArea(groupRect, cardRect) +
+      getCardDetailOverlapArea(groupRect, primaryRect);
+    const overflow = getCardDetailOverflow(groupRect, groupSize, bounds);
+    return {
+      ...candidate,
+      left,
+      top,
+      score: overflow * 10000 + collision * 100 + preference,
+    };
+  });
+  const best = candidates.reduce((currentBest, candidate) =>
+    !currentBest || candidate.score < currentBest.score ? candidate : currentBest,
+  null);
+  let top = best.top;
+  const positions = sizes.map((size) => {
+    const position = {
+      placement: best.placement,
+      left:
+        best.placement === "left"
+          ? best.left + groupWidth - size.width
+          : best.placement === "right"
+            ? best.left
+            : best.left + (groupWidth - size.width) / 2,
+      top,
+    };
+    top += size.height + CARD_DETAIL_GAP;
+    return position;
+  });
+  return { placement: best.placement, positions };
+}
+
+function getRenderedCardDetailScale(source) {
+  const naturalWidth = source?.offsetWidth || 1;
+  const renderedWidth = source?.getBoundingClientRect().width || naturalWidth;
+  const scale = renderedWidth / naturalWidth;
+  return Number.isFinite(scale) && scale > 0 ? scale : 1;
+}
+
+function ensureAdaptiveCardDetailLayer() {
+  if (adaptiveCardDetailLayer?.isConnected) return adaptiveCardDetailLayer;
+  adaptiveCardDetailLayer = document.createElement("div");
+  adaptiveCardDetailLayer.className = "adaptive-card-detail-layer";
+  adaptiveCardDetailLayer.setAttribute("aria-hidden", "true");
+  document.body.append(adaptiveCardDetailLayer);
+  document.documentElement.classList.add("adaptive-card-details-enabled");
+  return adaptiveCardDetailLayer;
+}
+
+function createAdaptiveCardDetailPanel(source, kind, scale) {
+  const layer = ensureAdaptiveCardDetailLayer();
+  const naturalWidth = source.offsetWidth || 268;
+  const naturalHeight = source.offsetHeight || 1;
+  const panel = document.createElement("div");
+  panel.className = `adaptive-card-detail-panel adaptive-card-detail-${kind}`;
+  panel.style.width = `${naturalWidth}px`;
+  panel.style.setProperty("--adaptive-card-detail-scale", String(scale));
+  panel.append(source.cloneNode(true));
+  layer.append(panel);
+  return {
+    element: panel,
+    width: naturalWidth * scale,
+    height: naturalHeight * scale,
+  };
+}
+
+function setAdaptiveCardDetailPanelPosition(panel, position) {
+  panel.element.dataset.placement = position.placement;
+  panel.element.style.left = `${position.left}px`;
+  panel.element.style.top = `${position.top}px`;
+}
+
+function renderAdaptiveCardDetails(card) {
+  if (!card?.isConnected) {
+    hideAdaptiveCardDetails();
+    return;
+  }
+  const isHeroCard = card.classList.contains("hero-card");
+  const sourceRoot = isHeroCard
+    ? card.querySelector(".hero-card-detail-stack")
+    : card.querySelector(".item-skill-tooltip");
+  if (!sourceRoot) {
+    hideAdaptiveCardDetails();
+    return;
+  }
+  const layer = ensureAdaptiveCardDetailLayer();
+  layer.replaceChildren();
+  adaptiveCardDetailCard = card;
+  const cardRect = normalizeCardDetailRect(card.getBoundingClientRect());
+  const bounds = getCardDetailViewportBounds();
+  const rawScale = getRenderedCardDetailScale(sourceRoot);
+  const primarySource = isHeroCard
+    ? sourceRoot.querySelector(".hero-skill-tooltip")
+    : sourceRoot;
+  if (!primarySource) return;
+  const maximumPrimaryScale = Math.min(
+    (bounds.right - bounds.left) / Math.max(1, primarySource.offsetWidth),
+    (bounds.bottom - bounds.top) / Math.max(1, primarySource.offsetHeight),
+  );
+  const scale = Math.min(rawScale, maximumPrimaryScale);
+  const primaryPanel = createAdaptiveCardDetailPanel(
+    primarySource,
+    isHeroCard ? "skill" : "item",
+    scale,
+  );
+  const primaryPosition = isHeroCard
+    ? getPrioritizedHeroSkillPosition(cardRect, primaryPanel, bounds)
+    : getAdaptiveSingleDetailPosition(cardRect, primaryPanel, bounds);
+  setAdaptiveCardDetailPanelPosition(primaryPanel, primaryPosition);
+  layer.dataset.primaryPlacement = primaryPosition.placement;
+
+  if (!isHeroCard) return;
+  const auxiliarySources = Array.from(sourceRoot.children).filter(
+    (child) =>
+      child.classList.contains("hero-equipment-tooltip") ||
+      child.classList.contains("hero-status-tooltip") ||
+      child.classList.contains("hero-derived-detail-rail"),
+  );
+  const auxiliaryPanels = auxiliarySources.map((source) => {
+    const kind = source.classList.contains("hero-equipment-tooltip")
+      ? "equipment"
+      : source.classList.contains("hero-status-tooltip")
+        ? "status"
+        : "derived";
+    return createAdaptiveCardDetailPanel(source, kind, scale);
+  });
+  const primaryRect = {
+    left: primaryPosition.left,
+    top: primaryPosition.top,
+    width: primaryPanel.width,
+    height: primaryPanel.height,
+  };
+  const auxiliaryLayout = getAuxiliaryCardDetailLayout(
+    auxiliaryPanels,
+    cardRect,
+    primaryRect,
+    bounds,
+  );
+  auxiliaryPanels.forEach((panel, index) => {
+    setAdaptiveCardDetailPanelPosition(panel, auxiliaryLayout.positions[index]);
+  });
+  layer.dataset.auxiliaryPlacement = auxiliaryLayout.placement;
+}
+
+function hideAdaptiveCardDetails() {
+  if (adaptiveCardDetailAnimationFrame) {
+    window.cancelAnimationFrame(adaptiveCardDetailAnimationFrame);
+    adaptiveCardDetailAnimationFrame = 0;
+  }
+  adaptiveCardDetailCard = null;
+  adaptiveCardDetailLayer?.replaceChildren();
+  if (adaptiveCardDetailLayer) {
+    delete adaptiveCardDetailLayer.dataset.primaryPlacement;
+    delete adaptiveCardDetailLayer.dataset.auxiliaryPlacement;
+  }
+}
+
+function requestAdaptiveCardDetailPosition() {
+  if (!adaptiveCardDetailCard || adaptiveCardDetailAnimationFrame) return;
+  adaptiveCardDetailAnimationFrame = window.requestAnimationFrame(() => {
+    adaptiveCardDetailAnimationFrame = 0;
+    if (!adaptiveCardDetailCard?.isConnected) {
+      hideAdaptiveCardDetails();
+      return;
+    }
+    renderAdaptiveCardDetails(adaptiveCardDetailCard);
+  });
+}
+
+function initializeAdaptiveCardDetails() {
+  ensureAdaptiveCardDetailLayer();
+  document.addEventListener(
+    "pointerover",
+    (event) => {
+      const card = event.target instanceof Element
+        ? event.target.closest(".hero-card, .item-card")
+        : null;
+      if (!card || card === adaptiveCardDetailCard) return;
+      renderAdaptiveCardDetails(card);
+    },
+    true,
+  );
+  document.addEventListener(
+    "pointerout",
+    (event) => {
+      const card = event.target instanceof Element
+        ? event.target.closest(".hero-card, .item-card")
+        : null;
+      if (!card || card !== adaptiveCardDetailCard) return;
+      if (event.relatedTarget instanceof Node && card.contains(event.relatedTarget)) return;
+      if (card.contains(document.activeElement)) return;
+      hideAdaptiveCardDetails();
+    },
+    true,
+  );
+  document.addEventListener("focusin", (event) => {
+    const card = event.target instanceof Element
+      ? event.target.closest(".hero-card, .item-card")
+      : null;
+    if (card) renderAdaptiveCardDetails(card);
+  });
+  document.addEventListener("focusout", (event) => {
+    if (!adaptiveCardDetailCard) return;
+    if (
+      event.relatedTarget instanceof Node &&
+      adaptiveCardDetailCard.contains(event.relatedTarget)
+    ) {
+      return;
+    }
+    if (!adaptiveCardDetailCard.matches(":hover")) hideAdaptiveCardDetails();
+  });
+  document.addEventListener("pointerdown", hideAdaptiveCardDetails, true);
+  document.addEventListener("scroll", requestAdaptiveCardDetailPosition, {
+    capture: true,
+    passive: true,
+  });
+  window.addEventListener("resize", requestAdaptiveCardDetailPosition, { passive: true });
+  window.visualViewport?.addEventListener("resize", requestAdaptiveCardDetailPosition, {
+    passive: true,
+  });
+  window.visualViewport?.addEventListener("scroll", requestAdaptiveCardDetailPosition, {
+    passive: true,
+  });
+  document.addEventListener("fullscreenchange", requestAdaptiveCardDetailPosition);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) hideAdaptiveCardDetails();
+  });
 }
 
 function getCodexEntries() {
@@ -8055,7 +10746,7 @@ function renderCodex() {
     shell.innerHTML =
       card.type === "hero"
         ? createHeroCardMarkup(card, { showCost: true })
-        : createItemCardMarkup(card, { showDragHint: false });
+        : createItemCardMarkup(card);
     fragment.append(shell);
   });
   elements.codexGrid.append(fragment);
@@ -8070,12 +10761,14 @@ function openCodex() {
   });
   renderCodex();
   elements.codexOverlay.hidden = false;
+  playAudioCue("codexOpen");
   elements.codexCloseButton?.focus();
 }
 
-function closeCodex({ restoreFocus = true } = {}) {
+function closeCodex({ restoreFocus = true, silent = false } = {}) {
   if (!elements.codexOverlay || elements.codexOverlay.hidden) return;
   elements.codexOverlay.hidden = true;
+  if (!silent) playAudioCue("uiCancel");
   if (restoreFocus) elements.codexButton?.focus();
 }
 
@@ -8131,14 +10824,20 @@ function renderShop() {
       slot.addEventListener("contextmenu", (event) => {
         if (state.phase !== "shop") return;
         event.preventDefault();
+        if (isRoundRewardBlockingShop({ notifyPlayer: true })) return;
         card.isLocked = !card.isLocked;
         addLog(`${card.name}${card.isLocked ? "已锁定" : "已解除锁定"}。`);
+        playAudioCue(card.isLocked ? "uiConfirm" : "uiCancel");
         render();
       });
       slot.addEventListener("pointerdown", (event) => {
         if (event.button !== 0 || event.target.closest("button") || state.phase !== "shop") return;
         event.preventDefault();
-        resetLineupDragDirection();
+        if (card.type === "hero") {
+          beginLineupDragDirection(event.clientX);
+        } else {
+          resetLineupDragDirection();
+        }
         pointerDraggedShopIndex = index;
         pointerDraggedLineupIndex = null;
         pointerDraggedEquipmentIndex = null;
@@ -8249,7 +10948,7 @@ function renderLogs() {
   state.logs.forEach((message) => {
     const entry = document.createElement("div");
     entry.className = "log-entry";
-    entry.textContent = message;
+    entry.innerHTML = getEscapedGameTextMarkup(message);
     elements.logList.append(entry);
   });
 }
@@ -8263,19 +10962,22 @@ function renderFlow() {
 
 function renderBonds() {
   const counts = getBondCounts();
-  const currentLevels = Object.fromEntries(
-    BOND_FACTIONS.map((faction) => [faction, getBondLevel(counts[faction] ?? 0)]),
+  const currentEffectCounts = Object.fromEntries(
+    BOND_FACTIONS.map((faction) => [
+      faction,
+      getBondEffectCount(counts[faction] ?? 0, faction),
+    ]),
   );
-  if (previousRenderedBondLevels) {
+  if (previousRenderedBondEffectCounts) {
     BOND_FACTIONS.forEach((faction) => {
-      const previousLevel = previousRenderedBondLevels[faction] ?? 0;
-      const level = currentLevels[faction] ?? 0;
-      if (level <= previousLevel) return;
+      const previousEffectCount = previousRenderedBondEffectCounts[faction] ?? 0;
+      const effectCount = currentEffectCounts[faction] ?? 0;
+      if (effectCount <= previousEffectCount) return;
 
       queuedBondUpgradeCelebrations.push({
         faction,
-        previousLevel,
-        level,
+        previousLevel: previousEffectCount,
+        level: effectCount,
         unitIds: state.lineup
           .filter(Boolean)
           .filter((unit) => getEffectiveUnitBonds(unit).includes(faction))
@@ -8283,50 +10985,63 @@ function renderBonds() {
       });
     });
   }
-  previousRenderedBondLevels = currentLevels;
+  previousRenderedBondEffectCounts = currentEffectCounts;
   elements.bondList.replaceChildren();
 
   Object.values(BOND_RULES).forEach((bond) => {
     const count = counts[bond.name] ?? 0;
-    const level = getBondLevel(count);
-    const effectText = bond.effects[level > 0 ? level : 1];
-    const tooltipId = `bond-level-tooltip-${bond.name}`;
-    const levelEffects = [1, 2, 3, 4]
+    const effectCount = getBondEffectCount(count, bond.name);
+    const effectText = effectCount > 0
+      ? bond.effects[effectCount]
+      : `达到2人后：${bond.effects[2]}`;
+    const effectMarkup = getBondDescriptionMarkup(effectText);
+    const tooltipId = `bond-effect-tooltip-${bond.name}`;
+    const visibleEffectTiers = getVisibleBondEffectTiers(bond.name);
+    const derivedContentMarkup = createDerivedContentRailMarkup(
+      getDerivedContentEntries(visibleEffectTiers.map((people) => bond.effects[people])),
+      "bond-derived-detail-rail",
+    );
+    const peopleEffects = visibleEffectTiers
       .map(
-        (effectLevel) => `
-          <li class="bond-level-effect ${effectLevel === level ? "current" : ""}">
-            <span class="bond-level-badge">${effectLevel === 4 ? "LVMAX" : `LV${effectLevel}`}</span>
-            <span class="bond-level-requirement">${effectLevel + 1}人</span>
-            <span class="bond-level-copy">${bond.effects[effectLevel]}</span>
-            ${effectLevel === level ? '<em class="bond-level-current">当前</em>' : ""}
+        (people) => `
+          <li class="bond-level-effect ${people === effectCount ? "current" : ""}">
+            <span class="bond-level-badge">${people}人</span>
+            <span class="bond-level-copy">${getBondDescriptionMarkup(bond.effects[people])}</span>
+            ${people === effectCount ? '<em class="bond-level-current">当前</em>' : ""}
           </li>
         `,
       )
       .join("");
     const item = document.createElement("article");
-    item.className = `bond-card bond-${bond.name} bond-level-${level} ${level > 0 ? "active" : ""} ${getFactionClass(bond.name)}`;
+    item.className = `bond-card bond-${bond.name} bond-level-${effectCount} ${effectCount > 0 ? "active" : ""} ${getFactionClass(bond.name)}`;
     item.dataset.faction = bond.name;
     item.tabIndex = 0;
+    item.setAttribute(
+      "aria-label",
+      `${bond.label}：${getStatPairAccessibleText(normalizeBondDescription(effectText))}`,
+    );
     item.setAttribute("aria-describedby", tooltipId);
     item.innerHTML = `
       <div class="bond-header">
         <strong>${bond.label}</strong>
       </div>
       <div class="bond-detail">
-        <div class="bond-effect">${effectText}</div>
+        <div class="bond-effect">${effectMarkup}</div>
       </div>
       <div class="bond-progress">
-        <strong>${count}/5</strong>
-        <span>${getBondLevelText(level)}</span>
+        <div class="bond-progress-count">${getBondProgressMarkup(count, bond.name)}</div>
       </div>
       <div id="${tooltipId}" class="bond-level-tooltip" role="tooltip">
-        <div class="bond-level-tooltip-title">
-          <strong>${bond.label}</strong>
-          <span>四级效果</span>
+        <div class="bond-level-tooltip-surface">
+          <div class="bond-level-tooltip-title">
+            <strong>${bond.label}</strong>
+            <span>${visibleEffectTiers.join("/")}人效果 · 只结算最高人数档</span>
+          </div>
+          <ol class="bond-level-effects">
+            ${peopleEffects}
+          </ol>
         </div>
-        <ol class="bond-level-effects">
-          ${levelEffects}
-        </ol>
+        ${derivedContentMarkup}
       </div>
     `;
     elements.bondList.append(item);
@@ -8348,6 +11063,7 @@ function playQueuedBondUpgradeCelebrations() {
   if (queuedBondUpgradeCelebrations.length === 0) return;
   clearBondUpgradeEffects();
   const celebrations = queuedBondUpgradeCelebrations.splice(0);
+  playAudioCue("bondGain");
   let longestDelay = 0;
 
   celebrations.forEach((celebration) => {
@@ -8391,6 +11107,294 @@ function escapeBattleReportHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+const BATTLE_NUMBER_GLYPH_COLUMNS = Object.freeze({
+  "+": 0,
+  "-": 1,
+  0: 2,
+  1: 3,
+  2: 4,
+  3: 5,
+  4: 6,
+  5: 7,
+  6: 8,
+  7: 9,
+  8: 10,
+  9: 11,
+});
+const BATTLE_NUMBER_ROWS = Object.freeze({
+  damage: 0,
+  "true-damage": 4,
+  buff: 5,
+});
+
+function getBattleNumberMarkup(value, tone = "buff") {
+  const normalizedTone = Object.hasOwn(BATTLE_NUMBER_ROWS, tone) ? tone : "buff";
+  const row = BATTLE_NUMBER_ROWS[normalizedTone];
+  const glyphs = Array.from(String(value ?? ""));
+  if (glyphs.length === 0 || glyphs.some((glyph) => !Object.hasOwn(BATTLE_NUMBER_GLYPH_COLUMNS, glyph))) {
+    return escapeBattleReportHtml(value);
+  }
+  return `<span class="battle-number battle-number-${normalizedTone}" aria-hidden="true">${glyphs
+    .map((glyph) => {
+      const column = BATTLE_NUMBER_GLYPH_COLUMNS[glyph];
+      const x = (column * 100) / 11;
+      const y = (row * 100) / 6;
+      return `<span class="battle-number-glyph" style="background-position:${x.toFixed(5)}% ${y.toFixed(5)}%"></span>`;
+    })
+    .join("")}</span>`;
+}
+
+function getFloatingStatValueMarkup(
+  value,
+  icon = "",
+  { showPositiveSign = true, tone = null } = {},
+) {
+  const numericValue = Number(value) || 0;
+  const signedValue = numericValue > 0 && showPositiveSign ? `+${numericValue}` : String(numericValue);
+  const numberTone = tone || (numericValue < 0 ? "true-damage" : "buff");
+  const iconMarkup = icon
+    ? `<img class="floating-stat-icon floating-stat-icon-${icon}" src="res/StatIcon/${icon}.png" alt="" aria-hidden="true" />`
+    : "";
+  return `<span class="floating-stat-value${
+    icon ? ` floating-stat-value-${icon}` : ""
+  }">${getBattleNumberMarkup(
+    signedValue,
+    numberTone,
+  )}${iconMarkup}</span>`;
+}
+
+function getFloatingStatChangeMarkup(attack, health) {
+  const attackDelta = Number(attack) || 0;
+  const healthDelta = Number(health) || 0;
+  const hasAttack = attackDelta !== 0;
+  const hasHealth = healthDelta !== 0;
+  if (!hasAttack && !hasHealth) return "";
+  const isPositivePair = attackDelta > 0 && healthDelta > 0;
+  const attackMarkup = hasAttack
+    ? getFloatingStatValueMarkup(attackDelta, isPositivePair ? "" : "attack")
+    : "";
+  const healthMarkup = hasHealth
+    ? getFloatingStatValueMarkup(healthDelta, "", {
+        showPositiveSign: !hasAttack,
+      })
+    : "";
+  return `<span class="floating-stat-change">${attackMarkup}${
+    hasAttack && hasHealth ? '<span class="floating-stat-separator" aria-hidden="true">/</span>' : ""
+  }${healthMarkup}</span>`;
+}
+
+function parseFloatingAttributeText(value) {
+  const text = String(value ?? "");
+  const pairMatch = /\+(\d+)\s*\/\s*\+?(\d+)/u.exec(text);
+  if (pairMatch) {
+    return {
+      prefix: text.slice(0, pairMatch.index),
+      suffix: text.slice(pairMatch.index + pairMatch[0].length),
+      attack: Number(pairMatch[1]),
+      health: Number(pairMatch[2]),
+    };
+  }
+  const attackMatch = /(?:攻击(?:力)?\s*([+-]\d+)|([+-]\d+)\s*攻击(?:力)?)/u.exec(text);
+  if (attackMatch) {
+    return {
+      prefix: text.slice(0, attackMatch.index),
+      suffix: text.slice(attackMatch.index + attackMatch[0].length),
+      attack: Number(attackMatch[1] ?? attackMatch[2]),
+      health: 0,
+    };
+  }
+  const healthMatch = /(?:生命(?:值)?\s*([+-]\d+)|([+-]\d+)\s*生命(?:值)?)/u.exec(text);
+  if (healthMatch) {
+    return {
+      prefix: text.slice(0, healthMatch.index),
+      suffix: text.slice(healthMatch.index + healthMatch[0].length),
+      attack: 0,
+      health: Number(healthMatch[1] ?? healthMatch[2]),
+    };
+  }
+  return null;
+}
+
+function getFloatingAttributeTextMarkup(value) {
+  const parsed = parseFloatingAttributeText(value);
+  if (!parsed) return getEscapedGameTextMarkup(value);
+  return `<span class="floating-attribute-message">${
+    parsed.prefix
+      ? `<span class="floating-attribute-context">${escapeBattleReportHtml(parsed.prefix)}</span>`
+      : ""
+  }${getFloatingStatChangeMarkup(parsed.attack, parsed.health)}${
+    parsed.suffix
+      ? `<span class="floating-attribute-context">${escapeBattleReportHtml(parsed.suffix)}</span>`
+      : ""
+  }</span>`;
+}
+
+function getFloatingAttributeAccessibleText(value) {
+  const parsed = parseFloatingAttributeText(value);
+  if (!parsed) return getStatPairAccessibleText(value);
+  const changes = [];
+  if (parsed.attack) changes.push(`${parsed.attack > 0 ? "+" : ""}${parsed.attack}攻击力`);
+  if (parsed.health) changes.push(`${parsed.health > 0 ? "+" : ""}${parsed.health}生命值`);
+  return `${parsed.prefix}${changes.join("/")}${parsed.suffix}`;
+}
+
+function getFloatingDamageMarkup(amount, damageType = "attack") {
+  const numericAmount = Math.max(0, Number(amount) || 0);
+  const tone = damageType === "true" ? "true-damage" : "damage";
+  return `<span class="floating-damage-value">${getBattleNumberMarkup(
+    `-${numericAmount}`,
+    tone,
+  )}</span>`;
+}
+
+function getSkillTriggerTagMarkup(skillName) {
+  const normalizedName = String(skillName || "技能").replace(/^【|】$/gu, "");
+  return `<strong class="skill-trigger-tag hero-skill-name-tag card-detail-ink-tag">${escapeBattleReportHtml(normalizedName)}</strong>`;
+}
+
+function renderBattlePopupMarkup(popup) {
+  const tone = String(popup?.tone || "effect");
+  if (tone === "skill") {
+    return getSkillTriggerTagMarkup(popup.text);
+  }
+  const damageMatch = /^-(\d+)$/u.exec(String(popup?.text ?? ""));
+  if (tone === "damage" && damageMatch) {
+    const amount = Number.isFinite(popup.damageAmount)
+      ? popup.damageAmount
+      : Number(damageMatch[1]);
+    const isTrueDamage = popup.damageType === "true";
+    return `<strong class="battle-value-popup damage-value-popup ${
+      isTrueDamage ? "true-damage" : "damage"
+    }" aria-label="造成${amount}点${isTrueDamage ? "真实" : "普通"}伤害">${getFloatingDamageMarkup(
+      amount,
+      popup.damageType,
+    )}</strong>`;
+  }
+  const attributeMarkup = getFloatingAttributeTextMarkup(popup?.text);
+  if (parseFloatingAttributeText(popup?.text)) {
+    return `<strong class="battle-value-popup attribute-value-popup ${escapeBattleReportHtml(
+      tone,
+    )}" aria-label="${escapeBattleReportHtml(
+      getFloatingAttributeAccessibleText(popup.text),
+    )}">${attributeMarkup}</strong>`;
+  }
+  return `<strong class="${escapeBattleReportHtml(tone)}">${getEscapedGameTextMarkup(
+    popup?.text,
+  )}</strong>`;
+}
+
+function getStatPairMarkup(markup) {
+  const bonusMarkup = String(markup ?? "").replace(
+    /(^|[^\d+])(?:\+(\d+)\s*\/\s*\+?(\d+)|(\d+)\s*\/\s*\+(\d+))/g,
+    (_match, prefix, attackWithPlus, healthAfterAttackPlus, attackBeforeHealthPlus, healthWithPlus) => {
+      const attack = attackWithPlus ?? attackBeforeHealthPlus;
+      const health = healthAfterAttackPlus ?? healthWithPlus;
+      return `${prefix}<span class="inline-stat-pair inline-stat-pair-bonus"><span class="inline-stat-value">+${attack}<img class="inline-stat-icon inline-stat-icon-attack" src="res/StatIcon/attack.png" alt="攻击力" /></span><span class="inline-stat-separator">/</span><span class="inline-stat-value">+${health}<img class="inline-stat-icon inline-stat-icon-health" src="res/StatIcon/health.png" alt="生命值" /></span></span>`;
+    },
+  );
+  return bonusMarkup.replace(
+    /(^|[^\d+\/])(\d+)\s*\/\s*(\d+)(?!\s*\/\s*\d)/g,
+    (_match, prefix, attack, health) =>
+      `${prefix}<span class="inline-stat-pair inline-stat-pair-base"><span class="inline-stat-value"><img class="inline-stat-icon inline-stat-icon-attack" src="res/StatIcon/attack.png" alt="攻击力" />${attack}</span><span class="inline-stat-separator">/</span><span class="inline-stat-value"><img class="inline-stat-icon inline-stat-icon-health" src="res/StatIcon/health.png" alt="生命值" />${health}</span></span>`,
+  );
+}
+
+function getInlineStatTermIconMarkup(statName) {
+  const iconName = statName === "攻击力" ? "attack" : "health";
+  return `<img class="inline-stat-icon inline-stat-term-icon inline-stat-icon-${iconName}" src="res/StatIcon/${iconName}.png" alt="${statName}" />`;
+}
+
+function getInlineExperienceIconMarkup() {
+  return '<img class="inline-experience-icon" src="res/StatIcon/experience.png" alt="经验值" />';
+}
+
+function getExperienceDescriptionMarkup(markup) {
+  return String(markup ?? "")
+    .split(/(<[^>]+>)/g)
+    .map((part, index) =>
+      index % 2 === 0 ? part.replaceAll("经验值", getInlineExperienceIconMarkup()) : part,
+    )
+    .join("");
+}
+
+function getInlineStatTermPairMarkup() {
+  return `<span class="inline-stat-pair inline-stat-term-pair">${getInlineStatTermIconMarkup("攻击力")}<span class="inline-stat-separator">/</span>${getInlineStatTermIconMarkup("生命值")}</span>`;
+}
+
+function getStatTermReplacementMarkup(statTerm) {
+  if (statTerm === "攻血") return getInlineStatTermPairMarkup();
+  if (statTerm === "面板攻击") {
+    return `面板${getInlineStatTermIconMarkup("攻击力")}`;
+  }
+  if (statTerm.startsWith("当前生命")) {
+    return `当前${getInlineStatTermIconMarkup("生命值")}`;
+  }
+  return getInlineStatTermIconMarkup(statTerm);
+}
+
+function getPercentBeforeAttackIconMarkup(markup) {
+  return String(markup ?? "").replace(
+    /攻击力(\s*)(<span\b(?=[^>]*\bhero-skill-scaled-value\b)[^>]*>\s*\d+(?:\.\d+)?%\s*<\/span>|\d+(?:\.\d+)?%)/g,
+    (_match, spacing, percentageMarkup) =>
+      `${percentageMarkup}${spacing}${getInlineStatTermIconMarkup("攻击力")}`,
+  );
+}
+
+function getStatDescriptionMarkup(markup) {
+  return getPercentBeforeAttackIconMarkup(getStatPairMarkup(markup))
+    .split(/(<[^>]+>)/g)
+    .map((part, index) =>
+      index % 2 === 0
+        ? part.replace(
+            /攻血|当前生命(?:值)?|攻击力|生命值|面板攻击(?=和)/g,
+            (statTerm) => getStatTermReplacementMarkup(statTerm),
+          )
+        : part,
+    )
+    .join("");
+}
+
+function getEscapedGameTextMarkup(value) {
+  return getStatPairMarkup(escapeBattleReportHtml(value));
+}
+
+function getEscapedStatDescriptionMarkup(value) {
+  return getStatDescriptionMarkup(escapeBattleReportHtml(value));
+}
+
+function getStatPairAccessibleText(value) {
+  const bonusText = String(value ?? "").replace(
+    /(^|[^\d+])(?:\+(\d+)\s*\/\s*\+?(\d+)|(\d+)\s*\/\s*\+(\d+))/g,
+    (_match, prefix, attackWithPlus, healthAfterAttackPlus, attackBeforeHealthPlus, healthWithPlus) => {
+      const attack = attackWithPlus ?? attackBeforeHealthPlus;
+      const health = healthAfterAttackPlus ?? healthWithPlus;
+      return `${prefix}+${attack}攻击力/+${health}生命值`;
+    },
+  );
+  const baseText = bonusText.replace(
+    /(^|[^\d+\/])(\d+)\s*\/\s*(\d+)(?!\s*\/\s*\d)/g,
+    (_match, prefix, attack, health) => `${prefix}${attack}攻击力/${health}生命值`,
+  );
+  return baseText
+    .replaceAll("攻血", "攻击力/生命值")
+    .replace(/面板攻击(?=和生命值)/g, "面板攻击力")
+    .replace(/当前生命(?!值)/g, "当前生命值");
+}
+
+function normalizeBondDescription(value) {
+  return String(value ?? "")
+    .replace(/([魏蜀吴群])将/g, "$1武将")
+    .replaceAll("。", "");
+}
+
+function getBondDescriptionMarkup(value) {
+  const factionMarkup = escapeBattleReportHtml(normalizeBondDescription(value)).replace(
+    /([魏蜀吴群])(?=武将)/g,
+    (faction) => `<span class="bond-faction-word" data-faction="${faction}">${faction}</span>`,
+  );
+  return getStatPairMarkup(getDerivedContentHighlightedMarkup(factionMarkup));
 }
 
 function escapeRegExp(value) {
@@ -8516,7 +11520,7 @@ function formatBattleReportMessage(message, entry = {}, battleSidesByName = new 
   placeholders.forEach((html, index) => {
     output = output.replace(`\uE000${index}\uE001`, html);
   });
-  return output;
+  return getStatPairMarkup(output);
 }
 
 function renderBattleReportEntry(entry, battleSidesByName) {
@@ -8732,23 +11736,27 @@ function getSelectedBattleSnapshot(battle) {
 }
 
 function getBattleUnitStatusEntries(unit) {
-  const statusIds = Object.entries(unit.statuses ?? {})
-    .filter(([, status]) => Boolean(status))
-    .map(([statusId]) => statusId);
-  if (unit.skillDisabled) statusIds.push("skill-disabled");
-  return [...new Set(statusIds)]
-    .sort((left, right) => {
-      const leftIndex = STATUS_PRESENTATION_ORDER.indexOf(left);
-      const rightIndex = STATUS_PRESENTATION_ORDER.indexOf(right);
-      return (
-        (leftIndex < 0 ? STATUS_PRESENTATION_ORDER.length : leftIndex) -
-        (rightIndex < 0 ? STATUS_PRESENTATION_ORDER.length : rightIndex)
-      );
-    })
-    .map((statusId) => ({
-      id: STATUS_LABELS[statusId] ? statusId : "unknown",
-      label: STATUS_LABELS[statusId] ?? statusId,
-    }));
+  const statusId = getUnitStatusId(unit);
+  const effectIds = [statusId, unit.skillDisabled ? "skill-disabled" : null].filter(Boolean);
+  return effectIds
+    .map((statusId) => {
+      const statusData = unit.statuses?.[statusId] ?? {};
+      let description = STATUS_DESCRIPTIONS[statusId] ?? "当前单位正在受到此状态影响。";
+      if (statusId === "intimidated" && statusData.spent) {
+        description += " 当前标记已消耗。";
+      }
+      if (statusId === "unparalleled" && Number.isFinite(statusData.targetCount)) {
+        description = `免疫后续负面状态；只有新的正面状态可以覆盖无双；普通攻击会对目标后方最近的 ${statusData.targetCount} 名单位造成本次普攻最终伤害 30% 的追加伤害。`;
+      }
+      if (statusId === "rest" && Number.isFinite(statusData.amount)) {
+        description = `其他友军完成普通攻击后，自身 +${statusData.amount} 生命；自己的交锋不会触发自身休整；将获得负面状态时，清除休整并阻止该负面状态。`;
+      }
+      return {
+        id: STATUS_LABELS[statusId] ? statusId : "unknown",
+        label: STATUS_LABELS[statusId] ?? statusId,
+        description,
+      };
+    });
 }
 
 function getBattleUnitStatusNames(unit) {
@@ -8757,13 +11765,18 @@ function getBattleUnitStatusNames(unit) {
 
 function getBattleSnapshotCardUnit(unit, exchange) {
   const definition = CARD_POOLS.hero.find((hero) => hero.name === unit.name) ?? {};
+  const derivedUnitDefinition = DERIVED_UNIT_DEFINITION_BY_NAME[unit.name] ?? {};
   return {
     ...definition,
     ...unit,
     image: unit.image ?? definition.image ?? HERO_IMAGE_BY_NAME[unit.name] ?? "",
-    skill: unit.skill ?? definition.skill ?? "",
+    skill: unit.skill || definition.skill || derivedUnitDefinition.skill || "",
     effectId:
-      unit.effectId ?? definition.effectId ?? unit.skillEffectIds?.[0] ?? null,
+      unit.effectId ??
+      definition.effectId ??
+      unit.skillEffectIds?.[0] ??
+      derivedUnitDefinition.effectId ??
+      null,
     equipment: cloneDirectModifier(unit.equipment),
     statuses: cloneDirectModifier(unit.statuses ?? {}),
     extraFactions: [...(unit.extraFactions ?? [])],
@@ -8786,8 +11799,34 @@ function getBattleTeamCardSlots(units, side) {
     () => null,
   );
   return side === "player"
-    ? [...emptySlots, ...visibleUnits]
-    : [...visibleUnits, ...emptySlots];
+      ? [...emptySlots, ...visibleUnits]
+      : [...visibleUnits, ...emptySlots];
+}
+
+function getBattleTeamSlotMap(units, side) {
+  return new Map(
+    getBattleTeamCardSlots(units ?? [], side)
+      .map((unit, slotIndex) => (unit ? [unit.id, slotIndex] : null))
+      .filter(Boolean),
+  );
+}
+
+function getBattleAdvanceMovements(beforeSnapshot, afterSnapshot) {
+  return ["player", "enemy"].flatMap((side) => {
+    const beforeSlots = getBattleTeamSlotMap(beforeSnapshot?.[side] ?? [], side);
+    const afterSlots = getBattleTeamSlotMap(afterSnapshot?.[side] ?? [], side);
+    return [...afterSlots.entries()]
+      .filter(
+        ([unitId, toSlot]) =>
+          beforeSlots.has(unitId) && beforeSlots.get(unitId) !== toSlot,
+      )
+      .map(([unitId, toSlot]) => ({
+        unitId,
+        side,
+        fromSlot: beforeSlots.get(unitId),
+        toSlot,
+      }));
+  });
 }
 
 function renderBattleTeams(battle) {
@@ -8899,17 +11938,64 @@ function selectNextBattleExchange() {
     ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-function getBattleAnimationSteps(battle) {
-  if (Array.isArray(battle.presentationTimeline) && battle.presentationTimeline.length > 0) {
-    if (
-      !Array.isArray(battle.animationSteps) ||
-      battle.animationSteps.length !== battle.presentationTimeline.length ||
-      battle.animationSteps[0]?.id !== battle.presentationTimeline[0]?.id
-    ) {
-      battle.animationSteps = battle.presentationTimeline.map((step) => ({
+function getBattleAnimationVisibleSnapshot(snapshot, removedUnitIds) {
+  if (!snapshot || removedUnitIds.size === 0) return snapshot;
+  return {
+    ...snapshot,
+    player: (snapshot.player ?? []).filter(
+      (unit) => !removedUnitIds.has(unit.id),
+    ),
+    enemy: (snapshot.enemy ?? []).filter(
+      (unit) => !removedUnitIds.has(unit.id),
+    ),
+  };
+}
+
+function buildBattleAnimationSteps(presentationTimeline) {
+  const removedUnitIds = new Set();
+  const steps = [];
+  presentationTimeline.forEach((step) => {
+    const isLeaveTransition = step.kind === "leave";
+    const isSkippedAnimationStep = Boolean(step.animationSkip);
+    const isDuplicateConsumedDeath = (step.entries ?? []).some(
+      (entry) => entry.type === "death" && step.kind === "consume",
+    );
+    if (!isLeaveTransition && !isSkippedAnimationStep && !isDuplicateConsumedDeath) {
+      steps.push({
         ...step,
         entries: (step.entries ?? []).filter((entry) => !entry.animationSkip),
-      }));
+        beforeSnapshot: getBattleAnimationVisibleSnapshot(
+          step.beforeSnapshot,
+          removedUnitIds,
+        ),
+        snapshot: getBattleAnimationVisibleSnapshot(
+          step.snapshot,
+          removedUnitIds,
+        ),
+        afterSnapshot: getBattleAnimationVisibleSnapshot(
+          step.afterSnapshot,
+          removedUnitIds,
+        ),
+      });
+    }
+    (step.deathIds ?? []).forEach((unitId) => removedUnitIds.add(unitId));
+  });
+  return steps;
+}
+
+function getBattleAnimationSteps(battle) {
+  if (Array.isArray(battle.presentationTimeline) && battle.presentationTimeline.length > 0) {
+    const timelineVersion = `${battle.presentationTimeline.length}:${
+      battle.presentationTimeline.at(-1)?.id ?? ""
+    }`;
+    if (
+      !Array.isArray(battle.animationSteps) ||
+      battle.animationTimelineVersion !== timelineVersion
+    ) {
+      battle.animationSteps = buildBattleAnimationSteps(
+        battle.presentationTimeline,
+      );
+      battle.animationTimelineVersion = timelineVersion;
     }
     return battle.animationSteps;
   }
@@ -8981,6 +12067,7 @@ function getBattleAnimationPhaseLabel(step) {
   if (step.kind === "ready") return "战斗准备";
   if (step.kind === "clash") return `第 ${step.exchange} 轮 · 同时交锋`;
   if (step.kind === "exchange") return `第 ${step.exchange} 轮交锋`;
+  if (step.kind === "advance") return `第 ${step.exchange} 轮 · 阵容补位`;
   if (step.kind === "result") return "战斗结果";
   if (step.kind === "death" || step.kind === "consume" || step.kind === "leave") {
     return Number.isInteger(step.exchange) && step.exchange > 0
@@ -9039,7 +12126,7 @@ function renderBattleAnimationContextRow(step, position) {
       </div>
     `;
   }
-  const title = escapeBattleReportHtml(step.title || step.description || "战斗操作");
+  const title = getEscapedGameTextMarkup(step.title || step.description || "战斗操作");
   return `
     <div class="battle-animation-context-row is-${position}"${currentAttribute}>
       <span class="battle-animation-context-position">${labels[position]}</span>
@@ -9178,9 +12265,9 @@ function getBattleAnimationFieldState(battle, step, snapshot) {
       collection.push({ id: null, name });
     }
   };
-  const addPopup = (id, name, text, tone = "effect") => {
+  const addPopup = (id, name, text, tone = "effect", details = {}) => {
     if (!text || (!id && !name)) return;
-    popups.push({ id: id ?? null, name: name ?? null, text, tone });
+    popups.push({ id: id ?? null, name: name ?? null, text, tone, ...details });
   };
   const findStepUnit = (unitId) =>
     ["player", "enemy"]
@@ -9200,7 +12287,7 @@ function getBattleAnimationFieldState(battle, step, snapshot) {
     addIdentity(deaths, unitId, findStepUnit(unitId)?.name),
   );
   (step.cues ?? []).forEach((cue) =>
-    addPopup(cue.unitId, findStepUnit(cue.unitId)?.name, cue.text, cue.tone),
+    addPopup(cue.unitId, findStepUnit(cue.unitId)?.name, cue.text, cue.tone, cue),
   );
 
   (step.entries ?? []).forEach((entry) => {
@@ -9229,6 +12316,10 @@ function getBattleAnimationFieldState(battle, step, snapshot) {
         entry.targetName,
         `-${entry.damage}`,
         "damage",
+        {
+          damageAmount: entry.damage,
+          damageType: entry.damageType,
+        },
       );
     } else if (entry.type === "status") {
       addPopup(
@@ -9305,6 +12396,7 @@ function getBattleAnimationFieldState(battle, step, snapshot) {
       step.effectName ||
       getBattleAnimationEffectName((step.entries ?? [])[0]) ||
       step.title,
+    movements: step.movements ?? [],
     triggeredBonds: getBattleAnimationTriggeredBonds(step, snapshot),
   };
 }
@@ -9327,6 +12419,9 @@ function renderBattleAnimationFieldCard(unit, side, exchange, fieldState, slotIn
   const isSource = battleAnimationIdentityMatches(unit, fieldState.sources);
   const isTarget = battleAnimationIdentityMatches(unit, fieldState.targets);
   const isDead = battleAnimationIdentityMatches(unit, fieldState.deaths);
+  const movement = (fieldState.movements ?? []).find(
+    (entry) => entry.unitId === unit.id && entry.side === side,
+  );
   const isClashing =
     fieldState.ally?.id === unit.id || fieldState.foe?.id === unit.id;
   const unitPopups = fieldState.popups.filter((popup) =>
@@ -9339,19 +12434,29 @@ function renderBattleAnimationFieldCard(unit, side, exchange, fieldState, slotIn
         isSource ? " is-source" : ""
       }${isTarget ? " is-target" : ""}${isClashing ? " is-clashing" : ""}${
         isDead ? " is-defeated" : ""
-      }"
+      }${movement ? " is-advancing" : ""}"
       data-unit-id="${escapeBattleReportHtml(unit.id)}"
+      ${
+        movement
+          ? `style="--battle-advance-offset: ${movement.fromSlot - movement.toSlot};"`
+          : ""
+      }
     >
       <div class="battle-field-card">
         ${createHeroCardMarkup(cardUnit, { battleSnapshot: true })}
       </div>
+      ${
+        isDead
+          ? `<div class="battle-field-smoke" aria-hidden="true">${Array.from(
+              { length: 7 },
+              () => "<i></i>",
+            ).join("")}</div>`
+          : ""
+      }
       <div class="battle-field-popups">
         ${unitPopups
           .map(
-            (popup) =>
-              `<strong class="${escapeBattleReportHtml(
-                popup.tone,
-              )}">${escapeBattleReportHtml(popup.text)}</strong>`,
+            (popup) => renderBattlePopupMarkup(popup),
           )
           .join("")}
       </div>
@@ -9380,8 +12485,8 @@ function renderBattleAnimationFieldBonds(
 ) {
   const activeBonds = BOND_FACTIONS.map((faction) => ({
     faction,
-    level: battle.lockedBonds?.[side]?.[faction] ?? 0,
-  })).filter((entry) => entry.level > 0);
+    effectCount: battle.lockedBonds?.[side]?.[faction] ?? 0,
+  })).filter((entry) => entry.effectCount > 0);
   const sideLabel = side === "player" ? "我方" : "敌方";
   if (activeBonds.length === 0) {
     return `<div class="battle-field-bonds empty" aria-label="${sideLabel}无激活羁绊">无激活羁绊</div>`;
@@ -9389,10 +12494,10 @@ function renderBattleAnimationFieldBonds(
   return `
     <div class="battle-field-bonds" aria-label="${sideLabel}激活羁绊">
       ${activeBonds
-        .map(({ faction, level }) => {
+        .map(({ faction, effectCount }) => {
           const bond = BOND_RULES[faction];
           const triggered = fieldState.triggeredBonds?.[side]?.includes(faction);
-          const levelLabel = level >= 4 ? "LVMAX" : `LV${level}`;
+          const effectLabel = `${effectCount}人效果`;
           const weiProgress =
             faction === "魏"
               ? `<span class="battle-field-bond-progress">召唤 ${getBattleAnimationWeiProgress(
@@ -9406,17 +12511,17 @@ function renderBattleAnimationFieldBonds(
               class="battle-field-bond${triggered ? " is-triggered" : ""}"
               data-faction="${faction}"
               aria-label="${escapeBattleReportHtml(
-                `${bond.label} ${levelLabel}：${bond.effects[level]}${
+                `${bond.label} ${effectLabel}：${bond.effects[effectCount]}${
                   triggered ? "，当前正在触发" : ""
                 }`,
               )}"
             >
               <div class="battle-field-bond-title">
                 <strong>${escapeBattleReportHtml(bond.label)}</strong>
-                <em>${levelLabel}</em>
+                <em>${effectLabel}</em>
                 ${weiProgress}
               </div>
-              <p>${escapeBattleReportHtml(bond.effects[level])}</p>
+              <p>${getBondDescriptionMarkup(bond.effects[effectCount])}</p>
             </article>
           `;
         })
@@ -9487,33 +12592,14 @@ function renderBattleAnimationFatePanel(
 function renderBattleAnimationBattlefield(battle, step) {
   const snapshot = getBattleAnimationSnapshot(battle, step);
   const fieldState = getBattleAnimationFieldState(battle, step, snapshot);
-  const summary = (step.entries ?? []).find((entry) => entry.type === "round-summary");
-  const clash = (step.entries ?? []).find((entry) => entry.type === "exchange");
   const resultClass =
     battle.result === "win" ? "win" : battle.result === "loss" ? "loss" : "draw";
   const centerContent =
-    step.kind === "exchange" || step.kind === "clash"
-      ? `
-        <div class="battle-field-impact" aria-hidden="true"><span>交锋</span></div>
-        <small>${clash?.damageToEnemy?.finalAmount ?? summary?.damageToEnemy?.finalAmount ?? 0} ↔ ${
-          clash?.damageToPlayer?.finalAmount ?? summary?.damageToPlayer?.finalAmount ?? 0
-        }</small>
-      `
-      : step.kind === "result"
-        ? `<div class="battle-field-result-mark ${resultClass}">${
-            battle.result === "win" ? "胜" : battle.result === "loss" ? "败" : "平"
-          }</div>`
-        : `
-          <span class="battle-field-effect-title">${escapeBattleReportHtml(
-            fieldState.effectName,
-          )}</span>
-          <small>${escapeBattleReportHtml(
-            step.description ||
-              (step.kind === "damage"
-                ? "本段伤害完成后再进入下一段"
-                : "当前效果独立结算"),
-          )}</small>
-        `;
+    step.kind === "result"
+      ? `<div class="battle-field-result-mark ${resultClass}">${
+          battle.result === "win" ? "胜" : battle.result === "loss" ? "败" : "平"
+        }</div>`
+      : "";
   return `
     <div class="battle-animation-field">
       ${renderBattleAnimationFatePanel(
@@ -9545,9 +12631,11 @@ function renderBattleAnimationBattlefield(battle, step) {
           fieldState,
         )}
       </div>
-      <div class="battle-field-center ${step.kind}">
-        ${centerContent}
-      </div>
+      ${
+        centerContent
+          ? `<div class="battle-field-center ${step.kind}">${centerContent}</div>`
+          : ""
+      }
       ${
         step.kind === "result"
           ? `<div class="battle-field-result-copy ${resultClass}">
@@ -9558,6 +12646,50 @@ function renderBattleAnimationBattlefield(battle, step) {
       }
     </div>
   `;
+}
+
+function getBattleSkillAudioCue(step) {
+  const key = String(step?.effectId || step?.effectName || step?.title || "battle-skill");
+  let hash = 0;
+  for (let index = 0; index < key.length; index += 1) {
+    hash = (hash * 31 + key.charCodeAt(index)) >>> 0;
+  }
+  return `battleSkill${(hash % 5) + 1}`;
+}
+
+function playBattleAnimationStepAudio(battle, step) {
+  if (!battle || !step || battle.view !== "animation" || battle.lastAudioStepId === step.id) {
+    return;
+  }
+  battle.lastAudioStepId = step.id;
+
+  let cueName = null;
+  if (step.kind === "ready") {
+    cueName = "battleReady";
+  } else if (step.kind === "clash" || step.kind === "exchange") {
+    cueName = "battleClash";
+  } else if (step.kind === "damage") {
+    cueName = "battleDamage";
+  } else if (step.kind === "death" || step.kind === "consume") {
+    cueName = "battleDeath";
+  } else if (step.kind === "advance") {
+    cueName = "cardMove";
+  } else if (["skill", "bond", "equipment", "effect"].includes(step.kind)) {
+    cueName = getBattleSkillAudioCue(step);
+  } else if (step.kind === "result") {
+    cueName =
+      battle.result === "win"
+        ? "battleVictory"
+        : battle.result === "loss"
+          ? "battleDefeat"
+          : "uiCancel";
+  } else if ((step.entries ?? []).some((entry) => entry.type === "damage")) {
+    cueName = "battleDamage";
+  }
+
+  if (!cueName) return;
+  const speed = getBattleAnimationSpeed(battle.animationSpeed);
+  playAudioCue(cueName, { playbackRate: Math.min(1.25, 1 + (speed - 1) * 0.05) });
 }
 
 function getBattleAnimationSpeed(value) {
@@ -9658,6 +12790,7 @@ function setBattleAnimationSpeedFromControl() {
   }
   battleAnimationPlaybackSpeed = speed;
   if (battle) battle.animationSpeed = speed;
+  playAudioCue("battleSpeed");
   syncBattleAnimationSpeedControl(battle);
   applyBattleAnimationPlaybackSpeed(speed);
   if (battle?.animationPlaying && battle.view === "animation") {
@@ -9705,6 +12838,7 @@ function renderBattleAnimationStep(battle) {
   );
   elements.battleAnimationPrevious.disabled = battle.animationIndex === 0;
   elements.battleAnimationNext.disabled = battle.animationIndex >= steps.length - 1;
+  playBattleAnimationStepAudio(battle, step);
   const playLabel = battle.animationPlaying
     ? "暂停"
     : battle.animationIndex >= steps.length - 1
@@ -9758,6 +12892,7 @@ function replayBattleAnimation() {
   if (!battle) return;
   battle.animationIndex = 0;
   battle.animationPlaying = true;
+  battle.lastAudioStepId = null;
   setBattleView("animation");
   renderBattleAnimationStep(battle);
 }
@@ -9809,7 +12944,7 @@ function renderBattle() {
   elements.battleTitle.textContent = resultLabel;
   elements.battleSummary.textContent =
     state.playerDataTest?.status === "completed"
-      ? "第 20 回合玩家阵容数据已记录并导出；本局继续按生命与旗帜条件进行。"
+      ? "第 20 回合玩家阵容数据已记录并导出；查看完本场战斗后即可完成本局测试。"
       : "本场使用商店阵容的独立副本；结算完成后不会回写任何战斗状态。";
   renderBattleTeams(battle);
   elements.battleLog.innerHTML = renderBattleReport(battle, battle.selectedExchange);
@@ -9826,23 +12961,52 @@ function renderBattle() {
     : "进入下一回合";
 }
 
+function playGameResultAudio(outcome) {
+  const outcomeKey = `${outcome}:${state.round}`;
+  if (audioRuntime.lastGameOutcomeKey === outcomeKey) return;
+  audioRuntime.lastGameOutcomeKey = outcomeKey;
+  playAudioCue(
+    outcome === "victory"
+      ? "gameVictory"
+      : outcome === "defeat"
+        ? "battleDefeat"
+        : "rewardClaim",
+  );
+}
+
 function renderGameResult() {
   if (!elements.gameResultOverlay) return;
   const outcome = state.gameOver ? state.gameOutcome : null;
   const isVictory = outcome === "victory";
   const isDefeat = outcome === "defeat";
-  document.body.classList.toggle("game-result-visible", isVictory || isDefeat);
-  elements.gameResultOverlay.hidden = !isVictory && !isDefeat;
-  if (!isVictory && !isDefeat) return;
+  const isTestComplete = outcome === "test-complete";
+  const hasOutcome = isVictory || isDefeat || isTestComplete;
+  document.body.classList.toggle("game-result-visible", hasOutcome);
+  elements.gameResultOverlay.hidden = !hasOutcome;
+  if (!hasOutcome) {
+    audioRuntime.lastGameOutcomeKey = null;
+    return;
+  }
+  playGameResultAudio(outcome);
 
   elements.gameResultDialog.classList.toggle("victory", isVictory);
   elements.gameResultDialog.classList.toggle("defeat", isDefeat);
-  elements.gameResultKicker.textContent = isVictory ? "十旗定鼎 · 战局终结" : "心火尽灭 · 战局终结";
-  elements.gameResultTitle.textContent = isVictory ? "问鼎中原" : "本局落败";
-  elements.gameResultSeal.textContent = isVictory ? "胜" : "败";
+  elements.gameResultKicker.textContent = isVictory
+    ? "百旗定鼎 · 战局终结"
+    : isDefeat
+      ? "心火尽灭 · 战局终结"
+      : "二十回合 · 测试完成";
+  elements.gameResultTitle.textContent = isVictory
+    ? "问鼎中原"
+    : isDefeat
+      ? "本局落败"
+      : "测试完成";
+  elements.gameResultSeal.textContent = isVictory ? "胜" : isDefeat ? "败" : "成";
   elements.gameResultMessage.textContent = isVictory
     ? `第 ${state.round} 回合集齐 ${FLAG_VICTORY_TARGET} 面旗帜，你赢得了本局。`
-    : `生命在第 ${state.round} 回合归零，本局征途到此为止。`;
+    : isDefeat
+      ? `生命在第 ${state.round} 回合归零，本局征途到此为止。`
+      : `第 ${PLAYER_DATA_TEST_MAX_ROUND} 回合战斗已经结算，玩家阵容测试数据已完成。`;
 
   const stats = [
     ["最终回合", state.round],
@@ -9880,13 +13044,40 @@ function renderGameResult() {
     elements.gameResultLineup.append(slot);
   });
 
-  const activeBonds = getBondEntries().filter((entry) => entry.level > 0);
+  const activeBonds = getBondEntries().filter((entry) => entry.effectCount > 0);
   elements.gameResultBondSummary.textContent =
     activeBonds.length > 0
       ? activeBonds
-          .map((entry) => `${BOND_RULES[entry.faction].label} ${entry.count}人 · LV${entry.level}`)
+          .map(
+            (entry) =>
+              `${BOND_RULES[entry.faction].label} ${entry.count}人 · 使用${entry.effectCount}人效果`,
+          )
           .join("　")
       : "未激活羁绊";
+}
+
+function renderRoundReward() {
+  if (!elements.roundRewardOverlay) return;
+  const pending = state.pendingRoundReward;
+  const collapsed = Boolean(pending && state.roundRewardCollapsed);
+  elements.roundRewardOverlay.hidden = !pending || collapsed;
+  if (elements.roundRewardCollapsedBar) {
+    elements.roundRewardCollapsedBar.hidden = !collapsed;
+  }
+  elements.shopStage?.toggleAttribute("inert", collapsed);
+  if (!pending) return;
+
+  elements.roundRewardOptions.replaceChildren();
+  elements.roundRewardTitle.textContent = ROUND_REWARD_TITLES[pending.round] ?? "回合奖励";
+  pending.candidates.forEach((candidate, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "reward-option";
+    button.setAttribute("aria-label", `选择${candidate.name}作为回合奖励`);
+    button.innerHTML = createItemCardMarkup({ ...candidate, cost: 0, rewardItem: true });
+    button.addEventListener("click", () => chooseRoundRewardCard(index));
+    elements.roundRewardOptions.append(button);
+  });
 }
 
 function renderRewardChoice() {
@@ -9906,7 +13097,6 @@ function renderRewardChoice() {
   setBondSelectionHintSource("shop-focus", []);
   setBondSelectionHintSource("shop-drag", []);
 
-  elements.rewardTitle.textContent = `${reward.unitName} 升到 ${reward.level} 级：选择1名${reward.rewardTier}阶武将`;
   elements.rewardOptions.replaceChildren();
   reward.candidates.forEach((candidate, index) => {
     const button = document.createElement("button");
@@ -9936,23 +13126,27 @@ function renderStratagemChoice() {
 
   if (heroPending) {
     elements.stratagemChoiceTitle.textContent = `${heroPending.ownerName}【广识】：选择额外羁绊`;
-    elements.stratagemChoiceDescription.textContent =
-      `选择一名友军及其本局永久获得的额外羁绊，并使目标 +${heroPending.statBonus}/+${heroPending.statBonus}；购买成功后的选择不可取消。`;
+    elements.stratagemChoiceDescription.innerHTML = getEscapedGameTextMarkup(
+      "选择1名其他友军，为其及本局全部同名武将添加1个额外羁绊；购买成功后的选择不可取消。",
+    );
     elements.stratagemChoiceOptions.replaceChildren();
     heroPending.options.forEach((option, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = `stratagem-bond-option bond-${option.faction}`;
-      button.innerHTML = `<strong>${option.unitName} · ${BOND_RULES[option.faction].label}</strong><span>永久添加${option.faction}羁绊，并 +${heroPending.statBonus}/+${heroPending.statBonus}</span>`;
+      button.innerHTML = `<strong>${option.unitName} · ${BOND_RULES[option.faction].label}</strong><span>本局永久添加${option.faction}羁绊，同名武将同步</span>`;
       button.addEventListener("click", () => selectHeroBondChoice(index));
       elements.stratagemChoiceOptions.append(button);
     });
-    elements.stratagemChoiceCancelButton.hidden = true;
+    elements.stratagemChoiceCancelButton.hidden = !heroPending.cancelable;
+    elements.stratagemChoiceCancelButton.textContent = "暂不使用";
     return;
   }
 
   elements.stratagemChoiceTitle.textContent = `${pending.cardName}：选择羁绊`;
-  elements.stratagemChoiceDescription.textContent = pending.choiceDescription;
+  elements.stratagemChoiceDescription.innerHTML = getEscapedGameTextMarkup(
+    pending.choiceDescription,
+  );
   elements.stratagemChoiceOptions.replaceChildren();
   pending.availableFactions.forEach((faction) => {
     const button = document.createElement("button");
@@ -9973,10 +13167,12 @@ function renderStratagemChoice() {
     button.addEventListener("click", () => selectStratagemBondChoice(faction));
     elements.stratagemChoiceOptions.append(button);
   });
-  elements.stratagemChoiceCancelButton.hidden = false;
+  elements.stratagemChoiceCancelButton.hidden = Boolean(pending.generated);
+  elements.stratagemChoiceCancelButton.textContent = "取消使用";
 }
 
 function render() {
+  hideAdaptiveCardDetails();
   const shopRule = getShopRule(state.round);
   elements.roundText.textContent = state.round;
   elements.phaseText.textContent =
@@ -9998,12 +13194,17 @@ function render() {
     state.gold < REFRESH_COST ||
     state.pendingRewards.length > 0 ||
     Boolean(state.pendingStratagemUse) ||
-    Boolean(state.pendingHeroBondChoice);
+    Boolean(state.pendingHeroBondChoice) ||
+    Boolean(state.pendingRoundReward);
   elements.endTurnButton.disabled =
     state.phase !== "shop" ||
     state.pendingRewards.length > 0 ||
     Boolean(state.pendingStratagemUse) ||
-    Boolean(state.pendingHeroBondChoice);
+    Boolean(state.pendingHeroBondChoice) ||
+    Boolean(state.pendingRoundReward);
+  const shopBlocked = Boolean(state.pendingRoundReward);
+  elements.shopGrid?.toggleAttribute("inert", shopBlocked);
+  elements.lineupGrid?.toggleAttribute("inert", shopBlocked);
   renderFlow();
   renderBonds();
   renderShop();
@@ -10011,16 +13212,21 @@ function render() {
   renderLogs();
   renderBattle();
   renderGameResult();
+  renderRoundReward();
   renderRewardChoice();
   renderStratagemChoice();
   playQueuedShopPresentations();
   playQueuedBondUpgradeCelebrations();
+  syncGameAudioScene();
 }
 
 elements.refreshButton.addEventListener("click", () => refreshShop());
 elements.endTurnButton.addEventListener("click", endTurn);
 elements.codexButton?.addEventListener("click", openCodex);
-elements.fullscreenButton?.addEventListener("click", togglePageFullscreen);
+elements.fullscreenButton?.addEventListener("click", () => {
+  playAudioCue("uiConfirm");
+  togglePageFullscreen();
+});
 document.addEventListener("fullscreenchange", updateFullscreenButton);
 document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
 updateFullscreenButton();
@@ -10029,6 +13235,7 @@ elements.codexTypeFilters?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-codex-type]");
   if (!button) return;
   codexFilters.type = button.dataset.codexType;
+  playAudioCue("uiTab");
   renderCodex();
 });
 elements.codexTierFilters?.addEventListener("click", (event) => {
@@ -10036,33 +13243,48 @@ elements.codexTierFilters?.addEventListener("click", (event) => {
   if (!button) return;
   if (button.dataset.codexTier === "全部") {
     codexFilters.tier = "全部";
+    playAudioCue("uiTab");
     renderCodex();
     return;
   }
   const tier = Number.parseInt(button.dataset.codexTier ?? "", 10);
   if (!Number.isInteger(tier)) return;
   codexFilters.tier = tier;
+  playAudioCue("uiTab");
   renderCodex();
 });
 elements.codexFactionFilters?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-codex-faction]");
   if (!button) return;
   codexFilters.faction = button.dataset.codexFaction;
+  playAudioCue("uiTab");
   renderCodex();
 });
 elements.codexOverlay?.addEventListener("click", (event) => {
   if (event.target === elements.codexOverlay) closeCodex();
 });
-elements.nextExchangeButton?.addEventListener("click", selectNextBattleExchange);
+elements.nextExchangeButton?.addEventListener("click", () => {
+  playAudioCue("uiTab");
+  selectNextBattleExchange();
+});
 elements.continueButton?.addEventListener("click", startNextRound);
 elements.gameResultRestartButton?.addEventListener("click", resetDemo);
-elements.battleAnimationTab?.addEventListener("click", () => setBattleView("animation"));
-elements.battleReportTab?.addEventListener("click", () => setBattleView("report"));
+elements.battleAnimationTab?.addEventListener("click", () => {
+  playAudioCue("uiTab");
+  setBattleView("animation");
+});
+elements.battleReportTab?.addEventListener("click", () => {
+  playAudioCue("uiTab");
+  setBattleView("report");
+});
 elements.battleAnimationPrevious?.addEventListener("click", () => {
   const battle = state.battle;
   if (battle) setBattleAnimationIndex((battle.animationIndex ?? 0) - 1);
 });
-elements.battleAnimationPlay?.addEventListener("click", toggleBattleAnimationPlayback);
+elements.battleAnimationPlay?.addEventListener("click", () => {
+  playAudioCue("uiConfirm");
+  toggleBattleAnimationPlayback();
+});
 elements.battleAnimationFastForward?.addEventListener(
   "click",
   cycleBattleAnimationSpeed,
@@ -10087,7 +13309,10 @@ elements.battleLog?.addEventListener("click", (event) => {
   const round = event.target.closest(".battle-report-round");
   if (!round) return;
   const exchange = Number.parseInt(round.dataset.exchange ?? "", 10);
-  if (Number.isInteger(exchange)) selectBattleExchange(exchange);
+  if (Number.isInteger(exchange)) {
+    playAudioCue("uiTab");
+    selectBattleExchange(exchange);
+  }
 });
 elements.battleLog?.addEventListener("keydown", (event) => {
   if (event.key !== "Enter" && event.key !== " ") return;
@@ -10095,10 +13320,15 @@ elements.battleLog?.addEventListener("keydown", (event) => {
   if (!round) return;
   event.preventDefault();
   const exchange = Number.parseInt(round.dataset.exchange ?? "", 10);
-  if (Number.isInteger(exchange)) selectBattleExchange(exchange);
+  if (Number.isInteger(exchange)) {
+    playAudioCue("uiTab");
+    selectBattleExchange(exchange);
+  }
 });
 elements.rewardSkipButton?.addEventListener("click", skipUpgradeReward);
-elements.stratagemChoiceCancelButton?.addEventListener("click", cancelStratagemChoice);
+elements.roundRewardCollapseButton?.addEventListener("click", () => setRoundRewardCollapsed(true));
+elements.roundRewardExpandButton?.addEventListener("click", () => setRoundRewardCollapsed(false));
+elements.stratagemChoiceCancelButton?.addEventListener("click", cancelCurrentChoice);
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   if (elements.codexOverlay && !elements.codexOverlay.hidden) {
@@ -10127,6 +13357,9 @@ document.addEventListener("pointermove", (event) => {
     return;
   }
   if (pointerDraggedShopIndex !== null) {
+    if (state.shop[pointerDraggedShopIndex]?.type === "hero") {
+      updateLineupDragDirection(event.clientX);
+    }
     markLineupDropTarget(event.clientX, event.clientY);
     return;
   }
@@ -10151,6 +13384,20 @@ document.addEventListener("pointerup", (event) => {
           event.clientX,
           event.clientY,
           pointerDraggedLineupIndex,
+        )
+      : null;
+  if (
+    pointerDraggedShopIndex !== null &&
+    state.shop[pointerDraggedShopIndex]?.type === "hero"
+  ) {
+    updateLineupDragDirection(event.clientX);
+  }
+  const shopHeroDragIntent =
+    pointerDraggedShopIndex !== null
+      ? getShopHeroDragIntent(
+          event.clientX,
+          event.clientY,
+          pointerDraggedShopIndex,
         )
       : null;
   resetLineupDragDirection();
@@ -10205,7 +13452,7 @@ document.addEventListener("pointerup", (event) => {
     useStratagemOnLineup(shopIndex, lineupIndex);
     return;
   }
-  buyHeroToLineup(shopIndex, lineupIndex);
+  buyHeroToLineup(shopIndex, lineupIndex, shopHeroDragIntent);
 });
 document.addEventListener("pointercancel", () => {
   pointerDraggedShopIndex = null;
@@ -10218,6 +13465,8 @@ document.addEventListener("pointercancel", () => {
   clearLineupDropState();
   setBondSelectionHintSource("shop-drag", []);
 });
+
+initializeAdaptiveCardDetails();
 
 function createBattleTestUnit({
   name,
@@ -10233,6 +13482,8 @@ function createBattleTestUnit({
   equipment = null,
   statuses = {},
   faction = null,
+  extraFactions = [],
+  tempExtraFactions = [],
 }) {
   const definition = CARD_POOLS.hero.find((hero) => hero.name === name) ?? {};
   const unit = {
@@ -10254,8 +13505,8 @@ function createBattleTestUnit({
       equipment: cloneDirectModifier(equipment),
     },
     statuses: cloneDirectModifier(statuses),
-    extraFactions: [],
-    tempExtraFactions: [],
+    extraFactions: [...extraFactions],
+    tempExtraFactions: [...tempExtraFactions],
   };
   return cloneBattleUnit(unit, { side, index });
 }
@@ -10345,6 +13596,2234 @@ function runBattleAnimationRegressionTests() {
     extraFactions: [],
     tempExtraFactions: [],
   });
+
+  test("新版正式数据包含60名武将并同步颜良汉献帝阶级", () => {
+    assert(CARD_POOLS.hero.length === 60, `正式武将数量应为60，实际为${CARD_POOLS.hero.length}`);
+    assert(CARD_POOLS.hero.find((hero) => hero.name === "文丑")?.tier === 2, "文丑不是2阶");
+    assert(CARD_POOLS.hero.find((hero) => hero.name === "颜良")?.tier === 2, "颜良不是2阶");
+    assert(CARD_POOLS.hero.find((hero) => hero.name === "汉献帝")?.tier === 3, "汉献帝不是3阶");
+  });
+
+  test("全部正式卡牌效果ID均已接入结构化结算", () => {
+    const missingHeroEffects = CARD_POOLS.hero
+      .filter((hero) => !hero.effectId || !EFFECT_DEFINITIONS[hero.effectId])
+      .map((hero) => hero.name);
+    const missingItemEffects = CARD_POOLS.stratagem
+      .filter((item) => !item.effectId || !EFFECT_DEFINITIONS[item.effectId])
+      .map((item) => item.name);
+    assert(missingHeroEffects.length === 0, `缺少武将效果：${missingHeroEffects.join("、")}`);
+    assert(missingItemEffects.length === 0, `缺少装备/计策效果：${missingItemEffects.join("、")}`);
+  });
+
+  test("羁绊只使用最高人数效果且5人效果需要解锁", () => {
+    const previousUnlocked = state.unlockedFivePersonBonds;
+    try {
+      state.unlockedFivePersonBonds = [];
+      assert(getBondEffectCount(1, "魏") === 0, "1人羁绊不应激活");
+      assert(getBondEffectCount(3, "魏") === 3, "3人羁绊没有使用3人效果");
+      assert(getBondEffectCount(5, "魏") === 4, "未解锁的5人羁绊没有回退到4人效果");
+      state.unlockedFivePersonBonds = ["魏"];
+      assert(getBondEffectCount(5, "魏") === 5, "解锁后的5人羁绊没有使用5人效果");
+    } finally {
+      state.unlockedFivePersonBonds = previousUnlocked;
+    }
+  });
+
+  test("羁绊面板按当前人数和5人资格显示进度档位", () => {
+    assert(
+      JSON.stringify(getVisibleBondEffectTiers("魏", [])) === JSON.stringify([2, 3, 4]),
+      "未解锁5人资格时的羁绊详情仍显示5人效果",
+    );
+    assert(
+      JSON.stringify(getVisibleBondEffectTiers("魏", ["魏"])) === JSON.stringify([2, 3, 4, 5]),
+      "解锁5人资格后的羁绊详情没有显示5人效果",
+    );
+    assert(
+      getBondProgressMarkup(0, "魏", []) === "<strong>0</strong>/2",
+      "0人羁绊进度不正确",
+    );
+    assert(
+      getBondProgressMarkup(1, "魏", []) === "<strong>1</strong>/2",
+      "1人羁绊进度不正确",
+    );
+    assert(
+      getBondProgressMarkup(2, "魏", []) === "<strong>2</strong>/3",
+      "2人羁绊进度不正确",
+    );
+    assert(
+      getBondProgressMarkup(3, "魏", []) === "2/<strong>3</strong>/4",
+      "3人羁绊进度不正确",
+    );
+    assert(
+      getBondProgressMarkup(4, "魏", []) === "2/3/<strong>4</strong>",
+      "未解锁5人资格时的4人羁绊进度不正确",
+    );
+    assert(
+      getBondProgressMarkup(4, "魏", ["魏"]) === "2/3/<strong>4</strong>/5",
+      "已解锁5人资格时的4人羁绊进度不正确",
+    );
+    assert(
+      getBondProgressMarkup(5, "魏", []) === "2/3/<strong>4</strong>",
+      "未解锁资格时的5人羁绊进度不正确",
+    );
+    assert(
+      getBondProgressMarkup(5, "魏", ["魏"]) === "2/3/4/<strong>5</strong>",
+      "已解锁资格时的5人羁绊进度不正确",
+    );
+  });
+
+  test("六种负面状态共用正式随机池", () => {
+    assert(
+      JSON.stringify(NEGATIVE_STATUS_POOL) ===
+        JSON.stringify(["burn", "broken-morale", "fear", "chain", "intimidated", "counterplot"]),
+      `负面状态池不正确：${NEGATIVE_STATUS_POOL.join("、")}`,
+    );
+  });
+
+  test("友军效果排除拥有者但允许另一张同名武将", () => {
+    const previousLineup = state.lineup;
+    const previousLogLength = state.logs.length;
+    const previousSkillAnimationCount = queuedShopSkillAnimations.length;
+    const previousBonusAnimationCount = queuedShopBonusAnimations.length;
+    try {
+      const recruited = createShopSkillTestUnit({
+        id: "lingtong-recruited",
+        name: "凌统",
+        faction: "吴",
+        attack: 4,
+        health: 4,
+      });
+      const allyCopy = createShopSkillTestUnit({
+        id: "lingtong-ally-copy",
+        name: "凌统",
+        faction: "吴",
+        attack: 4,
+        health: 4,
+      });
+      recruited.skillEffectIds = ["hero.lingtong.guoshi-zhifeng"];
+      allyCopy.skillEffectIds = ["hero.lingtong.guoshi-zhifeng"];
+      state.lineup = [recruited, allyCopy, null, null, null];
+      dispatchShopEvent("unit:recruit", { unit: recruited });
+      assert(
+        recruited.bodyAttack === 5 && recruited.bodyHealth === 6,
+        "另一张凌统没有给新招募凌统提供 +1/+2",
+      );
+      assert(
+        allyCopy.bodyAttack === 4 && allyCopy.bodyHealth === 4,
+        "技能拥有者错误地给自己增加了属性",
+      );
+    } finally {
+      state.lineup = previousLineup;
+      state.logs.splice(previousLogLength);
+      queuedShopSkillAnimations.splice(previousSkillAnimationCount);
+      queuedShopBonusAnimations.splice(previousBonusAnimationCount);
+    }
+  });
+
+  test("商店武将技能标签先于对应效果入队", () => {
+    const previousLineup = state.lineup;
+    const previousEffectEventCount = state.effectEvents.length;
+    const previousSkillAnimationCount = queuedShopSkillAnimations.length;
+    const previousBonusAnimationCount = queuedShopBonusAnimations.length;
+    const previousSequence = shopPresentationSequence;
+    try {
+      const owner = createShopSkillTestUnit({
+        id: "zhugejin-skill-label-owner",
+        name: "诸葛瑾",
+        faction: "吴",
+      });
+      const target = createShopSkillTestUnit({
+        id: "zhugejin-skill-label-target",
+        name: "韩当",
+        faction: "吴",
+      });
+      owner.skillEffectIds = ["hero.zhugejin.hongya"];
+      state.lineup = [owner, target, null, null, null];
+
+      dispatchShopEvent("round:end", { round: state.round });
+
+      const skillAnimation = queuedShopSkillAnimations[previousSkillAnimationCount];
+      const bonusAnimation = queuedShopBonusAnimations[previousBonusAnimationCount];
+      assert(Boolean(skillAnimation), "诸葛瑾触发时没有生成技能标签表现");
+      assert(Boolean(bonusAnimation), "诸葛瑾触发时没有生成属性效果表现");
+      assert(
+        skillAnimation.sequence < bonusAnimation.sequence,
+        "技能标签没有排在对应属性效果之前",
+      );
+      assert(hasQueuedShopPresentations(), "商店表现队列错误地被视为空队列");
+    } finally {
+      state.lineup = previousLineup;
+      state.effectEvents.splice(previousEffectEventCount);
+      queuedShopSkillAnimations.splice(previousSkillAnimationCount);
+      queuedShopBonusAnimations.splice(previousBonusAnimationCount);
+      shopPresentationSequence = previousSequence;
+    }
+  });
+
+  test("左慈交换不要求前后目标共享羁绊", () => {
+    const previousLineup = state.lineup;
+    const previousLogLength = state.logs.length;
+    const previousSkillAnimationCount = queuedShopSkillAnimations.length;
+    try {
+      const behind = createShopSkillTestUnit({
+        id: "zuoci-behind",
+        name: "甄姬",
+        faction: "魏",
+        attack: 5,
+        health: 6,
+      });
+      const owner = createShopSkillTestUnit({
+        id: "zuoci-owner",
+        name: "左慈",
+        faction: "无",
+        attack: 3,
+        health: 1,
+      });
+      const ahead = createShopSkillTestUnit({
+        id: "zuoci-ahead",
+        name: "黄忠",
+        faction: "蜀",
+        attack: 9,
+        health: 10,
+      });
+      behind.tier = 1;
+      owner.tier = 1;
+      ahead.tier = 1;
+      owner.skillEffectIds = ["hero.zuoci.bianhuan-moce"];
+      state.lineup = [behind, owner, ahead, null, null];
+      dispatchShopEvent("unit:sell", { unit: owner });
+      assert(
+        behind.attack === 9 && behind.health === 10 && ahead.attack === 5 && ahead.health === 6,
+        "左慈没有交换不同羁绊目标的最终面板攻血",
+      );
+    } finally {
+      state.lineup = previousLineup;
+      state.logs.splice(previousLogLength);
+      queuedShopSkillAnimations.splice(previousSkillAnimationCount);
+    }
+  });
+
+  test("孙策计算自身羁绊武将时不包含自己", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "孙策", health: 50 }],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      seed: 11,
+      maxExchanges: 0,
+    });
+    const sunce = battle.playerEnd.find((unit) => unit.name === "孙策");
+    assert(sunce?.attack === 5 && sunce?.maxHealth === 50, "孙策错误地计算了自己");
+    assertContinuous(battle);
+  });
+
+  test("马超首次普攻额外伤害合并在同一普攻段", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "马超", level: 1, attack: 7, health: 50 }],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      seed: 13,
+      maxExchanges: 1,
+    });
+    const exchange = battle.structuredLog.find((entry) => entry.type === "exchange");
+    assert(exchange?.damageToEnemy?.finalAmount === 14, "马超首次普攻总伤害不是14");
+    assert(
+      !battle.structuredLog.some(
+        (entry) => entry.type === "damage" && entry.effectId === "hero.machao.pozhen",
+      ),
+      "马超额外伤害被拆成了独立伤害段",
+    );
+    assertContinuous(battle);
+  });
+
+  test("赵云升级获得无双会覆盖开场灼烧", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        { name: "徐庶", level: 1, attack: 3, health: 50 },
+        { name: "赵云", level: 1, copies: 2, attack: 7, health: 50 },
+      ],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      lockedBonds: { enemy: { 吴: 2 } },
+      seed: 15,
+      maxExchanges: 0,
+    });
+    const zhaoyun = battle.playerEnd.find((unit) => unit.name === "赵云");
+    assert(zhaoyun?.level === 2, "徐庶没有使赵云在战斗开始时升级");
+    assert(
+      JSON.stringify(Object.keys(zhaoyun?.statuses ?? {})) === JSON.stringify(["unparalleled"]),
+      `赵云升级后应只保留无双，实际为${Object.keys(zhaoyun?.statuses ?? {}).join("、")}`,
+    );
+    assertContinuous(battle);
+  });
+
+  test("无双免疫后续负面状态且正面状态可以覆盖无双", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        {
+          name: "赵云",
+          attack: 7,
+          health: 50,
+          statuses: { unparalleled: { targetCount: 1 } },
+        },
+      ],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      lockedBonds: { enemy: { 吴: 2 } },
+      seed: 16,
+      maxExchanges: 0,
+    });
+    const zhaoyun = battle.playerEnd.find((unit) => unit.name === "赵云");
+    assert(
+      JSON.stringify(Object.keys(zhaoyun?.statuses ?? {})) === JSON.stringify(["unparalleled"]),
+      "无双被后续负面状态覆盖或产生了状态共存",
+    );
+
+    const positiveTarget = {
+      statuses: { unparalleled: { targetCount: 1 } },
+      skillDisabled: false,
+      skillDisabledUntilExchange: null,
+    };
+    applyPositiveStatus(positiveTarget, "rest", { amount: 3 });
+    assert(
+      JSON.stringify(Object.keys(positiveTarget.statuses)) === JSON.stringify(["rest"]),
+      "休整没有作为新正面状态覆盖无双",
+    );
+    assertContinuous(battle);
+  });
+
+  test("技能禁用独立于状态槽并在下一轮清除", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "吕蒙", attack: 4, health: 50 }],
+      enemy: [
+        {
+          name: "休整木桩",
+          attack: 1,
+          health: 50,
+          skillEffectIds: [],
+          statuses: { rest: { amount: 3 } },
+        },
+      ],
+      seed: 17,
+      maxExchanges: 2,
+    });
+    const disabledStep = battle.presentationTimeline.find(
+      (step) => step.effectId === "hero.lvmeng.baiyi-dujiang" && step.kind === "effect",
+    );
+    const disabledTarget = getUnit(disabledStep, "enemy", "休整木桩");
+    assert(
+      JSON.stringify(Object.keys(disabledTarget?.statuses ?? {})) === JSON.stringify(["rest"]) &&
+        disabledTarget?.skillDisabled === true,
+      "技能禁用没有与休整独立共存",
+    );
+    assert(
+      Object.keys(battle.roundSnapshots[1]?.enemy[0]?.statuses ?? {}).includes("rest") &&
+        battle.roundSnapshots[1]?.enemy[0]?.skillDisabled === false,
+      "下一轮没有独立清除技能禁用并保留原状态",
+    );
+    assertContinuous(battle);
+  });
+
+  test("震慑只令下一次普攻归零并保留已消耗标记", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        {
+          name: "震慑测试者",
+          attack: 5,
+          health: 50,
+          skillEffectIds: [],
+          statuses: { intimidated: { spent: false } },
+        },
+      ],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      seed: 17,
+      maxExchanges: 2,
+    });
+    const exchanges = battle.structuredLog.filter((entry) => entry.type === "exchange");
+    assert(exchanges[0]?.damageToEnemy?.finalAmount === 0, "震慑没有令第一次普攻归零");
+    assert(exchanges[1]?.damageToEnemy?.finalAmount === 5, "已消耗震慑错误影响了第二次普攻");
+    assert(
+      battle.playerEnd[0]?.statuses?.intimidated?.spent === true,
+      "震慑触发后没有保留已消耗标记",
+    );
+    assertContinuous(battle);
+  });
+
+  test("连锁先快照全部连锁单位再统一替换状态", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        { name: "张飞", health: 50 },
+        { name: "庞统", attack: 8, health: 50 },
+      ],
+      enemy: [
+        { name: "木桩甲", attack: 1, health: 50, skillEffectIds: [] },
+        { name: "木桩乙", attack: 1, health: 50, skillEffectIds: [] },
+      ],
+      seed: 19,
+      maxExchanges: 0,
+    });
+    assert(
+      battle.enemyEnd.every((unit) => unit.statuses?.["broken-morale"]),
+      "连锁单位没有被原子替换为破胆",
+    );
+    assertContinuous(battle);
+  });
+
+  test("东吴业火以最高优先级先于令箭武将技能结算", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        {
+          name: "张飞",
+          health: 50,
+          equipment: {
+            name: "令箭",
+            effectId: "equipment.initiative-flag",
+          },
+        },
+      ],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      lockedBonds: { enemy: { 吴: 2 } },
+      seed: 20,
+      maxExchanges: 0,
+    });
+    const wuTriggerIndex = battle.presentationTimeline.findIndex(
+      (step) => step.kind === "bond" && step.effectId === "bond.wu-battle-start",
+    );
+    const zhangfeiSkillIndex = battle.presentationTimeline.findIndex(
+      (step) =>
+        step.kind === "skill" && step.effectId === "hero.zhangfei.yanren-paoxiao",
+    );
+    assert(wuTriggerIndex >= 0, "缺少东吴业火战斗开始触发步骤");
+    assert(zhangfeiSkillIndex >= 0, "缺少佩戴令箭的张飞战斗开始技能步骤");
+    assert(
+      wuTriggerIndex < zhangfeiSkillIndex,
+      "佩戴令箭的张飞错误先于东吴业火结算",
+    );
+    assertContinuous(battle);
+  });
+
+  test("灼烧覆盖灼烧时新灼烧触发引燃后被清除", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "太史慈", level: 1, attack: 5, health: 20 }],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      lockedBonds: { player: { 吴: 2 } },
+      seed: 21,
+      maxExchanges: 0,
+    });
+    const target = battle.enemyEnd[0];
+    assert(target?.health === 41, `太史慈伤害与引燃后应剩41生命，实际为${target?.health}`);
+    assert(!hasNegativeStatus(target), "引燃后没有清除当前的新灼烧");
+    assertContinuous(battle);
+  });
+
+  test("其他负面状态覆盖灼烧时吴5也保留新状态", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "关羽", level: 1, attack: 10, health: 30 }],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      lockedBonds: { player: { 吴: 5 } },
+      seed: 22,
+      maxExchanges: 1,
+    });
+    const target = battle.enemyEnd[0];
+    assert(target?.health === 34, `普攻与引燃后应剩34生命，实际为${target?.health}`);
+    assert(target?.statuses?.intimidated, "震慑覆盖灼烧并引燃后没有保留震慑");
+    assert(!target?.statuses?.burn, "当前槽不是灼烧时，东吴业火5人仍错误补回了灼烧");
+    assertContinuous(battle);
+  });
+
+  test("东吴业火5人会在新灼烧被引燃清除后补回原灼烧", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "太史慈", level: 1, attack: 5, health: 20 }],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      lockedBonds: { player: { 吴: 5 } },
+      seed: 23,
+      maxExchanges: 0,
+    });
+    const target = battle.enemyEnd[0];
+    assert(target?.health === 41, `太史慈伤害与引燃后应剩41生命，实际为${target?.health}`);
+    assert(target?.statuses?.burn, "东吴业火5人没有补回原灼烧");
+    assert(
+      target.statuses.burn.sourceEffectId === "bond.wu-battle-start",
+      "东吴业火5人补回的不是原灼烧",
+    );
+    assertContinuous(battle);
+  });
+
+  test("夏侯渊按触发时当前攻血的66%向下取整召唤LV1骑兵", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "夏侯渊", level: 2, attack: 10, health: 9 }],
+      enemy: [{ name: "木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      seed: 23,
+      maxExchanges: 1,
+    });
+    const cavalry = battle.playerEnd.find((unit) => unit.name === "骑兵");
+    assert(
+      cavalry?.level === 1 && cavalry?.attack === 6 && cavalry?.maxHealth === 5,
+      `夏侯渊骑兵应为LV1 6/5，实际为LV${cavalry?.level} ${cavalry?.attack}/${cavalry?.maxHealth}`,
+    );
+    assertContinuous(battle);
+  });
+
+  test("马云禄召唤骑兵按自身等级变为2/1、4/2、6/3", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "马云禄", level: 2, attack: 2, health: 1 }],
+      enemy: [{ name: "木桩", attack: 20, health: 50, skillEffectIds: [] }],
+      seed: 25,
+      maxExchanges: 1,
+    });
+    const cavalry = battle.playerEnd.find((unit) => unit.name === "骑兵");
+    assert(
+      cavalry?.level === 2 && cavalry?.attack === 4 && cavalry?.maxHealth === 2,
+      `马云禄LV2骑兵应为4/2，实际为LV${cavalry?.level} ${cavalry?.attack}/${cavalry?.maxHealth}`,
+    );
+    assert(cavalry?.faction === "蜀", "马云禄骑兵没有继承其基础羁绊");
+    assertContinuous(battle);
+  });
+
+  test("华佗固定复活为LV2 3/3、保留死者羁绊且升级只增加每回合次数", () => {
+    const createScenario = (level, maxExchanges) =>
+      simulateBattleTestScenario({
+        player: [
+          { name: "华佗", level, attack: 3, health: 50 },
+          {
+            name: "羁绊木桩",
+            faction: "蜀",
+            extraFactions: ["魏"],
+            attack: 1,
+            health: 1,
+            skillEffectIds: [],
+          },
+        ],
+        enemy: [{ name: "敌方木桩", attack: 10, health: 100, skillEffectIds: [] }],
+        seed: 26,
+        maxExchanges,
+      });
+
+    const firstReviveBattle = createScenario(3, 1);
+    const revived = firstReviveBattle.playerEnd.find((unit) => unit.name === "羁绊木桩");
+    assert(
+      revived?.level === 2 && revived?.attack === 3 && revived?.maxHealth === 3,
+      `华佗复活体应为LV2 3/3，实际为LV${revived?.level} ${revived?.attack}/${revived?.maxHealth}`,
+    );
+    assert(
+      JSON.stringify(getBattleUnitBonds(revived)) === JSON.stringify(["蜀", "魏"]),
+      `华佗复活体羁绊应与阵亡单位一致，实际为${getBattleUnitBonds(revived).join("、")}`,
+    );
+
+    [1, 2, 3].forEach((level) => {
+      const battle = createScenario(level, 4);
+      const reviveCount = battle.presentationTimeline.filter(
+        (step) => step.kind === "summon" && step.effectId === "hero.huatuo.jijiu",
+      ).length;
+      assert(
+        reviveCount === level,
+        `LV${level}华佗每回合应复活${level}次，实际为${reviveCount}次`,
+      );
+      assertContinuous(battle);
+    });
+    assertContinuous(firstReviveBattle);
+  });
+
+  test("重骑兵攻击前成长随等级缩放且技能变量使用等级标记", () => {
+    const definition = DERIVED_UNIT_DEFINITION_BY_NAME.重骑兵;
+    [1, 2, 3].forEach((level) => {
+      const expectedGain = 2 * level;
+      const display = resolveHeroSkillDisplay(definition.skill, level, {
+        name: "重骑兵",
+        level,
+        faction: "魏",
+      });
+      assert(
+        display.text.includes(`+${expectedGain}/${expectedGain}`) &&
+          display.html.includes('class="hero-skill-scaled-value"'),
+        `LV${level}重骑兵技能描述没有显示橘色等级变量 +${expectedGain}/${expectedGain}`,
+      );
+
+      const battle = simulateBattleTestScenario({
+        player: [
+          {
+            name: "重骑兵",
+            level,
+            attack: 5,
+            health: 5,
+            faction: "魏",
+            skillEffectIds: ["summon.heavy-cavalry-growth"],
+          },
+        ],
+        enemy: [{ name: "重骑兵测试木桩", attack: 1, health: 100, skillEffectIds: [] }],
+        seed: 26,
+        maxExchanges: 1,
+      });
+      const heavyCavalry = battle.playerEnd.find((unit) => unit.name === "重骑兵");
+      assert(
+        heavyCavalry?.attack === 5 + expectedGain &&
+          heavyCavalry?.maxHealth === 5 + expectedGain,
+        `LV${level}重骑兵攻击前应获得 +${expectedGain}/+${expectedGain}`,
+      );
+      assertContinuous(battle);
+    });
+  });
+
+  test("白马义从只在自己成为攻击者时触发突袭", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        {
+          name: "白马义从",
+          level: 2,
+          attack: 8,
+          health: 4,
+          faction: "群",
+          skillEffectIds: ["summon.white-horse-attack"],
+        },
+        { name: "前排木桩", attack: 1, health: 20, skillEffectIds: [] },
+      ],
+      enemy: [{ name: "敌方木桩", attack: 1, health: 30, skillEffectIds: [] }],
+      seed: 27,
+      maxExchanges: 1,
+    });
+    assert(
+      !battle.structuredLog.some(
+        (entry) => entry.type === "damage" && entry.sourceEffectId === "summon.white-horse-attack",
+      ),
+      "后排白马义从在自己未攻击时错误触发了突袭",
+    );
+    assertContinuous(battle);
+  });
+
+  test("张郃召唤同羁绊正式武将并清除附加内容", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "张郃", level: 2, attack: 4, health: 1 }],
+      enemy: [{ name: "木桩", attack: 20, health: 50, skillEffectIds: [] }],
+      seed: 29,
+      maxExchanges: 1,
+    });
+    const summon = battle.playerEnd.find((unit) => unit.name !== "张郃");
+    const definition = CARD_POOLS.hero.find((hero) => hero.name === summon?.name);
+    assert(summon && definition, "张郃没有召唤正式武将");
+    assert(definition.faction === "群" && summon.name !== "张郃", "张郃召唤池不正确");
+    assert(
+      summon.level === 2 &&
+        summon.attack === definition.attack * 2 &&
+        summon.maxHealth === definition.health * 2,
+      "张郃召唤物等级或基础攻血不正确",
+    );
+    assert(
+      summon.skillEffectIds?.[0] === definition.effectId && summon.faction === definition.faction,
+      "张郃召唤物没有保留抽中武将的技能或原始羁绊",
+    );
+    assert(
+      !summon.equipment &&
+        summon.extraFactions.length === 0 &&
+        Object.keys(summon.statuses).length === 0,
+      "张郃召唤物错误继承了装备、额外羁绊或状态",
+    );
+    assertContinuous(battle);
+  });
+
+  test("攻击前技能击杀当前目标后不再播放普通交锋", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "韩当", level: 1, attack: 2, health: 20 }],
+      enemy: [
+        {
+          name: "负面状态木桩",
+          attack: 9,
+          health: 3,
+          skillEffectIds: [],
+          statuses: { fear: { ownerSide: "player" } },
+        },
+      ],
+      seed: 37,
+      maxExchanges: 1,
+    });
+    assert(battle.result === "win", "韩当攻击前击杀目标后未正常结束战斗");
+    assert(
+      !battle.presentationTimeline.some((step) => step.kind === "clash"),
+      "已阵亡目标仍生成了普通交锋步骤",
+    );
+    assert(
+      !buildBattleAnimationSteps(battle.presentationTimeline).some(
+        (step) => step.kind === "clash" || step.kind === "exchange",
+      ),
+      "已阵亡目标仍生成了交锋动画",
+    );
+    assert(
+      !battle.structuredLog.some((entry) => entry.type === "exchange"),
+      "已阵亡目标仍参与了普通攻击伤害结算",
+    );
+    assertContinuous(battle);
+  });
+
+  test("阵亡卡牌先播放消失动画再从阵亡效果场景移除", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        {
+          name: "后排援军",
+          attack: 1,
+          health: 20,
+          skillEffectIds: [],
+        },
+        { name: "庞德", attack: 1, health: 1 },
+      ],
+      enemy: [
+        {
+          name: "阵亡效果测试木桩",
+          attack: 10,
+          health: 100,
+          skillEffectIds: [],
+        },
+      ],
+      seed: 48,
+      maxExchanges: 1,
+    });
+    const animationSteps = getBattleAnimationSteps(battle);
+    const deathStep = animationSteps.find(
+      (step) =>
+        step.kind === "death" &&
+        step.snapshot.player.some((unit) => unit.name === "庞德"),
+    );
+    const deathEffectStep = animationSteps.find(
+      (step) =>
+        step.effectId === "hero.pangde.xunjie" &&
+        step.timingWindow === "unit:death",
+    );
+    assert(deathStep, "庞德阵亡时没有生成卡牌消失动画步骤");
+    const deadUnitId = deathStep.deathIds.find((unitId) =>
+      deathStep.snapshot.player.some(
+        (unit) => unit.id === unitId && unit.name === "庞德",
+      ),
+    );
+    assert(deadUnitId, "庞德阵亡动画没有记录对应单位");
+    assert(deathEffectStep, "庞德阵亡效果没有生成独立动画步骤");
+    assert(
+      !animationSteps.some((step) => step.kind === "leave"),
+      "动画仍保留了额外的离场文字停顿",
+    );
+    assert(
+      deathStep.snapshot.player.some((unit) => unit.id === deadUnitId),
+      "阵亡动画开始前卡牌已经从战场快照消失",
+    );
+    const deathMarkup = renderBattleAnimationBattlefield(battle, deathStep);
+    assert(
+      deathMarkup.includes(`data-unit-id="${deadUnitId}"`) &&
+        deathMarkup.includes("is-defeated") &&
+        deathMarkup.includes("battle-field-smoke"),
+      "阵亡动画没有保留原卡牌并应用烟雾消失表现",
+    );
+    assert(
+      !deathEffectStep.beforeSnapshot.player.some(
+        (unit) => unit.id === deadUnitId,
+      ) &&
+        !deathEffectStep.snapshot.player.some(
+          (unit) => unit.id === deadUnitId,
+      ),
+      "阵亡效果播放时原卡牌仍停留在战场",
+    );
+    const deathEffectMarkup = renderBattleAnimationBattlefield(
+      battle,
+      deathEffectStep,
+    );
+    assert(
+      !deathEffectMarkup.includes(`data-unit-id="${deadUnitId}"`),
+      "阵亡效果的实际战场DOM仍渲染原卡牌",
+    );
+    assertContinuous(battle);
+  });
+
+  test("一方前排阵亡淡出后由后排补位并进入下一次交锋", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        {
+          name: "我方前排",
+          attack: 5,
+          health: 100,
+          skillEffectIds: [],
+        },
+      ],
+      enemy: [
+        {
+          name: "敌方前排",
+          attack: 1,
+          health: 1,
+          skillEffectIds: [],
+        },
+        {
+          name: "敌方后排",
+          attack: 1,
+          health: 20,
+          skillEffectIds: [],
+        },
+      ],
+      seed: 49,
+      maxExchanges: 2,
+    });
+    const animationSteps = getBattleAnimationSteps(battle);
+    const clashIndices = animationSteps
+      .map((step, index) => ({ step, index }))
+      .filter(({ step }) => step.kind === "clash");
+    const deathIndex = animationSteps.findIndex(
+      (step) =>
+        step.kind === "death" &&
+        step.deathIds.some((unitId) =>
+          step.snapshot.enemy.some(
+            (unit) => unit.id === unitId && unit.name === "敌方前排",
+          ),
+        ),
+    );
+    const advanceIndex = animationSteps.findIndex(
+      (step) =>
+        step.kind === "advance" &&
+        step.movements.some((movement) => movement.side === "enemy"),
+    );
+    assert(clashIndices.length === 2, "测试场景没有生成连续两轮交锋");
+    assert(
+      clashIndices[0].index < deathIndex &&
+        deathIndex < advanceIndex &&
+        advanceIndex < clashIndices[1].index,
+      "交锋、阵亡烟雾、阵容补位和下一次交锋的顺序不正确",
+    );
+    assert(
+      animationSteps[advanceIndex].movements.some(
+        (movement) =>
+          movement.side === "enemy" &&
+          movement.fromSlot === 1 &&
+          movement.toSlot === 0,
+      ),
+      "敌方后排没有记录向最前方补位的位移",
+    );
+    assert(
+      clashIndices[1].step.snapshot.enemy.some(
+        (unit) => unit.name === "敌方后排",
+      ) &&
+        !clashIndices[1].step.snapshot.enemy.some(
+          (unit) => unit.name === "敌方前排",
+        ),
+      "下一次交锋没有直接使用补位后的新前排",
+    );
+    assertContinuous(battle);
+  });
+
+  test("双方同轮阵亡时同步烟雾退场并同时补位", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        { name: "我方后排", attack: 1, health: 20, skillEffectIds: [] },
+        { name: "我方前排", attack: 5, health: 1, skillEffectIds: [] },
+      ],
+      enemy: [
+        { name: "敌方前排", attack: 5, health: 1, skillEffectIds: [] },
+        { name: "敌方后排", attack: 1, health: 20, skillEffectIds: [] },
+      ],
+      seed: 50,
+      maxExchanges: 2,
+    });
+    const animationSteps = getBattleAnimationSteps(battle);
+    const deathSteps = animationSteps.filter((step) => step.kind === "death");
+    const advanceSteps = animationSteps.filter((step) => step.kind === "advance");
+    assert(deathSteps.length === 1, "同轮双亡仍被拆成多个退场步骤");
+    assert(
+      deathSteps[0].simultaneous && deathSteps[0].deathIds.length === 2,
+      "同轮双亡步骤没有记录两个同步阵亡单位",
+    );
+    const deathMarkup = renderBattleAnimationBattlefield(battle, deathSteps[0]);
+    assert(
+      (deathMarkup.match(/battle-field-smoke/g) ?? []).length === 2 &&
+        (deathMarkup.match(/is-defeated/g) ?? []).length === 2,
+      "同轮双亡没有在同一场景为双方生成烟雾退场",
+    );
+    assert(advanceSteps.length === 1, "双方补位没有合并为同一个动画步骤");
+    assert(
+      advanceSteps[0].movements.some(
+        (movement) =>
+          movement.side === "player" && movement.fromSlot === 3 && movement.toSlot === 4,
+      ) &&
+        advanceSteps[0].movements.some(
+          (movement) =>
+            movement.side === "enemy" && movement.fromSlot === 1 && movement.toSlot === 0,
+        ),
+      "双方后排没有在同一步骤朝各自前排补位",
+    );
+    assertContinuous(battle);
+  });
+
+  test("武将与道具详情共用宣纸面板和水墨标签结构", () => {
+    const hero = CARD_POOLS.hero[0];
+    const item = CARD_POOLS.stratagem[0];
+    const heroTemplate = document.createElement("template");
+    const itemTemplate = document.createElement("template");
+    heroTemplate.innerHTML = createHeroCardMarkup(hero, { showCost: true }).trim();
+    itemTemplate.innerHTML = createItemCardMarkup(item).trim();
+    const heroTooltip = heroTemplate.content.querySelector(".hero-skill-tooltip.card-detail-paper");
+    const itemTooltip = itemTemplate.content.querySelector(".item-skill-tooltip.card-detail-paper");
+    assert(
+      heroTooltip?.querySelector(".card-detail-ink-tag")?.textContent.trim(),
+      "武将技能详情缺少水墨标签",
+    );
+    assert(
+      itemTooltip?.querySelector(".card-detail-ink-tag")?.textContent.trim() === item.category,
+      "道具详情的水墨类型标签不正确",
+    );
+    assert(
+      itemTooltip?.querySelector(".card-detail-title")?.textContent.trim() === item.name,
+      "道具详情缺少卡牌名称",
+    );
+    assert(
+      itemTooltip?.querySelector(".card-detail-meta")?.textContent.trim() === `${item.tier ?? 1}阶`,
+      "道具详情缺少阶数信息",
+    );
+    assert(itemTooltip?.children.length === 2, "道具详情没有保持标题与效果两行结构");
+    assert(
+      !itemTooltip?.querySelector("em") && !itemTooltip?.textContent.includes("拖到"),
+      "道具详情仍显示拖拽使用提示",
+    );
+  });
+
+  test("属性对描述统一显示攻击力与生命值图标", () => {
+    const mixedMarkup = getEscapedGameTextMarkup(
+      "甲 +1/1，乙 2/+3，丙 +4/+5；基础属性 5/5；等级 1/2/3；羁绊 2/3/4/5人",
+    );
+    const mixedTemplate = document.createElement("template");
+    mixedTemplate.innerHTML = mixedMarkup;
+    assert(
+      mixedTemplate.content.querySelectorAll(".inline-stat-pair").length === 4,
+      "属性对的兼容写法没有全部转换为图标标记",
+    );
+    assert(
+      mixedTemplate.content.querySelectorAll(".inline-stat-icon-attack").length === 4 &&
+        mixedTemplate.content.querySelectorAll(".inline-stat-icon-health").length === 4,
+      "属性对缺少攻击力或生命值图标",
+    );
+    const basePair = mixedTemplate.content.querySelector(".inline-stat-pair-base");
+    assert(
+      basePair?.querySelector(".inline-stat-value")?.firstElementChild?.classList.contains(
+        "inline-stat-icon-attack",
+      ),
+      "基础攻血没有按图标在前、数值在后的顺序显示",
+    );
+    assert(
+      mixedMarkup.includes("等级 1/2/3") && mixedMarkup.includes("羁绊 2/3/4/5人"),
+      "等级或羁绊人数序列被错误识别为攻血",
+    );
+
+    const yuJin = CARD_POOLS.hero.find((hero) => hero.name === "于禁");
+    const yuJinTemplate = document.createElement("template");
+    yuJinTemplate.innerHTML = createHeroCardMarkup(yuJin, { showCost: true }).trim();
+    const heroDescription = yuJinTemplate.content.querySelector(".hero-skill-description");
+    assert(
+      heroDescription?.querySelector(".inline-stat-icon-attack") &&
+        heroDescription?.querySelector(".inline-stat-icon-health"),
+      "武将技能中的 +攻击/生命 描述没有显示双图标",
+    );
+    assert(
+      yuJinTemplate.content
+        .querySelector(".hero-card")
+        ?.getAttribute("aria-label")
+        ?.includes("+1攻击力/+1生命值"),
+      "武将技能的无障碍描述没有规范为攻击力与生命值",
+    );
+
+    const pangDe = CARD_POOLS.hero.find((hero) => hero.name === "庞德");
+    const pangDeTemplate = document.createElement("template");
+    pangDeTemplate.innerHTML = createHeroCardMarkup(pangDe, { showCost: true }).trim();
+    const scaledHeroDescription = pangDeTemplate.content.querySelector(
+      ".hero-skill-description",
+    );
+    assert(
+      scaledHeroDescription?.querySelector(".inline-stat-icon-attack") &&
+        scaledHeroDescription?.querySelector(".inline-stat-icon-health"),
+      "按等级缩放的 +（攻击/生命）描述没有显示双图标",
+    );
+
+    const recommendTalent = CARD_POOLS.stratagem.find((item) => item.name === "举贤");
+    const itemTemplate = document.createElement("template");
+    itemTemplate.innerHTML = createItemCardMarkup(recommendTalent).trim();
+    const itemDescription = itemTemplate.content.querySelector(".item-skill-description");
+    assert(
+      itemDescription?.querySelector(".inline-stat-icon-attack") &&
+        itemDescription?.querySelector(".inline-stat-icon-health"),
+      "计策描述中的属性对没有显示双图标",
+    );
+
+    const cavalryTalisman = CARD_POOLS.stratagem.find((item) => item.name === "兵符");
+    const cavalryTalismanTemplate = document.createElement("template");
+    cavalryTalismanTemplate.innerHTML = createItemCardMarkup(cavalryTalisman).trim();
+    assert(
+      cavalryTalismanTemplate.content.querySelector(
+        ".item-skill-description .inline-stat-pair-base",
+      ),
+      "装备描述中的基础攻血没有显示双图标",
+    );
+    assert(
+      cavalryTalismanTemplate.content
+        .querySelector(".item-card")
+        ?.getAttribute("aria-label")
+        ?.includes("2攻击力/1生命值"),
+      "装备基础攻血的无障碍描述没有标明攻击力与生命值",
+    );
+  });
+
+  test("技能描述面板用图标替换攻击力与生命值属性词", () => {
+    [
+      { heroName: "甄姬", statName: "攻击力", iconClass: "inline-stat-icon-attack" },
+      { heroName: "廖化", statName: "生命值", iconClass: "inline-stat-icon-health" },
+    ].forEach(({ heroName, statName, iconClass }) => {
+      const hero = CARD_POOLS.hero.find((entry) => entry.name === heroName);
+      const template = document.createElement("template");
+      template.innerHTML = createHeroCardMarkup(hero, { showCost: true }).trim();
+      const description = template.content.querySelector(".hero-skill-description");
+      const icon = description?.querySelector(`.inline-stat-term-icon.${iconClass}`);
+      assert(icon?.getAttribute("alt") === statName, `${heroName}技能没有用${statName}图标替换属性词`);
+      assert(!description?.textContent.includes(statName), `${heroName}技能仍显示${statName}文字`);
+      assert(
+        template.content.querySelector(".hero-card")?.getAttribute("aria-label")?.includes(statName),
+        `${heroName}技能的无障碍描述丢失${statName}文本`,
+      );
+    });
+  });
+
+  test("攻击力百分比统一显示为百分比在前、攻击力图标在后", () => {
+    const entries = [
+      ...CARD_POOLS.hero.map((card) => ({
+        label: `${card.name}技能`,
+        skill: card.skill,
+        markup: getSkillDescriptionDisplay(card.skill, 1, card).html,
+      })),
+      ...CARD_POOLS.stratagem.map((card) => ({
+        label: `${card.name}描述`,
+        skill: card.skill,
+        markup: getEscapedStatDescriptionMarkup(card.skill),
+      })),
+    ].filter(({ skill }) => /攻击力(?:（)?\d+(?:\.\d+)?%/.test(skill));
+
+    assert(entries.length > 0, "卡池中没有找到攻击力百分比描述");
+    entries.forEach(({ label, skill, markup }) => {
+      const expectedCount = skill.match(/攻击力(?:（)?\d+(?:\.\d+)?%/g)?.length ?? 0;
+      const template = document.createElement("template");
+      template.innerHTML = markup;
+      const reorderedIcons = Array.from(
+        template.content.querySelectorAll(".inline-stat-term-icon.inline-stat-icon-attack"),
+      ).filter((icon) => /\d+(?:\.\d+)?%\s*$/.test(icon.previousSibling?.textContent ?? ""));
+      assert(
+        reorderedIcons.length === expectedCount,
+        `${label}没有按“百分比 + 攻击力图标”的顺序显示`,
+      );
+    });
+  });
+
+  test("全部武将技能中的经验值均替换为经验图标", () => {
+    const experienceHeroes = CARD_POOLS.hero.filter((hero) => hero.skill.includes("经验值"));
+    assert(experienceHeroes.length > 0, "武将池中没有找到包含经验值的技能");
+
+    experienceHeroes.forEach((hero) => {
+      const expectedIconCount = hero.skill.match(/经验值/g)?.length ?? 0;
+      const template = document.createElement("template");
+      template.innerHTML = createHeroCardMarkup(hero, { showCost: true }).trim();
+      const description = template.content.querySelector(".hero-skill-description");
+      const icons = description?.querySelectorAll(".inline-experience-icon") ?? [];
+      assert(
+        icons.length === expectedIconCount &&
+          Array.from(icons).every((icon) => icon.getAttribute("alt") === "经验值"),
+        `${hero.name}技能的经验图标数量或替代文本不正确`,
+      );
+      assert(
+        !description?.textContent.includes("经验值"),
+        `${hero.name}技能仍显示经验值文字`,
+      );
+      assert(
+        template.content
+          .querySelector(".hero-card")
+          ?.getAttribute("aria-label")
+          ?.includes("经验值"),
+        `${hero.name}技能的无障碍描述丢失经验值文本`,
+      );
+    });
+
+    const masterGuidance = CARD_POOLS.stratagem.find((item) => item.name === "开悟");
+    const itemTemplate = document.createElement("template");
+    itemTemplate.innerHTML = createItemCardMarkup(masterGuidance).trim();
+    const itemDescription = itemTemplate.content.querySelector(".item-skill-description");
+    assert(
+      itemDescription?.textContent.includes("经验值") &&
+        !itemDescription.querySelector(".inline-experience-icon"),
+      "经验图标替换不应扩展到武将技能以外的描述",
+    );
+  });
+
+  test("全部武将技能的攻血属性语义均转换为图标", () => {
+    const getExpectedIconCounts = (skillText) => {
+      const counts = { attack: 0, health: 0 };
+      String(skillText ?? "").replace(
+        /攻血|当前生命(?:值)?|攻击力|生命值|面板攻击(?=和)|\d+\s*\/\s*\d+/g,
+        (statTerm) => {
+          if (statTerm === "攻血" || /\d+\s*\/\s*\d+/.test(statTerm)) {
+            counts.attack += 1;
+            counts.health += 1;
+          } else if (statTerm === "攻击力" || statTerm === "面板攻击") {
+            counts.attack += 1;
+          } else {
+            counts.health += 1;
+          }
+          return statTerm;
+        },
+      );
+      return counts;
+    };
+
+    CARD_POOLS.hero.forEach((hero) => {
+      const expected = getExpectedIconCounts(hero.skill);
+      if (expected.attack === 0 && expected.health === 0) return;
+      const template = document.createElement("template");
+      template.innerHTML = createHeroCardMarkup(hero, { showCost: true }).trim();
+      const description = template.content.querySelector(".hero-skill-description");
+      const actualAttack = description?.querySelectorAll(".inline-stat-icon-attack").length ?? 0;
+      const actualHealth = description?.querySelectorAll(".inline-stat-icon-health").length ?? 0;
+      assert(
+        actualAttack === expected.attack && actualHealth === expected.health,
+        `${hero.name}技能属性图标数量错误：应为${expected.attack}攻/${expected.health}血，实际为${actualAttack}攻/${actualHealth}血`,
+      );
+      assert(
+        !/(?:攻血|攻击力|生命值|面板攻击|当前生命)/.test(description?.textContent ?? ""),
+        `${hero.name}技能仍有未转换的攻血属性词`,
+      );
+    });
+
+    ["黄忠", "韩当", "吕布"].forEach((heroName) => {
+      const hero = CARD_POOLS.hero.find((entry) => entry.name === heroName);
+      const template = document.createElement("template");
+      template.innerHTML = createHeroCardMarkup(hero, { showCost: true }).trim();
+      assert(
+        template.content.querySelector(".hero-skill-description")?.textContent.includes("攻击"),
+        `${heroName}技能的攻击动作词被错误替换`,
+      );
+    });
+
+    const legacyMarkup = getStatDescriptionMarkup("最终面板攻击和生命值");
+    const legacyTemplate = document.createElement("template");
+    legacyTemplate.innerHTML = legacyMarkup;
+    assert(
+      legacyTemplate.content.querySelectorAll(".inline-stat-icon-attack").length === 1 &&
+        legacyTemplate.content.querySelectorAll(".inline-stat-icon-health").length === 1,
+      "旧版左慈技能文案没有兼容转换为攻击与生命图标",
+    );
+  });
+
+  test("单属性词图标与属性对保持相同垂直基线", () => {
+    const fixture = document.createElement("div");
+    fixture.style.cssText = "position:absolute;visibility:hidden;pointer-events:none";
+    fixture.innerHTML = [
+      ["甄姬", "term-attack"],
+      ["廖化", "term-health"],
+      ["庞德", "stat-pair"],
+    ]
+      .map(([heroName, fixtureName]) => {
+        const hero = CARD_POOLS.hero.find((entry) => entry.name === heroName);
+        return `<div data-alignment-fixture="${fixtureName}">${createHeroCardMarkup(hero, { showCost: true })}</div>`;
+      })
+      .join("");
+    document.body.append(fixture);
+    try {
+      const pair = fixture.querySelector(
+        '[data-alignment-fixture="stat-pair"] .inline-stat-pair',
+      );
+      const termIcons = fixture.querySelectorAll(
+        '[data-alignment-fixture^="term-"] .inline-stat-term-icon',
+      );
+      const pairBaseline = pair ? getComputedStyle(pair).verticalAlign : "";
+      assert(
+        pairBaseline &&
+          termIcons.length === 2 &&
+          Array.from(termIcons).every(
+            (icon) => getComputedStyle(icon).verticalAlign === pairBaseline,
+          ),
+        "单属性词图标没有与属性对使用相同垂直基线",
+      );
+    } finally {
+      fixture.remove();
+    }
+  });
+
+  test("羁绊描述统一武将称谓、无句号并标记阵营色", () => {
+    const normalized = normalizeBondDescription("每阵亡4名魏将，在己方最前方召唤1名骑兵。");
+    const markup = getBondDescriptionMarkup("每阵亡4名魏将，在己方最前方召唤1名骑兵。");
+    assert(normalized.includes("魏武将"), "魏将没有规范为魏武将");
+    assert(!normalized.includes("魏将") && !normalized.includes("。"), "羁绊描述仍含简称或句号");
+    assert(
+      markup.includes('class="bond-faction-word" data-faction="魏"') && markup.includes("</span>武将"),
+      "羁绊描述没有为阵营字生成对应颜色标记",
+    );
+    assert(
+      Object.values(BOND_RULES).every((bond) =>
+        Object.values(bond.effects).every(
+          (effect) => !effect.includes("。") && !/([魏蜀吴群])将/.test(effect),
+        ),
+      ),
+      "正式羁绊描述仍含句号或旧称谓",
+    );
+  });
+
+  test("羁绊与武将详情在原面板旁显示衍生内容", () => {
+    const renderHeroTemplate = (name) => {
+      const hero = CARD_POOLS.hero.find((candidate) => candidate.name === name);
+      const template = document.createElement("template");
+      template.innerHTML = createHeroCardMarkup(hero, { showCost: true }).trim();
+      return template;
+    };
+    assert(
+      renderHeroTemplate("黄盖").content.querySelector('[data-derived-id="burn"]'),
+      "涉及灼烧的武将详情没有显示灼烧说明",
+    );
+    assert(
+      renderHeroTemplate("马云禄").content.querySelector('[data-derived-id="cavalry"]'),
+      "涉及骑兵的武将详情没有显示骑兵说明",
+    );
+    assert(
+      renderHeroTemplate("关羽").content.querySelector('[data-derived-id="intimidated"]'),
+      "涉及震慑的武将详情没有显示震慑说明",
+    );
+    assert(
+      renderHeroTemplate("袁术").content.querySelector('[data-derived-id="imperial-jade-seal"]'),
+      "涉及传国玉玺的武将详情没有显示衍生装备说明",
+    );
+    const weiDerivedNames = getDerivedContentEntries(Object.values(BOND_RULES.魏.effects)).map(
+      (entry) => entry.name,
+    );
+    assert(
+      weiDerivedNames.includes("骑兵") && weiDerivedNames.includes("重骑兵"),
+      "魏羁绊详情没有同时关联骑兵与重骑兵",
+    );
+    const wuDerivedNames = getDerivedContentEntries(Object.values(BOND_RULES.吴.effects)).map(
+      (entry) => entry.name,
+    );
+    assert(
+      wuDerivedNames.includes("灼烧") && wuDerivedNames.includes("引燃"),
+      "吴羁绊详情没有同时关联灼烧与引燃",
+    );
+  });
+
+  test("衍生内容名称在详情中使用独立颜色语义标记", () => {
+    const hero = CARD_POOLS.hero.find((candidate) => candidate.name === "马云禄");
+    const template = document.createElement("template");
+    template.innerHTML = createHeroCardMarkup(hero, { showCost: true }).trim();
+    assert(
+      template.content.querySelector(
+        '.hero-skill-description .derived-content-term[data-derived-id="cavalry"]',
+      ),
+      "武将技能描述中的骑兵名称没有生成衍生内容颜色标记",
+    );
+    assert(
+      template.content.querySelector(
+        '.derived-detail-name',
+      )?.textContent.trim() === "骑兵",
+      "衍生内容说明标题没有生成独立名称标记",
+    );
+    const cavalryDefinition = DERIVED_CONTENT_DEFINITIONS.find((entry) => entry.id === "cavalry");
+    const cavalryDetail = template.content.querySelector(
+      '.derived-detail-card[data-derived-id="cavalry"]',
+    );
+    const cavalryStatValues = cavalryDetail?.querySelectorAll(
+      ".derived-detail-stats .inline-stat-value",
+    );
+    assert(
+      cavalryDetail?.querySelector(".derived-detail-description")?.textContent.trim() === "无技能" &&
+        !cavalryDetail.textContent.includes("马云禄召唤") &&
+        cavalryDefinition?.internalRules.includes("马云禄召唤"),
+      "骑兵的玩家显示文案与底层规则没有正确分离",
+    );
+    assert(
+      cavalryStatValues?.length === 2 &&
+        cavalryStatValues[0].querySelector(".inline-stat-icon-attack") &&
+        cavalryStatValues[0].textContent.trim() === "2" &&
+        cavalryStatValues[1].querySelector(".inline-stat-icon-health") &&
+        cavalryStatValues[1].textContent.trim() === "1",
+      "骑兵攻血没有以攻击图标在前、生命图标在前的格式显示在标题中",
+    );
+    const bondMarkup = getBondDescriptionMarkup(BOND_RULES.魏.effects[4]);
+    assert(
+      bondMarkup.includes('class="derived-content-term" data-derived-id="heavy-cavalry"'),
+      "羁绊描述中的重骑兵名称没有生成衍生内容颜色标记",
+    );
+  });
+
+  test("重骑兵与白马义从说明复用武将技能等级解析", () => {
+    const derivedTemplate = document.createElement("template");
+    const derivedEntries = DERIVED_CONTENT_DEFINITIONS.filter((entry) =>
+      ["heavy-cavalry", "white-horse"].includes(entry.id),
+    );
+    derivedTemplate.innerHTML = createDerivedContentRailMarkup(derivedEntries).trim();
+
+    const getDerivedDescription = (id) =>
+      derivedTemplate.content.querySelector(
+        `.derived-detail-card[data-derived-id="${id}"] .derived-detail-description`,
+      );
+    const heavyDescription = getDerivedDescription("heavy-cavalry");
+    const whiteHorseDescription = getDerivedDescription("white-horse");
+    const heavyScaledValue = heavyDescription?.querySelector(".hero-skill-scaled-value");
+    const whiteHorseScaledValue = whiteHorseDescription?.querySelector(
+      ".hero-skill-scaled-value",
+    );
+
+    assert(
+      heavyDescription &&
+        !/[（）]/.test(heavyDescription.textContent) &&
+        heavyScaledValue?.textContent.replace(/\s/g, "") === "+2/+2",
+      "重骑兵衍生说明没有把 +（2/2）解析为暖橘色 +2/+2",
+    );
+    assert(
+      whiteHorseDescription &&
+        !/[（）]/.test(whiteHorseDescription.textContent) &&
+        whiteHorseDescription.querySelector(
+          '.inline-stat-term-icon.inline-stat-icon-health[alt="生命值"]',
+        ) &&
+        whiteHorseDescription.textContent.includes("最低的敌军") &&
+        whiteHorseScaledValue?.textContent.trim() === "4",
+      "白马义从衍生说明没有把（4）解析为暖橘色 4 点伤害",
+    );
+
+    const pangde = CARD_POOLS.hero.find((hero) => hero.name === "庞德");
+    const pangdeTemplate = document.createElement("template");
+    pangdeTemplate.innerHTML = createHeroCardMarkup(pangde, { showCost: true }).trim();
+    const heroScaledValue = pangdeTemplate.content.querySelector(
+      ".hero-skill-description .hero-skill-scaled-value",
+    );
+    assert(
+      heroScaledValue &&
+        heavyScaledValue?.className === heroScaledValue.className &&
+        whiteHorseScaledValue?.className === heroScaledValue.className,
+      "衍生单位与正常武将技能没有复用同一等级变量标记",
+    );
+  });
+
+  test("灼烧与引燃的衍生说明只保留玩家可读首段", () => {
+    const burnDefinition = DERIVED_CONTENT_DEFINITIONS.find((entry) => entry.id === "burn");
+    const igniteDefinition = DERIVED_CONTENT_DEFINITIONS.find((entry) => entry.id === "ignite");
+    assert(
+      burnDefinition?.description === "每次任意普通攻击完成后受到 1 点真实伤害",
+      "灼烧衍生说明没有精简为首段",
+    );
+    assert(
+      igniteDefinition?.description === "已有灼烧的单位再次获得任意负面状态时触发 6 点真实伤害",
+      "引燃衍生说明没有精简为首段",
+    );
+    assert(
+      !burnDefinition.description.includes("；") && !igniteDefinition.description.includes("；"),
+      "灼烧或引燃的衍生说明仍包含后续分号段落",
+    );
+  });
+
+  test("战斗召唤物技能文本完整保留到卡牌快照", () => {
+    const runtime = { nextSummonId: 1, teams: { player: [] } };
+    const heavyCavalry = createHeavyCavalry(runtime, "player");
+    const cavalry = createCavalry(runtime, "player", 2, 1, "魏", 1);
+    const whiteHorse = createWhiteHorseSummon(runtime, {
+      side: "player",
+      level: 2,
+      faction: "群",
+    });
+    const getSummonTooltip = (unit) => {
+      const snapshot = getBattleUnitSnapshot(unit);
+      const cardUnit = getBattleSnapshotCardUnit(snapshot, 1);
+      const template = document.createElement("template");
+      template.innerHTML = createHeroCardMarkup(cardUnit, { battleSnapshot: true }).trim();
+      return {
+        snapshot,
+        text: template.content.querySelector(".hero-skill-tooltip")?.textContent ?? "",
+      };
+    };
+    const heavyDetail = getSummonTooltip(heavyCavalry);
+    const cavalryDetail = getSummonTooltip(cavalry);
+    const whiteHorseDetail = getSummonTooltip(whiteHorse);
+    assert(
+      heavyDetail.snapshot.skill && heavyDetail.text.includes("攻击前") && heavyDetail.text.includes("+2/+2"),
+      "重骑兵技能在战斗快照或卡牌详情中丢失",
+    );
+    assert(
+      cavalryDetail.snapshot.skill && cavalryDetail.text.includes("无技能"),
+      "普通骑兵没有明确显示无技能",
+    );
+    assert(
+      whiteHorseDetail.snapshot.skill && whiteHorseDetail.text.includes("白马突袭"),
+      "白马义从技能在战斗快照或卡牌详情中丢失",
+    );
+  });
+
+  test("商店与战斗技能触发复用详情面板水墨标签", () => {
+    const shopTemplate = document.createElement("template");
+    shopTemplate.innerHTML = getSkillTriggerTagMarkup("老当益壮");
+    const shopTag = shopTemplate.content.querySelector(
+      ".skill-trigger-tag.hero-skill-name-tag.card-detail-ink-tag",
+    );
+    assert(shopTag?.textContent.trim() === "老当益壮", "商店技能触发没有使用详情水墨标签");
+
+    const battleTemplate = document.createElement("template");
+    battleTemplate.innerHTML = renderBattlePopupMarkup({
+      text: "【老当益壮】",
+      tone: "skill",
+    });
+    const battleTag = battleTemplate.content.querySelector(
+      ".skill-trigger-tag.hero-skill-name-tag.card-detail-ink-tag",
+    );
+    assert(battleTag?.textContent.trim() === "老当益壮", "战斗技能触发没有使用详情水墨标签");
+    assert(!battleTemplate.content.textContent.includes("【"), "战斗技能标签仍显示书名括号");
+  });
+
+  test("属性与伤害浮字按新规则使用BattleNum字形、攻击图标和指定颜色行", () => {
+    const pairTemplate = document.createElement("template");
+    pairTemplate.innerHTML = getFloatingAttributeTextMarkup("+1/+1");
+    assert(
+      pairTemplate.content.querySelectorAll(".battle-number-buff .battle-number-glyph").length === 3,
+      "属性对没有使用绿色BattleNum的+1/1字形",
+    );
+    assert(
+      pairTemplate.content
+        .querySelector(".battle-number-buff .battle-number-glyph")
+        ?.getAttribute("style")
+        ?.includes("83.33333%"),
+      "属性加成没有读取BattleNum绿色字形行",
+    );
+    assert(
+      !pairTemplate.content.querySelector(".floating-stat-icon"),
+      "双属性加成仍错误显示攻击力或生命值图标",
+    );
+
+    const attackTemplate = document.createElement("template");
+    attackTemplate.innerHTML = getFloatingAttributeTextMarkup("+1 攻击力");
+    assert(
+      attackTemplate.content.querySelectorAll(".battle-number-buff .battle-number-glyph").length === 2 &&
+        attackTemplate.content.querySelector(".floating-stat-icon-attack") &&
+        !attackTemplate.content.querySelector(".floating-stat-icon-health"),
+      "单攻击加成没有显示为绿色+1与攻击图标",
+    );
+
+    const healthTemplate = document.createElement("template");
+    healthTemplate.innerHTML = getFloatingAttributeTextMarkup("+1 生命值");
+    assert(
+      healthTemplate.content.querySelectorAll(".battle-number-buff .battle-number-glyph").length === 2 &&
+        !healthTemplate.content.querySelector(".floating-stat-icon"),
+      "单生命加成没有显示为绿色+1无图标",
+    );
+
+    const attackReductionTemplate = document.createElement("template");
+    attackReductionTemplate.innerHTML = renderBattlePopupMarkup({
+      text: "攻击力-2",
+      tone: "debuff",
+    });
+    assert(
+      attackReductionTemplate.content.querySelector(".battle-number-true-damage") &&
+        attackReductionTemplate.content.querySelector(".floating-stat-icon-attack") &&
+        !attackReductionTemplate.content.querySelector(".floating-stat-icon-health"),
+      "减攻击没有显示为白色负数与攻击图标",
+    );
+
+    const normalDamageTemplate = document.createElement("template");
+    normalDamageTemplate.innerHTML = renderBattlePopupMarkup({
+      text: "-2",
+      tone: "damage",
+      damageAmount: 2,
+      damageType: "attack",
+    });
+    assert(
+      normalDamageTemplate.content.querySelector(".battle-number-damage") &&
+        !normalDamageTemplate.content.querySelector(".floating-stat-icon"),
+      "普通伤害没有显示为红色BattleNum无图标",
+    );
+    assert(
+      normalDamageTemplate.content
+        .querySelector(".battle-number-damage .battle-number-glyph")
+        ?.getAttribute("style")
+        ?.endsWith("0.00000%"),
+      "普通伤害没有读取BattleNum红色字形行",
+    );
+
+    const trueDamageTemplate = document.createElement("template");
+    trueDamageTemplate.innerHTML = renderBattlePopupMarkup({
+      text: "-2",
+      tone: "damage",
+      damageAmount: 2,
+      damageType: "true",
+    });
+    assert(
+      trueDamageTemplate.content.querySelector(".battle-number-true-damage") &&
+        trueDamageTemplate.content.querySelector(".true-damage") &&
+        !trueDamageTemplate.content.querySelector(".floating-stat-icon"),
+      "真实伤害没有显示为白色BattleNum无图标",
+    );
+    assert(
+      trueDamageTemplate.content
+        .querySelector(".battle-number-true-damage .battle-number-glyph")
+        ?.getAttribute("style")
+        ?.includes("66.66667%"),
+      "真实伤害没有读取BattleNum白色字形行",
+    );
+  });
+
+  test("新版装备价格与特殊生成装备保持权威数据", () => {
+    const getItem = (name) => CARD_POOLS.stratagem.find((item) => item.name === name);
+    assert(getItem("令箭")?.cost === 1, "令箭价格不是1金币");
+    ["兵符", "绝影", "铁盾", "神农秘典", "蚩尤古盾", "修罗刀"].forEach(
+      (name) => assert(getItem(name)?.cost === 3, `${name}价格不是3金币`),
+    );
+    assert(getItem("传国玉玺")?.generatedOnly && getItem("传国玉玺")?.cost == null, "传国玉玺不应有价格");
+    assert(getItem("诏书")?.generatedOnly && getItem("诏书")?.cost == null, "诏书不应进入普通商店");
+  });
+
+  test("新版计策价格、前方目标与属性成长保持权威数据", () => {
+    const getItem = (name) => CARD_POOLS.stratagem.find((item) => item.name === name);
+    assert(getItem("演练")?.cost === 3, "演练价格不是3金币");
+    assert(getItem("口才")?.cost === 2, "口才价格不是2金币");
+    assert(!getItem("歃血盟书"), "旧计策歃血盟书仍存在于卡池");
+    assert(getItem("鼓舞")?.cost === 3, "鼓舞没有替换原4阶计策或价格错误");
+
+    const previousLineup = state.lineup;
+    const previousCounts = state.stratagemUseCounts;
+    const previousEventCount = state.effectEvents.length;
+    const previousBonusAnimationCount = queuedShopBonusAnimations.length;
+    try {
+      const weiBack = createShopSkillTestUnit({
+        id: "stratagem-wei-back",
+        name: "计策魏后排",
+        faction: "魏",
+      });
+      const weiMiddle = createShopSkillTestUnit({
+        id: "stratagem-wei-middle",
+        name: "计策魏中排",
+        faction: "魏",
+      });
+      const wuInactive = createShopSkillTestUnit({
+        id: "stratagem-wu-inactive",
+        name: "计策吴单将",
+        faction: "吴",
+      });
+      const weiFront = createShopSkillTestUnit({
+        id: "stratagem-wei-front",
+        name: "计策魏前排",
+        faction: "魏",
+      });
+      const weiFrontmost = createShopSkillTestUnit({
+        id: "stratagem-wei-frontmost",
+        name: "计策魏最前排",
+        faction: "魏",
+      });
+      const weiUnits = [weiBack, weiMiddle, weiFront, weiFrontmost];
+      state.lineup = [weiBack, weiMiddle, wuInactive, weiFront, weiFrontmost];
+      state.stratagemUseCounts = {};
+
+      const recommendBefore = weiUnits.reduce(
+        (total, unit) => ({ attack: total.attack + unit.attack, health: total.health + unit.health }),
+        { attack: 0, health: 0 },
+      );
+      const recommendOutcome = resolveShopEffect(getItem("举贤").effectId, {
+        card: getItem("举贤"),
+        targetUnit: null,
+        targetIndex: 0,
+        selectedFaction: "魏",
+      });
+      const recommendAfter = weiUnits.reduce(
+        (total, unit) => ({ attack: total.attack + unit.attack, health: total.health + unit.health }),
+        { attack: 0, health: 0 },
+      );
+      assert(recommendOutcome.applied, "举贤没有成功结算");
+      assert(
+        recommendAfter.attack === recommendBefore.attack + 2 &&
+          recommendAfter.health === recommendBefore.health + 2,
+        "举贤没有使随机1名目标获得+2/+2",
+      );
+
+      const advanceBefore = new Map(weiUnits.map((unit) => [unit.id, unit.attack]));
+      const advanceOutcome = resolveShopEffect(getItem("同袍共进").effectId, {
+        card: getItem("同袍共进"),
+        targetUnit: null,
+        targetIndex: 0,
+        selectedFaction: "魏",
+      });
+      assert(advanceOutcome.applied, "同袍共进没有成功结算");
+      assert(
+        weiBack.attack === advanceBefore.get(weiBack.id) &&
+          weiMiddle.attack === advanceBefore.get(weiMiddle.id) &&
+          weiFront.attack === advanceBefore.get(weiFront.id) + 1 &&
+          weiFrontmost.attack === advanceBefore.get(weiFrontmost.id) + 1,
+        "同袍共进没有固定强化所选羁绊中最前方2名武将",
+      );
+
+      const inactiveBefore = { attack: wuInactive.attack, health: wuInactive.health };
+      const hiddenOutcome = resolveShopEffect(getItem("潜龙蓄势").effectId, {
+        card: getItem("潜龙蓄势"),
+        targetUnit: null,
+        targetIndex: 0,
+        selectedFaction: null,
+      });
+      assert(hiddenOutcome.applied, "潜龙蓄势没有成功结算");
+      assert(
+        wuInactive.attack === inactiveBefore.attack + 2 &&
+          wuInactive.health === inactiveBefore.health + 2,
+        "潜龙蓄势没有给未激活羁绊武将+2/+2",
+      );
+
+      const inspire = getItem("鼓舞");
+      const inspireBefore = { attack: weiBack.attack, health: weiBack.health };
+      const bondsBefore = [...getBaseUnitBonds(weiBack)];
+      const validation = getStratagemUseValidation(inspire, weiBack);
+      const inspireOutcome = resolveShopEffect(inspire.effectId, {
+        card: inspire,
+        targetUnit: weiBack,
+        targetIndex: 0,
+        selectedFaction: null,
+      });
+      assert(validation.valid && !validation.requiresBondChoice, "鼓舞错误要求选择羁绊");
+      assert(inspireOutcome.applied, "鼓舞没有成功结算");
+      assert(
+        weiBack.attack === inspireBefore.attack + 3 && weiBack.health === inspireBefore.health + 3,
+        "鼓舞没有使所选武将+3/+3",
+      );
+      assert(
+        JSON.stringify(getBaseUnitBonds(weiBack)) === JSON.stringify(bondsBefore),
+        "鼓舞错误添加了额外羁绊",
+      );
+    } finally {
+      state.lineup = previousLineup;
+      state.stratagemUseCounts = previousCounts;
+      state.effectEvents.splice(previousEventCount);
+      queuedShopBonusAnimations.splice(previousBonusAnimationCount);
+    }
+  });
+
+  test("华雄固定造成1点开场伤害且黄忠攻击后给自身经验", () => {
+    const huaxiongBattle = simulateBattleTestScenario({
+      player: [{ name: "华雄", health: 20 }],
+      enemy: [{ name: "华雄木桩", attack: 1, health: 10, skillEffectIds: [] }],
+      seed: 101,
+      maxExchanges: 0,
+    });
+    assert(huaxiongBattle.enemyEnd[0]?.health === 9, "华雄开场伤害不是固定1点");
+
+    const huangzhongBattle = simulateBattleTestScenario({
+      player: [{ name: "黄忠", health: 50 }],
+      enemy: [{ name: "黄忠木桩", attack: 1, health: 50, skillEffectIds: [] }],
+      seed: 102,
+      maxExchanges: 1,
+    });
+    const huangzhong = huangzhongBattle.playerEnd.find((unit) => unit.name === "黄忠");
+    assert(
+      huangzhong?.bonusExperience === 1,
+      `黄忠攻击后应获得1经验，实际为${huangzhong?.bonusExperience ?? 0}`,
+    );
+  });
+
+  test("汉献帝诏书占用装备槽并分别拦截伤害与负面状态", () => {
+    const createEdictRuntime = () => {
+      const ally = createBattleTestUnit({
+        name: "诏书木桩",
+        side: "player",
+        index: 0,
+        attack: 1,
+        health: 20,
+        skillEffectIds: [],
+        statuses: { rest: { amount: 2 } },
+      });
+      const emperor = createBattleTestUnit({
+        name: "汉献帝",
+        side: "player",
+        index: 1,
+        health: 1,
+      });
+      const enemy = createBattleTestUnit({
+        name: "诏书伤害源",
+        side: "enemy",
+        index: 0,
+        attack: 15,
+        health: 20,
+        skillEffectIds: [],
+      });
+      const runtime = createBattleRuntime([ally, emperor], [enemy], {
+        seed: 103,
+        lockedBonds: { player: {}, enemy: {} },
+      });
+      emperor.health = 0;
+      resolveBattleUnitDeath(runtime, emperor, 0);
+      assert(ally.equipment?.effectId === "equipment.imperial-edict", "汉献帝没有生成诏书");
+      return { runtime, ally, enemy };
+    };
+
+    const damageCase = createEdictRuntime();
+    dealBattleDamage(damageCase.runtime, {
+      source: damageCase.enemy,
+      target: damageCase.ally,
+      amount: 15,
+      type: "true",
+      sourceEffectId: "test.edict-damage",
+      resolveDeaths: false,
+    });
+    assert(damageCase.ally.health === 15, "诏书没有把15点伤害减少为5点");
+    assert(!damageCase.ally.equipment, "诏书抵挡伤害后没有移除");
+
+    const statusCase = createEdictRuntime();
+    applyNegativeStatus(statusCase.runtime, statusCase.ally, "burn", {
+      ownerSide: "enemy",
+      sourceEffectId: "test.edict-status",
+      sourceName: "测试灼烧",
+    });
+    assert(!statusCase.ally.equipment, "诏书阻止负面状态后没有移除");
+    assert(Object.keys(statusCase.ally.statuses).length === 0, "诏书没有同时清空状态槽");
+  });
+
+  test("休整阻止负面状态且张辽按等级修改敌军全体当前生命", () => {
+    const restTarget = createBattleTestUnit({
+      name: "休整测试木桩",
+      side: "player",
+      index: 0,
+      health: 20,
+      skillEffectIds: [],
+      statuses: { rest: { amount: 4 } },
+    });
+    const source = createBattleTestUnit({
+      name: "休整状态源",
+      side: "enemy",
+      index: 0,
+      health: 20,
+      skillEffectIds: [],
+    });
+    const runtime = createBattleRuntime([restTarget], [source], {
+      seed: 104,
+      lockedBonds: { player: {}, enemy: {} },
+    });
+    applyNegativeStatus(runtime, restTarget, "burn", {
+      ownerSide: "enemy",
+      sourceEffectId: "test.rest-intercept",
+      sourceName: "测试灼烧",
+    });
+    assert(Object.keys(restTarget.statuses).length === 0, "休整没有与传入负面状态一起清除");
+
+    const zhangliaoBattle = simulateBattleTestScenario({
+      player: [{ name: "张辽", level: 2, copies: UNIT_LEVEL_COPY_THRESHOLDS[2], health: 50 }],
+      enemy: [
+        { name: "张辽木桩甲", attack: 1, health: 10, skillEffectIds: [] },
+        { name: "张辽木桩乙", attack: 1, health: 11, skillEffectIds: [] },
+      ],
+      seed: 105,
+      maxExchanges: 0,
+    });
+    assert(
+      zhangliaoBattle.enemyEnd.map((unit) => unit.health).join(",") === "6,6",
+      `2级张辽没有使敌军全体保留60%当前生命：${zhangliaoBattle.enemyEnd.map((unit) => unit.health).join(",")}`,
+    );
+  });
+
+  test("甘宁逐次施加灼烧并在击杀后转向新的最后方敌军", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "甘宁", level: 2, copies: UNIT_LEVEL_COPY_THRESHOLDS[2], health: 50 }],
+      enemy: [
+        { name: "甘宁目标甲", attack: 1, health: 5, skillEffectIds: [] },
+        { name: "甘宁目标乙", attack: 1, health: 5, skillEffectIds: [] },
+      ],
+      seed: 106,
+      maxExchanges: 0,
+    });
+    const igniteKills = battle.structuredLog.filter(
+      (entry) => entry.type === "damage" && entry.sourceEffectId === "status.burn-ignite",
+    );
+    assert(battle.enemyEnd.length === 0, "甘宁剩余施加次数没有转向新的最后方敌军");
+    assert(igniteKills.length === 2, `甘宁应触发2次引燃击杀，实际为${igniteKills.length}`);
+  });
+
+  test("召唤物继承召唤者全部羁绊且刘备对同羁绊召唤物加经验", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        { name: "刘备", health: 50 },
+        { name: "马云禄", health: 1, extraFactions: ["魏"] },
+      ],
+      enemy: [{ name: "召唤测试木桩", attack: 10, health: 50, skillEffectIds: [] }],
+      seed: 107,
+      maxExchanges: 1,
+    });
+    const cavalry = battle.playerEnd.find((unit) => unit.name === "骑兵");
+    assert(cavalry, "马云禄没有召唤骑兵");
+    assert(
+      JSON.stringify(getBattleUnitBonds(cavalry)) === JSON.stringify(["蜀", "魏"]),
+      `骑兵没有继承马云禄全部羁绊：${getBattleUnitBonds(cavalry).join("、")}`,
+    );
+    assert(cavalry.bonusExperience === 1, "刘备没有使同羁绊召唤骑兵获得1经验");
+  });
+
+  test("颜良获得状态与装备媒介伤害的击杀归属", () => {
+    const yanliang = createBattleTestUnit({
+      name: "颜良",
+      side: "player",
+      index: 0,
+      health: 20,
+    });
+    const target = createBattleTestUnit({
+      name: "颜良击杀木桩",
+      side: "enemy",
+      index: 0,
+      health: 5,
+      skillEffectIds: [],
+    });
+    const runtime = createBattleRuntime([yanliang], [target], {
+      seed: 108,
+      lockedBonds: { player: {}, enemy: {} },
+    });
+    applyNegativeStatus(runtime, target, "burn", {
+      ownerSide: "player",
+      sourceUnit: yanliang,
+      sourceEffectId: "equipment.future-status-damage",
+      sourceName: "测试伤害装备",
+    });
+    applyNegativeStatus(runtime, target, "burn", {
+      ownerSide: "player",
+      sourceUnit: yanliang,
+      sourceEffectId: "equipment.future-status-damage",
+      sourceName: "测试伤害装备",
+    });
+    assert(yanliang.attack === 5 && yanliang.maxHealth === 22, "颜良没有获得+2/+2击杀成长");
+  });
+
+  test("魏延文丑周泰按新版阵亡、相邻攻击与交锋减伤触发", () => {
+    const weiyanBattle = simulateBattleTestScenario({
+      player: [
+        { name: "魏延", health: 20 },
+        { name: "魏延友军", attack: 1, health: 1, skillEffectIds: [] },
+      ],
+      enemy: [{ name: "魏延敌军", attack: 10, health: 30, skillEffectIds: [] }],
+      seed: 109,
+      maxExchanges: 1,
+    });
+    const weiyan = weiyanBattle.playerEnd.find((unit) => unit.name === "魏延");
+    assert(weiyan?.attack === 3 && weiyan?.maxHealth === 21, "魏延没有因其他友军阵亡获得+1/+1");
+
+    const wenchouBattle = simulateBattleTestScenario({
+      player: [
+        { name: "文丑", health: 20 },
+        { name: "文丑前方友军", attack: 1, health: 20, skillEffectIds: [] },
+      ],
+      enemy: [{ name: "文丑敌军", attack: 1, health: 30, skillEffectIds: [] }],
+      seed: 110,
+      maxExchanges: 1,
+    });
+    const wenchou = wenchouBattle.playerEnd.find((unit) => unit.name === "文丑");
+    assert(wenchou?.attack === 4 && wenchou?.maxHealth === 21, "文丑没有因最近前方友军攻击获得+1/+1");
+
+    const zhoutaiBattle = simulateBattleTestScenario({
+      player: [{ name: "周泰", level: 2, copies: UNIT_LEVEL_COPY_THRESHOLDS[2], health: 20 }],
+      enemy: [{ name: "周泰敌军", attack: 10, health: 30, skillEffectIds: [] }],
+      seed: 111,
+      maxExchanges: 1,
+    });
+    const zhoutai = zhoutaiBattle.playerEnd.find((unit) => unit.name === "周泰");
+    assert(zhoutai?.health === 16, `2级周泰应把10点伤害减为4点，实际剩余生命${zhoutai?.health}`);
+  });
+
+  test("马岱按等级造成伤害且荀攸在成功使用计策后强化前后友军", () => {
+    const previousLineup = state.lineup;
+    const previousCounts = { ...state.stratagemUseCounts };
+    const previousEventCount = state.effectEvents.length;
+    const previousBonusAnimationCount = queuedShopBonusAnimations.length;
+    try {
+      const madai = createShopSkillTestUnit({
+        id: "madai-owner",
+        name: "马岱",
+        faction: "蜀",
+        level: 2,
+        health: 20,
+      });
+      const madaiTarget = createShopSkillTestUnit({
+        id: "madai-target",
+        name: "马岱前方友军",
+        faction: "蜀",
+        health: 10,
+      });
+      state.lineup = [madai, madaiTarget, null, null, null];
+      resolveShopHeroSkill(
+        { owner: madai, effectId: "hero.madai.fuzhan" },
+        { type: "round:end", payload: {} },
+      );
+      assert(madaiTarget.health === 6, "2级马岱没有造成4点伤害");
+
+      const behind = createShopSkillTestUnit({
+        id: "xunyou-behind",
+        name: "荀攸后方友军",
+        faction: "魏",
+      });
+      const xunyou = createShopSkillTestUnit({
+        id: "xunyou-owner",
+        name: "荀攸",
+        faction: "魏",
+        level: 2,
+      });
+      xunyou.skillEffectIds = ["hero.xunyou.qice"];
+      const ahead = createShopSkillTestUnit({
+        id: "xunyou-ahead",
+        name: "荀攸前方友军",
+        faction: "魏",
+      });
+      const behindAttackBefore = behind.attack;
+      const aheadAttackBefore = ahead.attack;
+      state.lineup = [behind, xunyou, ahead, null, null];
+      const card = CARD_POOLS.stratagem.find((item) => item.effectId === "stratagem.encourage");
+      const outcome = resolveShopEffect(card.effectId, {
+        card,
+        targetUnit: ahead,
+        targetIndex: 2,
+        selectedFaction: null,
+      });
+      assert(outcome.applied, "测试计策没有成功使用");
+      assert(behind.attack === behindAttackBefore + 2, "荀攸没有强化最近后方友军");
+      assert(ahead.attack === aheadAttackBefore + 3, "荀攸没有在计策自身+1之外再强化前方友军+2");
+    } finally {
+      state.lineup = previousLineup;
+      state.stratagemUseCounts = previousCounts;
+      state.effectEvents.splice(previousEventCount);
+      queuedShopBonusAnimations.splice(previousBonusAnimationCount);
+    }
+  });
+
+  test("于吉在原位置召唤继承全部羁绊的方士且公孙瓒召唤4/4白马", () => {
+    const rear = createBattleTestUnit({
+      name: "于吉后排",
+      side: "player",
+      index: 0,
+      health: 20,
+      skillEffectIds: [],
+    });
+    const yuji = createBattleTestUnit({
+      name: "于吉",
+      side: "player",
+      index: 1,
+      health: 1,
+      extraFactions: ["魏", "吴"],
+    });
+    const front = createBattleTestUnit({
+      name: "于吉前排",
+      side: "player",
+      index: 2,
+      health: 20,
+      skillEffectIds: [],
+    });
+    const enemy = createBattleTestUnit({
+      name: "于吉测试敌军",
+      side: "enemy",
+      index: 0,
+      health: 20,
+      skillEffectIds: [],
+    });
+    const runtime = createBattleRuntime([rear, yuji, front], [enemy], {
+      seed: 112,
+      lockedBonds: { player: {}, enemy: {} },
+    });
+    yuji.health = 0;
+    resolveBattleUnitDeath(runtime, yuji, 0);
+    const fangshi = runtime.teams.player[1];
+    assert(fangshi?.name === "方士", "方士没有回到于吉原来的中间位置");
+    assert(
+      JSON.stringify(getBattleUnitBonds(fangshi)) === JSON.stringify(["魏", "吴"]),
+      `方士没有继承于吉全部羁绊：${getBattleUnitBonds(fangshi).join("、")}`,
+    );
+
+    const gongsunBattle = simulateBattleTestScenario({
+      player: [{ name: "公孙瓒", health: 1 }],
+      enemy: [{ name: "白马测试敌军", attack: 10, health: 30, skillEffectIds: [] }],
+      seed: 113,
+      maxExchanges: 1,
+    });
+    const whiteHorse = gongsunBattle.playerEnd.find((unit) => unit.name === "白马义从");
+    assert(whiteHorse?.attack === 4 && whiteHorse?.maxHealth === 4, "白马义从基础攻血不是4/4");
+  });
+
+  test("铁盾抵挡10点伤害且只生效1次", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{
+        name: "铁盾测试武将",
+        attack: 0,
+        health: 100,
+        skillEffectIds: [],
+        equipment: { name: "铁盾", effectId: "equipment.iron-shield" },
+      }],
+      enemy: [{ name: "铁盾测试敌军", attack: 20, health: 100, skillEffectIds: [] }],
+      seed: 201,
+      maxExchanges: 2,
+    });
+    const steps = battle.presentationTimeline.filter(
+      (step) => step.effectId === "equipment.iron-shield",
+    );
+    assert(steps.length === 1, `铁盾应只生效1次，实际生效${steps.length}次`);
+    assert(steps[0]?.entries?.[0]?.blocked === 10, "铁盾没有抵挡10点伤害");
+    assert(!steps[0]?.snapshot?.player?.[0]?.equipment, "铁盾生效后没有从装备槽移除");
+  });
+
+  test("帅印在商店阶段强化新召唤武将且不响应复活", () => {
+    const previousLineup = state.lineup;
+    const previousLogLength = state.logs.length;
+    const previousSkillAnimationCount = queuedShopSkillAnimations.length;
+    const previousBonusAnimationCount = queuedShopBonusAnimations.length;
+    const previousSequence = shopPresentationSequence;
+    try {
+      const owner = createShopSkillTestUnit({
+        id: "shop-commander-seal-owner",
+        name: "帅印携带者",
+        faction: "魏",
+      });
+      owner.directModifiers.equipment = {
+        name: "帅印",
+        effectId: "equipment.commander-seal",
+      };
+      const summoned = createShopSkillTestUnit({
+        id: "shop-commander-seal-summon",
+        name: "新召唤武将",
+        faction: "蜀",
+        attack: 3,
+        health: 4,
+      });
+      state.lineup = [owner, summoned, null, null, null];
+
+      dispatchShopEvent("unit:summon", { unit: summoned, source: "test" });
+      assert(
+        summoned.bodyAttack === 4 && summoned.bodyHealth === 5,
+        `帅印没有在商店阶段使新召唤武将从3/4变为4/5：${summoned.bodyAttack}/${summoned.bodyHealth}`,
+      );
+      const skillAnimations = queuedShopSkillAnimations.slice(previousSkillAnimationCount);
+      const bonusAnimations = queuedShopBonusAnimations.slice(previousBonusAnimationCount);
+      assert(
+        skillAnimations.length === 1 && skillAnimations[0].skillName === "帅印",
+        "帅印提供商店加成前没有播放帅印技能标签",
+      );
+      assert(
+        bonusAnimations.length === 1 &&
+          skillAnimations[0].sequence < bonusAnimations[0].sequence,
+        "帅印技能标签没有先于+1/+1属性飘字播放",
+      );
+
+      dispatchShopEvent("unit:summon", { unit: summoned, source: "test", revived: true });
+      assert(
+        summoned.bodyAttack === 4 && summoned.bodyHealth === 5,
+        "帅印错误地响应了复活事件",
+      );
+    } finally {
+      state.lineup = previousLineup;
+      state.logs.splice(previousLogLength);
+      queuedShopSkillAnimations.splice(previousSkillAnimationCount);
+      queuedShopBonusAnimations.splice(previousBonusAnimationCount);
+      shopPresentationSequence = previousSequence;
+    }
+  });
+
+  test("甄姬在商店和战斗中都不把复活视为召唤", () => {
+    const shopOwner = createShopSkillTestUnit({
+      id: "shop-zhenji-revive-owner",
+      name: "甄姬",
+      faction: "魏",
+    });
+    const shopTarget = createShopSkillTestUnit({
+      id: "shop-zhenji-revive-target",
+      name: "复活友军",
+      faction: "魏",
+    });
+    const shopCandidate = {
+      owner: shopOwner,
+      effectId: "hero.zhenji.luoshen",
+    };
+    assert(
+      !isShopHeroEventApplicable(shopCandidate, "unit:summon", {
+        unit: shopTarget,
+        revived: true,
+      }),
+      "甄姬在商店阶段错误地把复活视为召唤",
+    );
+
+    const battleOwner = createBattleTestUnit({
+      name: "甄姬",
+      side: "player",
+      index: 0,
+    });
+    const battleTarget = createBattleTestUnit({
+      name: "复活友军",
+      side: "player",
+      index: 1,
+      skillEffectIds: [],
+    });
+    const runtime = createBattleRuntime([battleOwner, battleTarget], [], {
+      seed: 202,
+      lockedBonds: { player: {}, enemy: {} },
+    });
+    assert(
+      !isBattleHeroSkillApplicable(
+        runtime,
+        {
+          owner: battleOwner,
+          effectId: "hero.zhenji.luoshen",
+          definition: EFFECT_DEFINITIONS["hero.zhenji.luoshen"],
+        },
+        { type: "unit:summon", payload: { unit: battleTarget, revived: true } },
+      ),
+      "甄姬在战斗阶段错误地把复活视为召唤",
+    );
+  });
+
+  test("帅印会强化骑兵等己方衍生武将", () => {
+    const battle = simulateBattleTestScenario({
+      player: [
+        {
+          name: "帅印携带者",
+          attack: 1,
+          health: 20,
+          skillEffectIds: [],
+          equipment: { name: "帅印", effectId: "equipment.commander-seal" },
+        },
+        {
+          name: "马云禄",
+          attack: 0,
+          health: 1,
+          skillEffectIds: ["hero.mayunlu.xiliang-lienv"],
+        },
+      ],
+      enemy: [{ name: "帅印测试敌军", attack: 5, health: 50, skillEffectIds: [] }],
+      seed: 202,
+      maxExchanges: 1,
+    });
+    const cavalry = battle.playerEnd.find((unit) => unit.name.includes("骑兵"));
+    assert(cavalry?.attack === 3 && cavalry?.health === 2, "帅印没有使衍生骑兵从2/1变为3/2");
+    const bonusCueCount = battle.presentationTimeline
+      .flatMap((step) => step.cues ?? [])
+      .filter((cue) => cue.unitId === cavalry?.id && cue.text === "+1/+1").length;
+    assert(bonusCueCount === 1, `帅印的+1/+1应只飘字1次，实际为${bonusCueCount}次`);
+    const sealOwner = battle.playerEnd.find((unit) => unit.name === "帅印携带者");
+    const sealLabelStepIndex = battle.presentationTimeline.findIndex((step) =>
+      (step.cues ?? []).some(
+        (cue) => cue.unitId === sealOwner?.id && cue.text === "【帅印】",
+      ),
+    );
+    const bonusStepIndex = battle.presentationTimeline.findIndex((step) =>
+      (step.cues ?? []).some(
+        (cue) => cue.unitId === cavalry?.id && cue.text === "+1/+1",
+      ),
+    );
+    assert(sealLabelStepIndex >= 0, "帅印提供战斗加成前没有播放帅印技能标签");
+    assert(
+      sealLabelStepIndex < bonusStepIndex,
+      "帅印技能标签没有先于+1/+1属性飘字播放",
+    );
+  });
+
+  test("虎符结算+3/+3与1经验且经验成长同步生效", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{
+        name: "虎符测试武将",
+        attack: 4,
+        health: 6,
+        skillEffectIds: [],
+        equipment: { name: "虎符", effectId: "equipment.tiger-tally" },
+      }],
+      enemy: [{ name: "虎符木桩", attack: 0, health: 20, skillEffectIds: [] }],
+      seed: 203,
+      maxExchanges: 0,
+    });
+    const owner = battle.playerEnd[0];
+    assert(owner.attack === 8 && owner.health === 10, "虎符属性与1经验带来的卡牌成长没有完整结算");
+    assert(owner.experience === 1, "虎符没有给予1经验");
+  });
+
+  test("白玉龟清除负面状态并使携带者+2/+2", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{
+        name: "白玉龟测试武将",
+        attack: 4,
+        health: 6,
+        skillEffectIds: [],
+        equipment: { name: "白玉龟", effectId: "equipment.white-jade-turtle" },
+      }],
+      enemy: [{ name: "贾诩", attack: 0, health: 20, skillEffectIds: ["hero.jiaxu.fanjian"] }],
+      seed: 204,
+      maxExchanges: 0,
+    });
+    const owner = battle.playerEnd[0];
+    assert(owner.attack === 6 && owner.health === 8 && !getNegativeStatusId(owner), "白玉龟清除或成长效果错误");
+  });
+
+  test("阎魔帆以同等级5/5复活且不继承装备与状态", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{
+        name: "阎魔帆测试武将",
+        attack: 1,
+        health: 1,
+        level: 2,
+        statuses: { burn: { stacks: 1 } },
+        skillEffectIds: [],
+        equipment: { name: "阎魔帆", effectId: "equipment.yanmo-sail" },
+      }],
+      enemy: [{ name: "阎魔帆测试敌军", attack: 5, health: 20, skillEffectIds: [] }],
+      seed: 205,
+      maxExchanges: 1,
+    });
+    const revived = battle.playerEnd.find((unit) => unit.name === "阎魔帆测试武将");
+    assert(revived?.attack === 5 && revived?.health === 5 && revived?.level === 2, "阎魔帆复活面板或等级错误");
+    assert(!revived?.equipment && !getNegativeStatusId(revived), "阎魔帆复活后仍有装备或状态");
+  });
+
+  test("方天画戟同时攻击阶段按30%向下取整增伤与减伤", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{
+        name: "方天画戟测试武将",
+        attack: 11,
+        health: 50,
+        skillEffectIds: [],
+        equipment: { name: "方天画戟", effectId: "equipment.fangtian-halberd" },
+      }],
+      enemy: [{ name: "方天画戟测试敌军", attack: 11, health: 50, skillEffectIds: [] }],
+      seed: 206,
+      maxExchanges: 1,
+    });
+    const changes = battle.presentationTimeline
+      .filter((step) => step.effectId === "equipment.fangtian-halberd")
+      .flatMap((step) => step.entries ?? [])
+      .map((entry) => entry.damageChange);
+    assert(changes.includes(3) && changes.includes(-3), `方天画戟没有按11攻结算+3/-3：${changes.join("、")}`);
+  });
+
+  test("黄天令旗按自身攻击力20%向下取整附加每次技能伤害", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{
+        name: "华雄",
+        attack: 11,
+        health: 20,
+        skillEffectIds: ["hero.huaxiong.xiaoyong"],
+        equipment: { name: "黄天令旗", effectId: "equipment.yellow-heaven-banner" },
+      }],
+      enemy: [{ name: "黄天令旗木桩", attack: 0, health: 20, skillEffectIds: [] }],
+      seed: 207,
+      maxExchanges: 0,
+    });
+    const bannerEntry = battle.presentationTimeline
+      .find((step) => step.effectId === "equipment.yellow-heaven-banner")
+      ?.entries?.[0];
+    assert(bannerEntry?.damageChange === 2, "黄天令旗11攻没有附加向下取整后的2点技能伤害");
+  });
+
+  test("战斗场内隐藏过程说明与交锋标识且只保留结果印章", () => {
+    const battle = simulateBattleTestScenario({
+      player: [{ name: "甲", attack: 10, health: 10 }],
+      enemy: [{ name: "乙", attack: 1, health: 1 }],
+      maxExchanges: 1,
+    });
+    const processSteps = battle.presentationTimeline.filter(
+      (step) => step.kind !== "result",
+    );
+    assert(
+      processSteps.some((step) => step.kind === "clash"),
+      "测试场景没有生成交锋节点",
+    );
+    assert(
+      processSteps.every(
+        (step) =>
+          !renderBattleAnimationBattlefield(battle, step).includes(
+            "battle-field-center",
+          ),
+      ),
+      "战斗过程仍渲染中央说明或交锋标识",
+    );
+    const resultStep = battle.presentationTimeline.find(
+      (step) => step.kind === "result",
+    );
+    const resultMarkup = renderBattleAnimationBattlefield(battle, resultStep);
+    assert(
+      resultMarkup.includes("battle-field-result-mark"),
+      "战斗结果印章被错误隐藏",
+    );
+  });
+
+  return {
+    passed: tests.every((entry) => entry.passed),
+    tests,
+  };
 
   test("3级刘备仁泽只影响最近目标且经验固定减少1点", () => {
     const previousLineup = state.lineup;
@@ -10591,7 +16070,7 @@ function runBattleAnimationRegressionTests() {
     );
     assert(attackAfterSkills.length >= 2, "缺少双方攻击后技能步骤");
     assert(
-      attackAfterSkills[0].effectId === "hero.handang.yonglie" &&
+      attackAfterSkills[0].effectId === "hero.handang.zuoyou-kaigong" &&
         attackAfterSkills[1].effectId === "hero.xiahouyuan.qianli-benxi",
       "攻击后技能没有按当前攻击力从高到低结算",
     );
@@ -10624,7 +16103,7 @@ function runBattleAnimationRegressionTests() {
       (step) => step.kind === "skill" && step.timingWindow === "attack:after",
     );
     assert(
-      attackAfterSkills[0]?.effectId === "hero.handang.yonglie" &&
+      attackAfterSkills[0]?.effectId === "hero.handang.zuoyou-kaigong" &&
         attackAfterSkills[1]?.effectId === "hero.xiahouyuan.qianli-benxi",
       "同优先级装备效果打乱了武将技能的动态攻击力排序",
     );
@@ -10634,7 +16113,7 @@ function runBattleAnimationRegressionTests() {
   test("百厄角可随机施加全部当前负面状态", () => {
     assert(
       JSON.stringify(NEGATIVE_STATUS_POOL) ===
-        JSON.stringify(["burn", "intimidated", "counterplot"]),
+        JSON.stringify(["burn", "broken-morale", "fear", "chain", "intimidated", "counterplot"]),
       `百厄角负面状态池不完整：${NEGATIVE_STATUS_POOL.join("、")}`,
     );
     const appliedStatuses = new Set();
@@ -10715,6 +16194,75 @@ function runBattleAnimationRegressionTests() {
     assertContinuous(battle);
   });
 
+  test("限次装备用尽后立即移除且不显示0次", () => {
+    const shieldBattle = simulateBattleTestScenario({
+      player: [{ name: "木桩甲", attack: 20, health: 30, skillEffectIds: [] }],
+      enemy: [
+        {
+          name: "木桩乙",
+          attack: 1,
+          health: 30,
+          skillEffectIds: [],
+          equipment: {
+            name: "蚩尤古盾",
+            effectId: "equipment.black-tortoise-shield",
+          },
+        },
+      ],
+      seed: 46,
+      maxExchanges: 2,
+    });
+    const shieldSteps = shieldBattle.presentationTimeline.filter(
+      (step) =>
+        step.kind === "equipment" &&
+        step.effectId === "equipment.black-tortoise-shield",
+    );
+    assert(shieldSteps.length === 2, "蚩尤古盾没有正确消耗两次");
+    const spentShieldStep = shieldSteps[1];
+    const shieldOwner = getUnit(spentShieldStep, "enemy", "木桩乙");
+    const spentShieldMarkup = createHeroCardMarkup(shieldOwner, {
+      battleSnapshot: true,
+    });
+    assert(!shieldOwner?.equipment, "蚩尤古盾次数耗尽后仍保留在战斗装备槽");
+    assert(
+      spentShieldMarkup.includes("hero-equipment-slot empty") &&
+        !spentShieldMarkup.includes("battle-equipment-charges"),
+      "蚩尤古盾耗尽后的战斗卡面仍显示装备或0次角标",
+    );
+    assert(
+      spentShieldStep.entries?.[0]?.message.includes("装备已移除") &&
+        !spentShieldStep.entries?.[0]?.message.includes("剩余 0 次"),
+      "蚩尤古盾耗尽日志没有改为装备移除说明",
+    );
+    assertContinuous(shieldBattle);
+
+    const bladeBattle = simulateBattleTestScenario({
+      player: [
+        {
+          name: "修罗刀测试武将",
+          attack: 1,
+          health: 30,
+          skillEffectIds: [],
+          equipment: {
+            name: "修罗刀",
+            effectId: "equipment.siege-crossbow",
+          },
+        },
+      ],
+      enemy: [{ name: "修罗刀测试木桩", attack: 1, health: 100, skillEffectIds: [] }],
+      seed: 47,
+      maxExchanges: 1,
+    });
+    const bladeStep = bladeBattle.presentationTimeline.find(
+      (step) =>
+        step.kind === "equipment" && step.effectId === "equipment.siege-crossbow",
+    );
+    assert(bladeStep, "修罗刀没有生成限次装备步骤");
+    const bladeOwner = getUnit(bladeStep, "player", "修罗刀测试武将");
+    assert(!bladeOwner?.equipment, "修罗刀生效一次后仍保留在战斗装备槽");
+    assertContinuous(bladeBattle);
+  });
+
   test("传国玉玺的跨阶段强化进入独立动画步骤", () => {
     const previousShop = state.shop;
     const previousShopBondBonuses = state.shopBondBonuses;
@@ -10757,10 +16305,10 @@ function runBattleAnimationRegressionTests() {
     }
   });
 
-  test("交锋中阵亡的攻击者先结算攻击后技能再离场", () => {
+  test("交锋中先统一阵亡再结算已锁定的攻击后技能", () => {
     const battle = simulateBattleTestScenario({
-      player: [{ name: "韩当", attack: 5, health: 3 }],
-      enemy: [{ name: "夏侯渊", attack: 3, health: 5 }],
+      player: [{ name: "夏侯渊", attack: 5, health: 5 }],
+      enemy: [{ name: "夏侯渊", attack: 5, health: 5 }],
       seed: 47,
       maxExchanges: 1,
     });
@@ -10776,15 +16324,35 @@ function runBattleAnimationRegressionTests() {
       .filter(({ step }) => step.kind === "death")
       .map(({ index }) => index);
     assert(skillIndices.length === 2, "阵亡攻击者的攻击后技能没有全部锁定");
-    assert(deathIndices.length >= 2, "交锋后的双方阵亡步骤缺失");
+    const deathStep = battle.presentationTimeline[deathIndices[0]];
     assert(
-      Math.max(...skillIndices) < Math.min(...deathIndices),
-      "阵亡表现插入到了攻击后技能队列之前",
+      deathIndices.length === 1 &&
+        deathStep.simultaneous &&
+        deathStep.deathIds.length === 2,
+      "交锋后的双方阵亡没有合并为一个同步步骤",
+    );
+    assert(
+      Math.max(...deathIndices) < Math.min(...skillIndices),
+      "攻击后技能没有在统一阵亡完成后结算",
+    );
+    const eventTypes = battle.structuredLog
+      .filter((entry) => entry.type === "event")
+      .map((entry) => entry.eventType);
+    const damageAfterIndices = eventTypes
+      .map((eventType, index) => ({ eventType, index }))
+      .filter(({ eventType }) => eventType === "damage:after")
+      .map(({ index }) => index);
+    const deathEventIndex = eventTypes.indexOf("unit:death");
+    const attackAfterIndex = eventTypes.indexOf("attack:after");
+    assert(
+      Math.max(...damageAfterIndices) < deathEventIndex &&
+        deathEventIndex < attackAfterIndex,
+      "事件队列没有遵循伤害后、统一阵亡、攻击后的权威顺序",
     );
     assertContinuous(battle);
   });
 
-  test("满5人时阵亡待离场单位仍占用格子，召唤当次失败", () => {
+  test("满5人时阵亡释放的空位可供已锁定攻击后效果召唤", () => {
     const battle = simulateBattleTestScenario({
       player: [
         { name: "后排甲", health: 20, skillEffectIds: [] },
@@ -10804,19 +16372,19 @@ function runBattleAnimationRegressionTests() {
       seed: 49,
       maxExchanges: 1,
     });
-    const summonFailure = battle.presentationTimeline.find(
+    const summonStep = battle.presentationTimeline.find(
       (step) =>
-        step.kind === "summon-failed" &&
+        step.kind === "summon" &&
         step.effectId === "hero.xiahouyuan.qianli-benxi",
     );
-    assert(summonFailure, "满5人时夏侯渊的召唤没有判定失败");
+    assert(summonStep, "夏侯渊阵亡释放空位后没有完成已锁定的召唤");
     assert(
-      !battle.playerEnd.some((unit) => unit.name === "骑兵"),
-      "失败的召唤物仍在后续空位出现",
+      battle.playerEnd.some((unit) => unit.name === "骑兵"),
+      "召唤骑兵没有进入阵亡释放出的空位",
     );
     assert(
-      battle.playerEnd.length === LINEUP_SLOT_COUNT - 1,
-      `夏侯渊离场后应只剩4名武将，实际为${battle.playerEnd.length}名`,
+      battle.playerEnd.length === LINEUP_SLOT_COUNT,
+      `夏侯渊离场并召唤后应保持5名武将，实际为${battle.playerEnd.length}名`,
     );
     battle.presentationTimeline.forEach((step, index) => {
       assert(
@@ -11033,7 +16601,7 @@ function runBattleAnimationRegressionTests() {
     );
     assert(
       firstWeiBondMarkup.includes("魏武遗风") &&
-        firstWeiBondMarkup.includes("每阵亡4名魏将") &&
+        firstWeiBondMarkup.includes("每阵亡4名魏武将") &&
         firstWeiBondMarkup.includes("召唤 1/4"),
       "魏羁绊名称、效果或召唤进度没有显示在阵容上方",
     );
@@ -11192,7 +16760,7 @@ function runBattleAnimationRegressionTests() {
     const markup = renderBattleAnimationContextList(
       [
         { kind: "ready", title: "准备战斗" },
-        { kind: "opening", phase: "battle:start", title: "东吴业火 LV1触发" },
+        { kind: "opening", phase: "battle:start", title: "东吴业火 2人效果触发" },
         { kind: "result", title: "战斗结束" },
       ],
       1,
@@ -11205,7 +16773,7 @@ function runBattleAnimationRegressionTests() {
       assert(markup.includes(label), `战斗详情缺少“${label}”`);
     });
     assert(
-      markup.split("东吴业火 LV1触发").length - 1 === 1,
+      markup.split("东吴业火 2人效果触发").length - 1 === 1,
       "当前操作在战斗详情中被重复显示",
     );
   });
@@ -11273,6 +16841,20 @@ function runBattleAnimationRegressionTests() {
     assert(!markup.includes("battle-field-live-state"), "卡牌下方仍显示重复属性条");
   });
 
+  test("武将技能名从方括号中拆分为独立标签", () => {
+    const hero = CARD_POOLS.hero.find((entry) => /^\[[^\]]+\]/.test(entry.skill));
+    assert(Boolean(hero), "缺少可验证的方括号技能数据");
+    const expectedSkillName = hero.skill.match(/^\[([^\]]+)\]/)?.[1];
+    const template = document.createElement("template");
+    template.innerHTML = createHeroCardMarkup(hero, { showCost: true }).trim();
+    const tooltip = template.content.querySelector(".hero-skill-tooltip");
+    const skillTag = tooltip?.querySelector(".hero-skill-name-tag");
+    const skillDescription = tooltip?.querySelector(".hero-skill-description");
+    assert(skillTag?.textContent.trim() === expectedSkillName, "技能名标签没有使用方括号内容");
+    assert(!tooltip?.textContent.includes(`[${expectedSkillName}]`), "技能详情仍显示方括号技能名");
+    assert(Boolean(skillDescription?.textContent.trim()), "技能正文被错误移除");
+  });
+
   test("全部状态在商店阵容、战斗动画和战报快照共用无文字边框特效", () => {
     const unit = {
       id: "status-visual-unit",
@@ -11316,6 +16898,13 @@ function runBattleAnimationRegressionTests() {
       assert(
         effectRoot?.textContent.trim() === "",
         `${surfaceName}的状态边框内仍包含可见文字`,
+      );
+      const statusTooltip = card?.querySelector(".hero-status-tooltip");
+      assert(Boolean(statusTooltip), `${surfaceName}没有状态描述面板`);
+      assert(
+        statusTooltip?.textContent.includes(STATUS_LABELS[statusId]) &&
+          statusTooltip?.textContent.includes(STATUS_DESCRIPTIONS[statusId].slice(0, 4)),
+        `${surfaceName}的${STATUS_LABELS[statusId]}状态说明不完整`,
       );
     };
 
@@ -11444,23 +17033,97 @@ function mountGameRuleRegressionResults() {
     if (!condition) throw new Error(message);
   };
 
-  test("新局初始为5生命、0旗帜", () => {
+  test("商店武将挤位时连续武将向最近空位顺移", () => {
+    const previousLineup = state.lineup;
+    try {
+      const first = { id: "shop-insert-first", name: "甲" };
+      const target = { id: "shop-insert-target", name: "乙" };
+      const next = { id: "shop-insert-next", name: "丙" };
+      const inserted = { id: "shop-insert-new", name: "新武将" };
+      state.lineup = [first, target, next, null, null];
+      const emptyIndex = findLineupInsertionGap(1, null, 1);
+      assert(emptyIndex === 3, "没有找到目标右侧最近空位");
+      shiftLineupForInsertion(inserted, 1, 1, emptyIndex);
+      assert(
+        state.lineup[0] === first &&
+          state.lineup[1] === inserted &&
+          state.lineup[2] === target &&
+          state.lineup[3] === next &&
+          state.lineup[4] === null,
+        "商店武将插入后阵容没有按顺序向右挤位",
+      );
+    } finally {
+      state.lineup = previousLineup;
+    }
+  });
+
+  test("武将技能始终优先贴近卡牌上方且不会越出视口", () => {
+    const bounds = { left: 8, top: 8, right: 792, bottom: 592 };
+    const cardRect = { left: 650, top: 300, width: 120, height: 180 };
+    const skillSize = { width: 210, height: 90 };
+    const position = getPrioritizedHeroSkillPosition(cardRect, skillSize, bounds);
+    assert(position.placement === "above", "武将技能没有保持上方最高优先级");
+    assert(
+      position.top + skillSize.height === cardRect.top - CARD_DETAIL_GAP,
+      "武将技能没有贴近卡牌上边缘",
+    );
+    assert(
+      position.left >= bounds.left && position.left + skillSize.width <= bounds.right,
+      "武将技能横向越出了视口",
+    );
+  });
+  test("右侧空间不足时装备、状态与衍生详情移到武将技能左侧", () => {
+    const bounds = { left: 8, top: 8, right: 792, bottom: 592 };
+    const cardRect = { left: 650, top: 300, width: 120, height: 180 };
+    const primaryRect = { left: 582, top: 200, width: 210, height: 90 };
+    const layout = getAuxiliaryCardDetailLayout(
+      [
+        { width: 210, height: 80 },
+        { width: 210, height: 70 },
+      ],
+      cardRect,
+      primaryRect,
+      bounds,
+    );
+    assert(layout.placement === "left", "右边缘的辅助详情没有向左侧空位避让");
+    assert(
+      layout.positions.every((position, index) =>
+        position.left >= bounds.left &&
+        position.left + 210 <= bounds.right &&
+        position.top >= bounds.top &&
+        position.top + [80, 70][index] <= bounds.bottom,
+      ),
+      "辅助详情越出了视口",
+    );
+  });
+  test("道具详情在顶部空间不足时自动移到卡牌下方", () => {
+    const bounds = { left: 8, top: 8, right: 792, bottom: 592 };
+    const cardRect = { left: 330, top: 12, width: 120, height: 180 };
+    const position = getAdaptiveSingleDetailPosition(
+      cardRect,
+      { width: 210, height: 90 },
+      bounds,
+    );
+    assert(position.placement === "below", "顶部边缘的道具详情没有向下方空位避让");
+  });
+
+  test("测试模式新局初始为100生命、0旗帜", () => {
     const initial = createInitialState();
-    assert(initial.life === 5, `初始生命应为5，实际为${initial.life}`);
+    assert(initial.life === 100, `初始生命应为100，实际为${initial.life}`);
     assert(initial.flags === 0, `初始旗帜应为0，实际为${initial.flags}`);
   });
-  test("第3回合恢复1生命且不超过5", () => {
-    assert(getLifeAfterRoundStart(3, 3) === 4, "第3回合未正确恢复1生命");
-    assert(getLifeAfterRoundStart(5, 3) === 5, "第3回合生命超过5点上限");
-    assert(getLifeAfterRoundStart(3, 2) === 3, "非第3回合错误恢复生命");
+  test("第3回合恢复1生命且不超过100", () => {
+    assert(getLifeAfterRoundStart(99, 3) === 100, "第3回合未正确恢复1生命");
+    assert(getLifeAfterRoundStart(100, 3) === 100, "第3回合生命超过100点上限");
+    assert(getLifeAfterRoundStart(99, 2) === 99, "非第3回合错误恢复生命");
   });
-  test("胜利加1旗帜并在10旗帜时获胜", () => {
-    const progress = { life: 2, flags: 9, battleRecord: { wins: 9, losses: 3, draws: 0 } };
+  test("胜利加1旗帜并在100旗帜时获胜", () => {
+    const progress = { life: 92, flags: 99, battleRecord: { wins: 99, losses: 3, draws: 0 } };
     applyBattleResultToGameState(progress, "win");
-    assert(progress.flags === 10, `旗帜应为10，实际为${progress.flags}`);
-    assert(progress.life === 2, "胜利不应扣除生命");
-    assert(progress.battleRecord.wins === 10, "胜场统计未增加");
-    assert(getGameOutcome(progress.life, progress.flags) === "victory", "10旗帜未判定胜利");
+    assert(progress.flags === 100, `旗帜应为100，实际为${progress.flags}`);
+    assert(progress.life === 92, "胜利不应扣除生命");
+    assert(progress.battleRecord.wins === 100, "胜场统计未增加");
+    assert(getGameOutcome(progress.life, progress.flags) === "victory", "100旗帜未判定胜利");
   });
   test("失败减1生命并在归零时失败", () => {
     const progress = { life: 1, flags: 4, battleRecord: { wins: 4, losses: 4, draws: 0 } };
@@ -11476,6 +17139,247 @@ function mountGameRuleRegressionResults() {
     assert(progress.life === 4 && progress.flags === 6, "平局改变了生命或旗帜");
     assert(progress.battleRecord.draws === 1, "平局统计未增加");
     assert(getGameOutcome(progress.life, progress.flags) === null, "普通进度被错误判定为终局");
+  });
+  test("测试模式在第20回合结束", () => {
+    assert(getGameOutcome(90, 12, 19) === null, "第19回合被错误判定为测试完成");
+    assert(
+      getGameOutcome(90, 12, PLAYER_DATA_TEST_MAX_ROUND) === "test-complete",
+      "第20回合未判定为测试完成",
+    );
+  });
+  test("第3、7、11回合均从对应4张奖励卡中随机展示3张且必须三选一", () => {
+    const previousRound = state.round;
+    const previousShop = state.shop;
+    const previousPendingReward = state.pendingRoundReward;
+    const previousRoundRewardCollapsed = state.roundRewardCollapsed;
+    const previousSerial = state.serial;
+    const previousLogLength = state.logs.length;
+    try {
+      ROUND_REWARD_ROUNDS.forEach((round) => {
+        state.round = round;
+        state.shop = Array.from({ length: SHOP_POSITION_COUNT }, () => null);
+        state.pendingRoundReward = null;
+        queueRoundReward(round);
+        const names = state.pendingRoundReward?.candidates?.map((card) => card.name) ?? [];
+        assert(names.length === 3, `第${round}回合没有展示3张奖励卡`);
+        assert(new Set(names).size === 3, `第${round}回合出现重复奖励卡`);
+        assert(
+          names.every((name) => ROUND_REWARD_CARD_NAMES[round].includes(name)),
+          `第${round}回合混入错误奖励卡：${names.join("、")}`,
+        );
+        assert(isRoundRewardBlockingShop(), `第${round}回合奖励没有阻塞商店操作`);
+        renderRoundReward();
+        assert(
+          elements.roundRewardTitle?.textContent === ROUND_REWARD_TITLES[round],
+          `第${round}回合奖励标题错误`,
+        );
+        assert(
+          elements.roundRewardOptions?.querySelectorAll(".reward-option").length === 3,
+          `第${round}回合奖励没有复用升级奖励卡牌样式`,
+        );
+        const renderedRewardCards = [
+          ...(elements.roundRewardOptions?.querySelectorAll(".item-card") ?? []),
+        ];
+        assert(
+          renderedRewardCards.every((card) => {
+            const stars = [...card.querySelectorAll(".item-stars img")];
+            return stars.length > 0 && stars.every((star) => star.classList.contains("purple-star"));
+          }),
+          `第${round}回合奖励存在未显示为紫色的星星`,
+        );
+        assert(
+          !elements.roundRewardOverlay?.querySelector(".reward-dialog > p"),
+          `第${round}回合奖励仍显示额外说明文字`,
+        );
+        state.roundRewardCollapsed = true;
+        renderRoundReward();
+        assert(elements.roundRewardOverlay?.hidden, `第${round}回合奖励无法收起`);
+        assert(!elements.roundRewardCollapsedBar?.hidden, `第${round}回合收起后没有展开按钮`);
+        assert(elements.shopStage?.hasAttribute("inert"), `第${round}回合收起后商店仍可操作`);
+        state.roundRewardCollapsed = false;
+        renderRoundReward();
+        assert(!elements.roundRewardOverlay?.hidden, `第${round}回合奖励无法重新展开`);
+        assert(!elements.shopStage?.hasAttribute("inert"), `第${round}回合重新展开后商店仍被额外锁定`);
+        const selectedName = names[0];
+        chooseRoundRewardCard(0);
+        const rewardCard = state.shop[8];
+        assert(!state.pendingRoundReward, `第${round}回合选择后仍在阻塞`);
+        assert(rewardCard?.name === selectedName, `第${round}回合奖励没有进入商店最右侧道具位`);
+        assert(rewardCard?.cost === 0, `第${round}回合奖励不是0金币`);
+      });
+    } finally {
+      state.round = previousRound;
+      state.shop = previousShop;
+      state.pendingRoundReward = previousPendingReward;
+      state.roundRewardCollapsed = previousRoundRewardCollapsed;
+      state.serial = previousSerial;
+      state.logs.splice(previousLogLength);
+    }
+  });
+  test("合纵连横消耗后在商店8、7、6号位生成3份盟书并把原8号道具挤到9号", () => {
+    const previousShop = state.shop;
+    const previousSerial = state.serial;
+    const previousPending = state.pendingStratagemUse;
+    const previousLogLength = state.logs.length;
+    try {
+      state.shop = Array.from({ length: SHOP_POSITION_COUNT }, () => null);
+      ["甄姬", "庞德", "黄忠", "廖化", "马云禄"].forEach((name, index) => {
+        const base = CARD_POOLS.hero.find((hero) => hero.name === name);
+        state.shop[index] = createCardFromBase(base, "hero");
+      });
+      const oldItem = createFreeShopItemFromBase(
+        CARD_POOLS.stratagem.find((card) => card.name === "帅印"),
+      );
+      const alliancePacts = createFreeShopItemFromBase(
+        CARD_POOLS.stratagem.find((card) => card.name === "合纵连横"),
+      );
+      state.shop[7] = oldItem;
+      state.shop[8] = alliancePacts;
+      assert(completeStratagemUse(8, 0), "合纵连横没有成功使用");
+      assert(state.shop[8]?.id === oldItem.id, "原8号道具没有被挤到9号位");
+      [5, 6, 7].forEach((index) => {
+        assert(state.shop[index]?.name === "盟书", `${index + 1}号商店位没有生成盟书`);
+      });
+      assert(
+        state.shop.filter((card) => card?.name === "盟书").length === 3,
+        "合纵连横没有生成3张独立盟书",
+      );
+    } finally {
+      state.shop = previousShop;
+      state.serial = previousSerial;
+      state.pendingStratagemUse = previousPending;
+      state.logs.splice(previousLogLength);
+    }
+  });
+  test("商店满格时新增道具移除最左武将，新增武将移除最右道具", () => {
+    const previousShop = state.shop;
+    const previousSerial = state.serial;
+    const previousLogLength = state.logs.length;
+    try {
+      state.shop = Array.from({ length: SHOP_POSITION_COUNT }, () => null);
+      ["甄姬", "庞德", "黄忠", "廖化", "马云禄"].forEach((name, index) => {
+        state.shop[index] = createCardFromBase(
+          CARD_POOLS.hero.find((hero) => hero.name === name),
+          "hero",
+        );
+      });
+      ["帅印", "虎符", "百厄角", "龙方壶"].forEach((name, offset) => {
+        state.shop[5 + offset] = createFreeShopItemFromBase(
+          CARD_POOLS.stratagem.find((card) => card.name === name),
+        );
+      });
+      const newItem = createFreeShopItemFromBase(
+        CARD_POOLS.stratagem.find((card) => card.name === "白玉龟"),
+      );
+      addCardsToSharedShop([newItem], "测试道具");
+      assert(!state.shop.some((card) => card?.name === "甄姬"), "新增道具没有移除最左武将");
+      assert(state.shop[4]?.id === newItem.id, "新增道具没有生成在现有道具左侧");
+
+      const newHero = createCardFromBase(
+        CARD_POOLS.hero.find((hero) => hero.name === "诸葛瑾"),
+        "hero",
+      );
+      addCardsToSharedShop([newHero], "测试武将");
+      assert(!state.shop.some((card) => card?.name === "龙方壶"), "新增武将没有移除最右道具");
+      assert(state.shop[4]?.id === newHero.id, "新增武将没有生成在现有武将右侧");
+    } finally {
+      state.shop = previousShop;
+      state.serial = previousSerial;
+      state.logs.splice(previousLogLength);
+    }
+  });
+  test("众志成城在人数最多羁绊并列时要求选择且只解锁所选羁绊", () => {
+    const previousLineup = state.lineup;
+    const previousShop = state.shop;
+    const previousUnlocked = state.unlockedFivePersonBonds;
+    const previousPending = state.pendingStratagemUse;
+    const previousSerial = state.serial;
+    const previousLogLength = state.logs.length;
+    try {
+      state.lineup = Array.from({ length: LINEUP_SLOT_COUNT }, () => null);
+      ["甄姬", "庞德", "黄忠", "廖化"].forEach((name, index) => {
+        const base = CARD_POOLS.hero.find((hero) => hero.name === name);
+        state.lineup[index] = createUnitFromCard(createCardFromBase(base, "hero"));
+      });
+      state.shop = Array.from({ length: SHOP_POSITION_COUNT }, () => null);
+      state.shop[8] = createFreeShopItemFromBase(
+        CARD_POOLS.stratagem.find((card) => card.name === "众志成城"),
+      );
+      state.unlockedFivePersonBonds = [];
+      useStratagemOnLineup(8, 0);
+      assert(
+        JSON.stringify(state.pendingStratagemUse?.availableFactions) === JSON.stringify(["魏", "蜀"]),
+        `并列时没有提供魏、蜀二选一：${state.pendingStratagemUse?.availableFactions?.join("、")}`,
+      );
+      selectStratagemBondChoice("魏");
+      assert(state.unlockedFivePersonBonds.includes("魏"), "众志成城没有解锁所选魏羁绊");
+      assert(!state.unlockedFivePersonBonds.includes("蜀"), "众志成城错误地同时解锁蜀羁绊");
+      assert(getBondEffectCount(4, "魏") === 4 && getBondEffectCount(5, "魏") === 5, "5人效果资格结算错误");
+    } finally {
+      state.lineup = previousLineup;
+      state.shop = previousShop;
+      state.unlockedFivePersonBonds = previousUnlocked;
+      state.pendingStratagemUse = previousPending;
+      state.serial = previousSerial;
+      state.logs.splice(previousLogLength);
+    }
+  });
+  test("筹措军资获得12金币且厉兵秣马生成2张独立免费聚势强军", () => {
+    const previousShop = state.shop;
+    const previousGold = state.gold;
+    const previousSerial = state.serial;
+    const previousLogLength = state.logs.length;
+    try {
+      state.shop = Array.from({ length: SHOP_POSITION_COUNT }, () => null);
+      state.gold = 10;
+      state.shop[8] = createFreeShopItemFromBase(
+        CARD_POOLS.stratagem.find((card) => card.name === "筹措军资"),
+      );
+      assert(completeStratagemUse(8, 0), "筹措军资没有成功使用");
+      assert(state.gold === 22, `筹措军资应使金币变为22，实际为${state.gold}`);
+
+      state.shop[8] = createFreeShopItemFromBase(
+        CARD_POOLS.stratagem.find((card) => card.name === "厉兵秣马"),
+      );
+      assert(completeStratagemUse(8, 0), "厉兵秣马没有成功使用");
+      const generated = state.shop.filter((card) => card?.name === "聚势强军");
+      assert(generated.length === 2, `厉兵秣马应生成2张聚势强军，实际为${generated.length}张`);
+      assert(generated.every((card) => card.cost === 0), "厉兵秣马生成的聚势强军不是免费卡");
+      assert(new Set(generated.map((card) => card.id)).size === 2, "2张聚势强军没有作为独立卡牌生成");
+    } finally {
+      state.shop = previousShop;
+      state.gold = previousGold;
+      state.serial = previousSerial;
+      state.logs.splice(previousLogLength);
+    }
+  });
+  test("龙方壶仅在阵容无激活羁绊时于回合结束永久+2/+2", () => {
+    const previousLineup = state.lineup;
+    const previousSerial = state.serial;
+    const previousLogLength = state.logs.length;
+    try {
+      const base = CARD_POOLS.hero.find((hero) => hero.name === "甄姬");
+      const owner = createUnitFromCard(createCardFromBase(base, "hero"));
+      owner.directModifiers.equipment = createEquipmentFromCard(
+        createFreeShopItemFromBase(
+          CARD_POOLS.stratagem.find((card) => card.name === "龙方壶"),
+        ),
+      );
+      state.lineup = [owner, null, null, null, null];
+      const before = owner.bodyAttack;
+      dispatchShopEvent("round:end", { round: state.round });
+      assert(owner.bodyAttack === before + 2, "无激活羁绊时龙方壶没有永久+2/+2");
+
+      state.lineup[1] = createUnitFromCard(
+        createCardFromBase(CARD_POOLS.hero.find((hero) => hero.name === "庞德"), "hero"),
+      );
+      dispatchShopEvent("round:end", { round: state.round });
+      assert(owner.bodyAttack === before + 2, "存在激活羁绊时龙方壶仍然触发");
+    } finally {
+      state.lineup = previousLineup;
+      state.serial = previousSerial;
+      state.logs.splice(previousLogLength);
+    }
   });
 
   const results = {
